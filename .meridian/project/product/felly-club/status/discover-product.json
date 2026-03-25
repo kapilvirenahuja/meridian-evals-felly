@@ -1,0 +1,25 @@
+{
+  "recipe": "discover-product",
+  "slug": "felly-club",
+  "started_at": "2026-03-25T10:00:00+0530",
+  "iteration_count": 0,
+  "intent_assessment": {
+    "product_type": "product",
+    "skip_opportunity": false
+  },
+  "tasks": {
+    "assess-intent": { "status": "completed", "completed_at": "2026-03-25T10:00:00+0530" },
+    "discover-opportunity": { "status": "completed", "completed_at": "2026-03-25T10:01:00+0530" },
+    "draft-vision": { "status": "completed", "completed_at": "2026-03-25T10:15:00+0530" },
+    "derive-profiles": { "status": "completed", "completed_at": "2026-03-25T10:20:00+0530" },
+    "validate-profiles": { "status": "completed", "completed_at": "2026-03-25T10:25:00+0530" },
+    "generate-brief": { "status": "completed", "completed_at": "2026-03-25T10:26:00+0530" },
+    "checkpoint-brief": { "status": "completed", "completed_at": "2026-03-25T10:27:00+0530" },
+    "validate-vision": { "status": "completed", "completed_at": "2026-03-25T10:28:00+0530" },
+    "checkpoint-validation": { "status": "completed", "completed_at": "2026-03-25T10:29:00+0530" },
+    "pre-lock-resolution": { "status": "completed", "completed_at": "2026-03-25T10:30:00+0530" },
+    "lock-vision": { "status": "completed", "completed_at": "2026-03-25T10:30:00+0530" },
+    "evidence-self-commit": { "status": "completed", "completed_at": "2026-03-25T10:31:00+0530" },
+    "summary": { "status": "completed", "completed_at": "2026-03-25T10:31:00+0530" }
+  }
+}

@@ -1,0 +1,16 @@
+pre_lock_resolutions:
+  slug: "felly-club"
+  resolved_at: "2026-03-25T10:30:00+0530"
+  items:
+    - id: 1
+      type: "warning"
+      item: "market_context.market_size.tam — TAM expressed as range (USD 849M-1.53B) rather than single figure"
+      resolution: "Keep as-is. Range is acceptable for draft vision."
+    - id: 2
+      type: "warning"
+      item: "market_context.market_size.sam — SAM is ~25% estimate, not bottom-up calculation"
+      resolution: "Keep as-is. No specific SAM figure available. Estimate is acceptable for current stage."
+    - id: 3
+      type: "warning"
+      item: "profiles.product_profile.PP-1 — Level 2 Power User label may overstate for Sport vertical"
+      resolution: "Keep Level 2. Gen Z digital native assessment stands."

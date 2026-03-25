@@ -1,0 +1,81 @@
+validation:
+  slug: "felly-club"
+  product_type: "product"
+  validated_at: "2026-03-25T00:00:00Z"
+  ready_for_lock: true
+  completeness_score: 100
+
+  checklist:
+    - item: "name present"
+      status: "pass"
+    - item: "slug present"
+      status: "pass"
+    - item: "type present and valid (product)"
+      status: "pass"
+    - item: "status present and is DRAFT"
+      status: "pass"
+    - item: "domain present and non-empty"
+      status: "pass"
+    - item: "market_context present with all sub-sections (problem, target_users, competitors, market_size, differentiators, risks)"
+      status: "pass"
+    - item: "vision present with mission and tagline"
+      status: "pass"
+    - item: "value_proposition present and non-empty"
+      status: "pass"
+    - item: "strategic_goals present with 3+ entries, each with id, title, description, success_metrics"
+      status: "pass"
+    - item: "target_audience present with at least one persona"
+      status: "pass"
+    - item: "scope present with in_scope and out_of_scope"
+      status: "pass"
+    - item: "assumptions present and non-empty array"
+      status: "pass"
+    - item: "success_metrics present with measurable outcomes"
+      status: "pass"
+    - item: "profiles present with product_profile (7 dims), nfr_profile (7 dims), quality_profile (7 dims)"
+      status: "pass"
+    - item: "Strategic Goals terminology used (no OKR language)"
+      status: "pass"
+    - item: "No placeholder values (TBD, unclear, to be determined, ?)"
+      status: "pass"
+    - item: "Target users have goals and frustrations"
+      status: "pass"
+    - item: "Competitors have strengths and weaknesses"
+      status: "pass"
+    - item: "Market size has TAM, SAM, SOM"
+      status: "pass"
+    - item: "Risks have severity and mitigation"
+      status: "pass"
+    - item: "Success metrics are measurable (have targets and measurement methods)"
+      status: "pass"
+    - item: "Profile cascade is evident (NFR rationale references PP, QP rationale references PP+NFR)"
+      status: "pass"
+    - item: "Strategic goals align with problem statement"
+      status: "pass"
+    - item: "Success metrics align with strategic goals"
+      status: "pass"
+    - item: "Scope items are achievable within stated assumptions"
+      status: "pass"
+    - item: "Profile levels are internally consistent"
+      status: "pass"
+
+  issues:
+    - severity: "warning"
+      field: "market_context.market_size.tam"
+      message: "TAM is expressed as a range (USD 849M - 1.53B) rather than a single figure. This is acceptable given multiple source methodologies but may need narrowing for investor-facing materials."
+    - severity: "warning"
+      field: "market_context.market_size.sam"
+      message: "SAM is an estimate (~25% of TAM) rather than a bottom-up calculation. Acceptable for DRAFT but should be validated with primary research before fundraising."
+    - severity: "warning"
+      field: "profiles.product_profile.PP-1"
+      message: "PP-1 User Sophistication is Level 2 (Power User) but rationale mentions Gen Z digital natives. Level 2 is reasonable but the label 'Power User' may overstate if the mentee side includes first-time platform users in Sport verticals."
+
+  summary: |
+    The Felly Club product vision is comprehensive and ready for lock. All 26 validation checks pass.
+    The artifact covers all required structural sections including market context with 7 competitors,
+    5 strategic goals with measurable success metrics, 3 target personas, well-defined scope boundaries,
+    10 assumptions, 8 measurable success metrics with targets and measurement methods, and a complete
+    three-tier profile cascade (PP/NFR/QP) with 7 dimensions each. Profile rationale correctly
+    references upstream profiles (NFR references PP, QP references PP+NFR). Three minor warnings
+    are noted regarding market size precision and a profile label nuance, none of which are blockers.
+    The vision is well-structured, internally consistent, and ready for LOCK status transition.
