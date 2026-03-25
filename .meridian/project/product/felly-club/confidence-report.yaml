@@ -1,0 +1,666 @@
+confidence_report:
+  scored_at: "2026-03-25T00:00:00Z"
+  scored_by: "judge"
+  epics_path: ".meridian/project/product/felly-club/epics.yaml"
+  product_path: ".meridian/project/product/felly-club/product.yaml"
+
+  strategic_goals_summary:
+    - id: "SG-01"
+      title: "Launch functional mentorship marketplace MVP within 16 weeks"
+      success_metric: "Platform live with end-to-end flow operational in at least 2 of 4 target countries within 16 weeks"
+      epics_referencing: ["E1", "E3", "E4", "E8", "E10"]
+    - id: "SG-02"
+      title: "Establish mentor supply in Sport and Entertainment through domain-verified credentialing"
+      success_metric: "Minimum 50 domain-verified mentors onboarded across Sport and Entertainment within 8 weeks of launch"
+      epics_referencing: ["E2"]
+    - id: "SG-03"
+      title: "Deliver trust and transparency through escrow payments, dispute resolution, quality ratings"
+      success_metric: "Less than 5% dispute rate; greater than 80% of mentees rate sessions 4+ stars within 3 months"
+      epics_referencing: ["E5", "E6"]
+    - id: "SG-04"
+      title: "Achieve multi-geography regulatory compliance (GDPR, India TPDP, PCI DSS)"
+      success_metric: "Zero compliance violations across all four countries in first 6 months post-launch"
+      epics_referencing: ["E7"]
+    - id: "SG-05"
+      title: "Build referral-driven acquisition engine leveraging niche community network effects"
+      success_metric: "Greater than 30% of new mentee signups from referrals within 3 months; CAC below EUR 15"
+      epics_referencing: ["E9"]
+
+  epic_assessments:
+
+    - epic_id: "E1"
+      name: "Identity and Access Foundation"
+      strategic_goal_ref: "SG-01"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E1's three success scenarios test registration flow timing (<60s email verification),
+          RBAC enforcement (403 on wrong-role access), and MFA gate. These produce evidence
+          that authenticated identity exists — a prerequisite for SG-01's end-to-end flow.
+          However, none of the scenarios directly evidence 'platform live with end-to-end flow
+          operational in 2+ countries'. The scenarios are necessary but not sufficient for
+          SG-01's metric. They do not address multi-country operation, timezone-aware sessions,
+          or any downstream transaction. E1 is foundational infrastructure; its scenarios
+          correctly scope to auth correctness, not marketplace completion.
+        product_success_metrics_addressed:
+          - metric: "Platform Activation Rate"
+            coverage: "indirect"
+            note: "Auth is a prerequisite for activation but E1 scenarios do not measure activation"
+          - metric: "Time to First Session"
+            coverage: "indirect"
+            note: "Registration flow speed (<60s) contributes to time-to-first-session but does not measure it"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are observable and binary-testable.
+          FC-1 (role-restricted access without role) can be tested with an HTTP request and
+          verified by response code. FC-2 (token expiry) can be tested by inspecting token TTL
+          and attempting access post-expiry. FC-3 (>5s login) can be measured with a stopwatch
+          or load test. No ambiguity in pass/fail determination.
+
+      gap_detection:
+        uncovered_sg01_metrics:
+          - metric: "End-to-end flow in 2+ countries"
+            note: "Reasonably deferred — E1 is infrastructure; E4+E5 complete this flow"
+        note: "No gap is unexpected at this layer — E1 is correctly scoped as a foundation epic"
+
+      confidence: "high"
+      confidence_rationale: >
+        E1 is a well-scoped foundation epic. Scenarios validate the specific auth behaviors
+        required for SG-01 to function. Failure conditions are strongly falsifiable. The
+        partial metric coverage is appropriate for an infrastructure epic — it sets up the
+        measurement capability for downstream epics rather than claiming to deliver SG-01 alone.
+
+    - epic_id: "E2"
+      name: "Mentor Onboarding and Credentialing"
+      strategic_goal_ref: "SG-02"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E2's three success scenarios test: (1) application submission appearing in admin
+          queue within 30 seconds with confirmation email, (2) approved mentor's profile
+          becoming searchable with domain-verified badge within 5 minutes, and (3) pricing
+          band enforcement rejecting out-of-range rates. SG-02's metric is '50 domain-verified
+          mentors onboarded in Sport and Entertainment within 8 weeks of launch'. The scenarios
+          validate the onboarding pipeline mechanics (submission, approval, badge display,
+          pricing enforcement) which are necessary preconditions for reaching 50 mentors.
+          However, no scenario addresses the volume target (50 mentors), the 8-week timeline,
+          or specifically Sport and Entertainment vertical coverage. The scenarios test the
+          pipeline exists and works; they do not test whether it can process the required volume
+          within the required window. Additionally, the product success metric 'Mentor
+          Utilization Rate (>25% conduct 1+ session/month)' has no coverage in E2 scenarios —
+          E2 stops at profile approval, not mentor activation.
+        product_success_metrics_addressed:
+          - metric: "Mentor Utilization Rate"
+            coverage: "none"
+            note: "E2 covers supply onboarding only; mentor utilization requires E4 (booking) to be active"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are observable and binary-testable.
+          FC-1 (profile visible before approval) is testable by checking search index before
+          approval action is taken. FC-2 (badge on non-verified profiles) is testable by
+          inspecting badge presence against approval state in the database. FC-3 (>10 min
+          onboarding time) is measurable by a timed walkthrough. No ambiguity.
+
+      gap_detection:
+        uncovered_sg02_metrics:
+          - metric: "50 domain-verified mentors in Sport/Entertainment within 8 weeks"
+            note: >
+              No scenario validates volume throughput or vertical-specific distribution.
+              The 8-week timeline for 50 mentors implies the admin workflow must process
+              ~6+ applications per week — no scenario tests this throughput. This is a
+              meaningful gap: the pipeline mechanics may work but be too slow for the target.
+        uncovered_product_metrics:
+          - metric: "Mentor Utilization Rate (>25% conduct 1+ session/month)"
+            note: "Logically owned by E4 (booking), not E2, but no epic fully closes this metric"
+
+      confidence: "medium"
+      confidence_rationale: >
+        E2 scenarios strongly validate the onboarding pipeline mechanics with falsifiable
+        conditions. The gap is that no scenario tests volume throughput or vertical-specific
+        coverage — the 50-mentor target within 8 weeks is the actual SG-02 success criterion
+        and no scenario produces evidence toward it. Confidence is medium because the pipeline
+        works but scalability and vertical distribution are unconfirmed by the scenarios.
+
+    - epic_id: "E3"
+      name: "Mentor Discovery and Search"
+      strategic_goal_ref: "SG-01"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E3's three success scenarios test: (1) filtered search returning correct results
+          within 500ms, (2) autocomplete responding within 200ms, and (3) domain-verified
+          mentor relevance boost in unfiltered results. These directly validate the discovery
+          experience that enables mentees to find mentors — a prerequisite for SG-01's
+          end-to-end flow. The 500ms latency target aligns with the NFR-3 performance
+          requirement. However, SG-01's success metric is 'end-to-end flow operational in
+          2+ countries' — discovery is a key step but not the final evidence. Additionally,
+          'Platform Activation Rate' (>40% mentees complete 1 session within 30 days) and
+          'Time to First Session' (<7 days median) depend heavily on effective discovery
+          but are not directly measured by E3's scenarios.
+        product_success_metrics_addressed:
+          - metric: "Time to First Session"
+            coverage: "partial"
+            note: "Discovery speed contributes to time-to-first-session but scenarios do not measure this end-to-end"
+          - metric: "Platform Activation Rate"
+            coverage: "indirect"
+            note: "Effective search is a prerequisite for activation but not measured directly"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are binary-testable. FC-1 (unapproved/incomplete mentors
+          in results) is verifiable by seeding test data and checking returned IDs against
+          approval state. FC-2 (inaccurate facet counts) is testable by comparing displayed
+          counts against direct database queries. FC-3 (>1s latency) is measurable with
+          automated performance tests. All conditions have clear pass/fail boundaries.
+
+      gap_detection:
+        uncovered_sg01_metrics:
+          - metric: "End-to-end flow operational in 2+ countries"
+            note: "Search is one step in the chain; booking (E4) and payment (E5) complete the flow"
+        note: >
+          E3 scenarios are tightly scoped to search correctness and performance. This is
+          appropriate. The gap between discovery and activation (Platform Activation Rate,
+          Time to First Session) spans multiple epics; no single epic fully owns these metrics.
+
+      confidence: "high"
+      confidence_rationale: >
+        E3 scenarios are precise, latency-bounded, and strongly falsifiable. Coverage is
+        partial only because SG-01 spans multiple epics — E3 correctly owns the discovery
+        slice. No scenario gaps within E3's stated scope.
+
+    - epic_id: "E4"
+      name: "Session Booking and Video Delivery"
+      strategic_goal_ref: "SG-01"
+
+      scenario_to_metric_coverage:
+        rating: "full"
+        analysis: >
+          E4's three success scenarios test: (1) booking creation with calendar invite and slot
+          locking within 30 seconds, (2) Zoom SDK in-platform video connection without external
+          app, and (3) cancellation processing with slot release and notifications. These
+          scenarios collectively validate the core transaction of the marketplace — the
+          session booking and delivery flow — which is the centerpiece of SG-01's 'end-to-end
+          flow from signup to session completion'. Scenario 3 also indirectly validates the
+          cancellation policy enforcement that affects Session Completion Rate (>85%).
+          'Time to First Session' (<7 days) and 'Platform Activation Rate' (>40% complete
+          1 session within 30 days) both trace directly to E4's booking mechanics. Revenue
+          per session is not measured here (that is E5), but the session completion event
+          that triggers commission is defined here.
+        product_success_metrics_addressed:
+          - metric: "Session Completion Rate"
+            coverage: "partial"
+            note: "Booking mechanics and cancellation policy are validated; no-show prevention depends on E8 (reminders)"
+          - metric: "Platform Activation Rate"
+            coverage: "partial"
+            note: "Booking flow is the core activation action; 30-day window measurement is not tested"
+          - metric: "Time to First Session"
+            coverage: "partial"
+            note: "Booking slot selection and confirmation are tested; end-to-end timeline is not measured"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All four failure conditions are binary-testable. FC-1 (double-booking) is testable
+          by concurrent booking attempts on the same slot. FC-2 (video connection failure with
+          no fallback) is testable by inducing SDK failure and observing error handling.
+          FC-3 (timezone conversion errors) is testable with users in different timezone
+          configurations. FC-4 (invalid state transitions, e.g., cancelled to completed) is
+          testable by directly attempting the transition via API.
+
+      gap_detection:
+        note: >
+          E4 has 4 failure conditions (more than other epics) which reflects appropriate
+          attention to the complexity of this epic. No significant gaps within E4's scope.
+          The Session Completion Rate metric (>85%) is partially owned here but completion
+          of the metric requires E8 (reminder delivery) to reduce no-shows — this cross-epic
+          dependency is expected and not a gap within E4.
+
+      confidence: "high"
+      confidence_rationale: >
+        E4 scenarios cover the core marketplace transaction with strong falsifiability across
+        booking, video delivery, and cancellation. Four failure conditions signal appropriate
+        risk awareness for the most complex P1 epic. Metric coverage is partial only because
+        measurement of rates requires data aggregation across sessions — a platform-level
+        concern, not a scenario gap.
+
+    - epic_id: "E5"
+      name: "Payment Processing and Escrow"
+      strategic_goal_ref: "SG-03"
+
+      scenario_to_metric_coverage:
+        rating: "full"
+        analysis: >
+          E5's three success scenarios test: (1) escrow hold on booking with mentor visibility
+          and mentee receipt, (2) commission calculation (15% on EUR 75 → EUR 11.25 platform,
+          EUR 63.75 mentor release) on session completion, and (3) full refund on cancellation
+          within policy window within 5 business days. These scenarios directly produce
+          evidence toward SG-03's financial trust goal and the 'Revenue per Session' metric
+          (EUR 8-15 commission). Scenario 2 uses a concrete commission calculation (EUR 11.25
+          on EUR 75 at 15%) which falls within the EUR 8-15 target range. Scenario 3 validates
+          the refund mechanism that underpins the dispute rate target (<5%). The dispute rate
+          metric is not directly tested in E5 (it resides in E6), but the financial layer that
+          backs dispute resolution is validated here.
+        product_success_metrics_addressed:
+          - metric: "Revenue per Session"
+            coverage: "full"
+            note: "Scenario 2 explicitly tests commission calculation at EUR 11.25 on a EUR 75 session (15%), which falls within the EUR 8-15 target range"
+          - metric: "Session Completion Rate"
+            coverage: "indirect"
+            note: "Escrow-backed payment reduces financial no-show risk but does not directly measure completion rate"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All four failure conditions are binary and observable. FC-1 (early escrow release)
+          is verifiable by checking fund state before session completion event. FC-2 (incorrect
+          commission) is verifiable by arithmetic check against transaction records. FC-3
+          (session booked without payment) is verifiable by checking session state vs payment
+          state mismatch. FC-4 (silent payout failure) is verifiable by checking payout status
+          and notification delivery. All conditions have clear, measurable pass/fail criteria.
+
+      gap_detection:
+        uncovered_sg03_metrics:
+          - metric: "Less than 5% dispute rate"
+            note: >
+              Dispute rate measurement is deferred to E6. E5 provides the financial
+              infrastructure (refund, escrow) that backs dispute resolution but does not
+              measure dispute frequency. This is appropriate distribution across epics.
+          - metric: "Greater than 80% mentees rate 4+ stars"
+            note: "Quality ratings belong to E6; E5 has no coverage here as expected"
+
+      confidence: "high"
+      confidence_rationale: >
+        E5 scenarios are precise, numerically grounded (exact EUR amounts and percentages),
+        and directly address the Revenue per Session success metric. Failure conditions are
+        strongly falsifiable with clear monetary evidence. The partial gap on dispute rate
+        is correctly owned by E6.
+
+    - epic_id: "E6"
+      name: "Quality Assurance and Ratings"
+      strategic_goal_ref: "SG-03"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E6's three success scenarios test: (1) rating prompt delivery 15 minutes post-session
+          via email and in-platform, (2) aggregate rating and quality badge display on mentor
+          profile after 10 sessions at 4.7 average, and (3) dispute routing to admin queue
+          within 24-hour initiation window. SG-03's metrics are '<5% dispute rate' and
+          '>80% of mentees rate 4+ stars'. Scenario 1 validates the rating collection
+          mechanism (trigger and delivery) but not the aggregate rate — whether 80% of
+          mentees actually rate 4+ stars is a behavioral outcome that scenarios cannot
+          pre-test. Scenario 2 validates display accuracy for a pre-seeded mentor at 4.7
+          stars but does not test population-level distribution. Scenario 3 validates dispute
+          routing but does not test dispute resolution outcomes or measure dispute rate.
+          The scenarios are well-scoped to mechanism validation; the outcome metrics (rates
+          and percentages) are monitoring targets, not test-time measurables.
+        product_success_metrics_addressed:
+          - metric: "NPS (Mentee) >40"
+            coverage: "partial"
+            note: "E6 includes NPS survey delivery in scope (per constraints) but no scenario validates NPS collection or aggregation"
+          - metric: "Session Completion Rate"
+            coverage: "none"
+            note: "Not in E6's scope; owned by E4 and E8"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are binary-testable. FC-1 (ratings visible before
+          moderation) is testable by checking profile visibility immediately after submission.
+          FC-2 (non-completed-session mentees submitting ratings) is testable by attempting
+          rating submission without a completed session in the database. FC-3 (dispute triggers
+          automatic refund) is testable by initiating a dispute and verifying no payment state
+          change without admin action.
+
+      gap_detection:
+        uncovered_sg03_metrics:
+          - metric: "Greater than 80% mentees rate 4+ stars"
+            note: >
+              No scenario validates that the rating collection mechanism achieves the
+              population-level distribution target. This is a behavioral/operational metric
+              that cannot be tested at build time — it requires live operational data.
+              The mechanism is validated but the outcome is not pre-testable.
+          - metric: "Less than 5% dispute rate"
+            note: >
+              No scenario tests dispute volume or rate; scenario 3 tests routing only.
+              Same limitation: rate is an operational metric, not a build-time test.
+          - metric: "NPS (Mentee) >40"
+            note: >
+              NPS survey is in E6's in_scope list but no success scenario validates
+              NPS collection, storage, or aggregation. This is a scenario gap: if NPS
+              is in scope, at least one scenario should validate the collection mechanism.
+
+      confidence: "medium"
+      confidence_rationale: >
+        E6 scenarios correctly validate the quality and dispute mechanisms with strong
+        falsifiability. Confidence is medium because: (1) the NPS survey is listed in
+        scope but has no corresponding success scenario — a gap between stated scope and
+        test coverage, and (2) both SG-03 outcome metrics (dispute rate, 4-star rate)
+        are behavioral targets that scenarios cannot pre-validate, leaving the success
+        metric unconfirmed until live operational data exists.
+
+    - epic_id: "E7"
+      name: "Compliance and Data Protection"
+      strategic_goal_ref: "SG-04"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E7's three success scenarios test: (1) GDPR-compliant granular consent for a German
+          user during registration, (2) data export delivery within 72 hours in JSON format,
+          and (3) immutable timestamped audit log for consent history. SG-04's metric is
+          'zero compliance violations across all four countries in first 6 months'. The
+          scenarios validate the GDPR/EU consent and data portability flows, and audit log
+          integrity. However, India TPDP compliance is listed in E7's scope but has no
+          dedicated success scenario. PCI DSS scope management via PayU (no raw card storage)
+          has no success scenario. USA-specific privacy law compliance has no scenario.
+          The three scenarios collectively cover one of three regulatory regimes (GDPR/EU)
+          and miss two (India TPDP, PCI DSS). This is a meaningful scenario gap for an epic
+          whose stated goal is multi-regime compliance.
+        product_success_metrics_addressed:
+          - metric: "Zero compliance violations (SG-04)"
+            coverage: "partial"
+            note: "GDPR/EU flow validated; India TPDP and PCI DSS have no corresponding scenarios"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are binary-testable. FC-1 (data processed without
+          consent) is verifiable by checking processing state vs consent record in database.
+          FC-2 (audit log modifiable) is testable by attempting direct database mutation and
+          verifying tamper-evidence mechanism. FC-3 (residual data after deletion request)
+          is testable by executing deletion and scanning all system components (search index,
+          analytics, cache) for residual PII. All conditions have clear evidence.
+
+      gap_detection:
+        scenario_gaps:
+          - item: "India TPDP compliance"
+            note: >
+              Listed in E7 in_scope as 'India TPDP consent requirements for Indian users'
+              but no success scenario tests TPDP-specific consent collection for an Indian
+              user. This is a direct scope-to-scenario gap.
+          - item: "PCI DSS scope management"
+            note: >
+              Listed in E7 in_scope as 'PCI DSS scope management through PayU — no raw
+              card data storage' but no scenario validates that card data is not stored
+              anywhere in the platform. No test verifies the PayU gateway handles card
+              data exclusively.
+          - item: "USA privacy law compliance"
+            note: >
+              Four-country operation is the SG-04 premise but no scenario tests US-specific
+              privacy compliance. The intent acknowledges US state-level laws but scenarios
+              only address Germany (GDPR).
+
+      confidence: "medium"
+      confidence_rationale: >
+        E7 scenarios are well-designed for what they cover, with strong falsifiability.
+        Confidence is medium due to two scenario gaps: India TPDP and PCI DSS are both
+        listed as in-scope compliance requirements with no corresponding success scenarios.
+        These are not peripheral features — they are named in SG-04's multi-regime mandate.
+        The 'zero compliance violations' metric cannot be fully confirmed from E7's scenarios
+        as written because two of the three regulatory regimes are untested.
+
+    - epic_id: "E8"
+      name: "Platform Communications"
+      strategic_goal_ref: "SG-01"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E8's three success scenarios test: (1) booking confirmation email delivery within
+          2 minutes via SendGrid, (2) 1-hour reminder delivery via both FCM push and email
+          with join link, and (3) in-app message delivery to mentor inbox with push notification
+          within 30 seconds. These validate the communication infrastructure that supports
+          SG-01's end-to-end flow. Critically, E8's intent explicitly states that 'session
+          completion rate target (greater than 85%) depends directly on reminder effectiveness'
+          — yet no scenario measures no-show reduction or session completion rate. The scenarios
+          validate delivery (messages sent, notifications received) but not behavioral impact
+          (reduced no-shows, increased session completion). 'Platform Activation Rate' and
+          'Time to First Session' are also affected by communication timeliness but not
+          measured here.
+        product_success_metrics_addressed:
+          - metric: "Session Completion Rate (>85%)"
+            coverage: "partial"
+            note: "Reminder delivery is tested (mechanism) but no-show reduction (outcome) is not. The 85% target cannot be confirmed from E8 scenarios alone"
+          - metric: "NPS (Mentee) >40"
+            coverage: "none"
+            note: "NPS survey delivery is listed in E6 scope; E8 does not address this"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are binary-testable. FC-1 (reminder delivery failure
+          with no retry) is testable by simulating SendGrid delivery failure and verifying
+          retry mechanism or fallback. FC-2 (messages visible outside mentor-mentee pair)
+          is testable by checking message visibility for a third user on the same session.
+          FC-3 (non-functional notification preferences leading to opt-out) is testable by
+          attempting to set and then verify preference enforcement.
+
+      gap_detection:
+        uncovered_sg01_metrics:
+          - metric: "Session Completion Rate (>85%)"
+            note: >
+              E8 is the primary driver of no-show reduction through reminders, but
+              scenarios validate delivery only, not behavioral outcome. This is expected —
+              no-show rates are operational metrics — but the gap between mechanism
+              validation and metric confirmation is real.
+          - metric: "Platform Activation Rate (>40%)"
+            note: >
+              No scenario tests whether notification timing or content influences mentee
+              return behavior. Activation rate spans E1, E3, E4, E8 collectively.
+
+      confidence: "medium"
+      confidence_rationale: >
+        E8 scenarios are well-constructed for mechanism validation with strong falsifiability.
+        Confidence is medium because the epic's own intent claims a direct link to the
+        Session Completion Rate target (>85%) but scenarios do not produce evidence toward
+        this target. The mechanism is tested; the outcome metric remains unconfirmed by
+        E8 scenarios.
+
+    - epic_id: "E9"
+      name: "Referral and Acquisition Engine"
+      strategic_goal_ref: "SG-05"
+
+      scenario_to_metric_coverage:
+        rating: "full"
+        analysis: >
+          E9's three success scenarios test: (1) referral link generation with unique tracking
+          code and dashboard registration, (2) full funnel completion — referred user signs up,
+          completes first session, referrer receives EUR 10 credit and notification, and (3)
+          admin analytics dashboard showing conversion rate, rewards disbursed, and effective
+          CAC for referred users. SG-05's metrics are '>30% of new signups from referrals
+          within 3 months' and 'CAC below EUR 15'. Scenario 3 directly tests CAC visibility
+          in the analytics dashboard, which is the measurement mechanism for both targets.
+          Scenario 2 validates the full referral funnel completion that produces the 30%
+          signal. The scenarios cover mechanism (link generation), funnel completion (referral
+          reward), and measurement (CAC analytics) — all three components needed to confirm
+          SG-05 progress.
+        product_success_metrics_addressed:
+          - metric: "CAC below EUR 15 per mentee (SG-05)"
+            coverage: "full"
+            note: "Scenario 3 explicitly tests that the admin dashboard shows effective CAC for referred users — the measurement mechanism is validated"
+          - metric: "Greater than 30% signups from referrals (SG-05)"
+            coverage: "partial"
+            note: "Scenario 2 validates the full referral funnel works end-to-end; population-level 30% rate requires live operational data"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are binary-testable. FC-1 (referral attribution loss
+          during signup) is testable by end-to-end test: click link, complete signup and
+          first session, verify referrer credit. FC-2 (self-referral fraud) is testable by
+          attempting to use own referral link. FC-3 (reward disbursement causing negative
+          balance) is testable by checking payment balance state after reward processing.
+          All conditions have clear evidence checkpoints.
+
+      gap_detection:
+        note: >
+          E9 scenarios are well-matched to SG-05 success metrics. The only structural
+          limitation is that the 30% population-level rate is an operational metric requiring
+          live data — this is not a scenario design gap but an inherent limitation of
+          pre-launch testing.
+
+      confidence: "high"
+      confidence_rationale: >
+        E9 has the strongest scenario-to-metric alignment in the epic set. Scenarios cover
+        link generation, full funnel conversion, and admin measurement of the SG-05 targets
+        (CAC, conversion rate). Failure conditions are strongly falsifiable. The only
+        limitation is that 30% referral share is a population-level metric that cannot be
+        pre-validated — an expected constraint, not a design gap.
+
+    - epic_id: "E10"
+      name: "Admin Operations and Analytics"
+      strategic_goal_ref: "SG-01"
+
+      scenario_to_metric_coverage:
+        rating: "partial"
+        analysis: >
+          E10's three success scenarios test: (1) admin mentor approval queue view with
+          single-action approve/reject, (2) mentor earnings dashboard accuracy against actual
+          transaction history, and (3) admin financial oversight daily revenue sum matching
+          commission totals with no discrepancies. These validate operational tooling
+          correctness. For SG-01, E10 provides the monitoring and management layer post-launch.
+          However, the product success metrics (Platform Activation Rate, Session Completion
+          Rate, Mentor Utilization Rate, NPS, Revenue per Session, Time to First Session)
+          are only passively referenced — E10's scenarios validate that dashboards exist and
+          show accurate data for earnings and approvals, but no scenario tests that the
+          platform health metrics dashboard (active users, sessions, completion rates) actually
+          displays these success metrics. The admin analytics scope includes these metrics but
+          the scenarios do not validate their presence or accuracy.
+        product_success_metrics_addressed:
+          - metric: "Revenue per Session (EUR 8-15)"
+            coverage: "partial"
+            note: "Scenario 3 validates daily revenue sum accuracy but does not test the per-session average metric display"
+          - metric: "Mentor Utilization Rate (>25%)"
+            coverage: "none"
+            note: "Listed as platform health metric in E10 scope but no scenario validates its display or calculation"
+          - metric: "Platform Activation Rate (>40%)"
+            coverage: "none"
+            note: "Not present in any E10 scenario despite being a primary product success metric"
+          - metric: "Session Completion Rate (>85%)"
+            coverage: "none"
+            note: "E10 scope mentions 'sessions completed' in health metrics but no scenario validates this"
+          - metric: "NPS (Mentee) >40"
+            coverage: "none"
+            note: "Not addressed in E10 scenarios"
+          - metric: "Time to First Session (<7 days)"
+            coverage: "none"
+            note: "Not addressed in any epic's scenarios — this is a cross-epic gap"
+
+      falsifiability:
+        rating: "strong"
+        analysis: >
+          All three failure conditions are binary-testable. FC-1 (dashboard figures not
+          matching transaction records) is testable by arithmetic verification against
+          database. FC-2 (admin approval not propagating in real-time) is testable by
+          approving and immediately checking search index. FC-3 (role-gating failure) is
+          testable by attempting admin panel access with a mentor or mentee session token.
+
+      gap_detection:
+        scenario_gaps:
+          - item: "Platform health metrics dashboard scenarios"
+            note: >
+              E10 scope includes 'Platform health metrics dashboard (active users, sessions
+              booked, completed, completion rate, revenue)' but no success scenario validates
+              any of these health metrics. The scenarios cover earnings accuracy and approval
+              queue but not the completion rate, activation rate, or NPS displays that are
+              the primary product success metrics.
+          - item: "Time to First Session metric"
+            note: >
+              'Time to First Session: Median <7 days' is a product success metric with no
+              corresponding scenario in any epic. E10 would be the natural owner of this
+              measurement but it is absent from both E10's scenarios and all other epics.
+        cross_epic_gap:
+          - metric: "Time to First Session (<7 days median)"
+            note: >
+              This product success metric has no scenario coverage in any epic across the
+              entire epic set. It spans E1 (registration), E3 (discovery), E4 (booking)
+              and would be measured in E10 (analytics) — but no epic claims ownership
+              and no scenario produces evidence toward it.
+
+      confidence: "medium"
+      confidence_rationale: >
+        E10 scenarios are accurate and falsifiable for the operations they test (approval
+        queue, earnings accuracy, revenue reconciliation). Confidence is medium because the
+        platform health metrics dashboard — which is the primary mechanism for tracking all
+        six product success metrics — has no success scenario coverage. The most important
+        product measurement tool is in scope but untested.
+
+  cross_epic_analysis:
+    coverage_by_strategic_goal:
+      SG-01:
+        epics: ["E1", "E3", "E4", "E8", "E10"]
+        coverage_assessment: "strong"
+        note: >
+          Five epics collectively deliver the end-to-end marketplace flow. E1 (auth) →
+          E3 (discovery) → E4 (booking + video) → E8 (communications) → E10 (operations).
+          The chain is complete for the signup-to-session-completion flow.
+      SG-02:
+        epics: ["E2"]
+        coverage_assessment: "weak"
+        note: >
+          Only one epic serves SG-02. The 50-mentor volume target within 8 weeks is not
+          validated by any scenario. No epic tests the admin's capacity to process
+          applications at the required throughput.
+      SG-03:
+        epics: ["E5", "E6"]
+        coverage_assessment: "moderate"
+        note: >
+          E5 (payments/escrow) and E6 (ratings/disputes) jointly deliver SG-03. E5 scenarios
+          are strongly metric-aligned. E6 has a gap: NPS survey is in scope but untested.
+          The outcome metrics (dispute rate, 4-star rate) cannot be pre-validated.
+      SG-04:
+        epics: ["E7"]
+        coverage_assessment: "weak"
+        note: >
+          Single-epic coverage with two scenario gaps: India TPDP and PCI DSS compliance
+          have no success scenarios despite being explicit in-scope items for E7.
+      SG-05:
+        epics: ["E9"]
+        coverage_assessment: "strong"
+        note: >
+          E9 scenarios are well-aligned to SG-05 metrics. Referral mechanism, funnel
+          completion, and CAC measurement are all validated.
+
+    uncovered_product_success_metrics:
+      - metric: "Time to First Session (<7 days median)"
+        status: "no epic owns this metric"
+        note: >
+          This is the most significant cross-epic gap. The Time to First Session metric
+          spans E1 (registration), E3 (discovery), E4 (booking), and E10 (analytics) but
+          no epic's scenarios produce direct evidence toward the <7 days target. This
+          metric measures the end-to-end journey quality and is a direct indicator of
+          marketplace activation speed — its absence from all scenarios is a meaningful
+          blind spot.
+      - metric: "Mentor Utilization Rate (>25% conduct 1+ session/month)"
+        status: "indirect coverage only"
+        note: >
+          E2 onboards mentors and E4 enables booking, but no scenario measures whether
+          25% of approved mentors become active. E10 scope includes this metric but
+          no scenario validates its measurement.
+      - metric: "Platform Activation Rate (>40% complete 1 session within 30 days)"
+        status: "indirect coverage only"
+        note: >
+          Multiple epics contribute to activation (auth, discovery, booking, communications)
+          but no scenario measures activation rate directly. E10 is the natural home for
+          this metric measurement but has no scenario for it.
+
+    overall_confidence: "medium"
+    overall_rationale: >
+      The epic set is structurally sound with clear SG coverage, well-defined intent, and
+      predominantly strong falsifiability across failure conditions. Confidence is held at
+      medium overall due to four structural gaps: (1) the Time to First Session success
+      metric has no scenario coverage in any epic; (2) E7 has two scenario gaps for India
+      TPDP and PCI DSS despite explicit in-scope inclusion; (3) E6 has a NPS scenario gap;
+      and (4) E10's platform health metrics dashboard — the measurement mechanism for most
+      product success metrics — is in scope but has no scenario coverage. These gaps do not
+      indicate that the product vision is wrong, but they represent unconfirmed territory
+      where delivery could succeed technically while the product success metrics go unmeasured.
