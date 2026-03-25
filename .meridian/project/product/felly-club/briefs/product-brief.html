@@ -1,1451 +1,964 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Felly Club — Product Brief</title>
-<style>
-:root {
-  --bg-primary: #0D1117;
-  --bg-secondary: #161B22;
-  --bg-tertiary: #21262D;
-  --text-primary: #e0e0e8;
-  --text-secondary: #8B949E;
-  --text-dimmed: #484f58;
-  --color-air: #39D353;
-  --color-water: #58A6FF;
-  --color-earth: #8B949E;
-  --color-fire: #F0A000;
-  --status-draft: #fbbf24;
-  --status-validated: #4ade80;
-  --status-locked: #58A6FF;
-  --border-default: #30363d;
-  --border-accent: #58A6FF;
-  --shadow-retro: 4px 4px 0 rgba(33,38,45,1);
-  --comment-highlight: rgba(240,160,0,0.2);
-  --comment-highlight-hover: rgba(240,160,0,0.35);
-  --comment-popup-bg: #21262D;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--text-primary);
-  background: var(--bg-primary);
-}
-
-code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
-
-h1 { font-size: 28px; color: var(--color-water); border-bottom: 1px solid var(--border-default); padding-bottom: 8px; margin-bottom: 12px; }
-h2 { font-size: 20px; color: var(--color-air); border-bottom: 1px solid var(--border-default); padding-bottom: 8px; margin-bottom: 16px; margin-top: 32px; }
-h2:first-child { margin-top: 0; }
-h3 { font-size: 16px; color: var(--text-primary); margin-bottom: 8px; }
-
-.container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
-
-.header { margin-bottom: 24px; }
-.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-.header-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
-.hub-link { color: var(--color-water); text-decoration: none; font-size: 13px; }
-.hub-link:hover { text-decoration: underline; }
-.source-path { font-size: 12px; color: var(--text-dimmed); font-family: monospace; margin-top: 4px; }
-.generated-at { font-size: 12px; color: var(--text-dimmed); margin-top: 2px; }
-.slug-text { font-size: 13px; color: var(--text-dimmed); font-family: monospace; }
-.domain-text { font-size: 13px; color: var(--text-secondary); }
-
-.card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  box-shadow: var(--shadow-retro);
-  padding: 20px;
-  margin-bottom: 16px;
-  transition: border-color 0.15s;
-}
-.card:hover { border-color: var(--border-accent); }
-
-.card-air   { border-left: 3px solid var(--color-air); }
-.card-water { border-left: 3px solid var(--color-water); }
-.card-earth { border-left: 3px solid var(--color-earth); }
-.card-fire  { border-left: 3px solid var(--color-fire); }
-
-.highlight-box {
-  background: rgba(88,166,255,0.08);
-  border: 1px solid rgba(88,166,255,0.2);
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-}
-
-.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-.badge-draft     { background: rgba(251,191,36,0.15); color: var(--status-draft); }
-.badge-validated { background: rgba(74,222,128,0.15); color: var(--status-validated); }
-.badge-locked    { background: rgba(88,166,255,0.15); color: var(--status-locked); }
-.badge-type      { background: rgba(57,211,83,0.12); color: var(--color-air); }
-
-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
-th { background: var(--bg-tertiary); color: var(--text-primary); padding: 10px 12px; text-align: left; font-size: 13px; }
-td { padding: 8px 12px; border-bottom: 1px solid var(--border-default); color: var(--text-secondary); vertical-align: top; }
-tr:hover td { background: rgba(88,166,255,0.05); }
-
-.tab-bar { display: flex; border-bottom: 1px solid var(--border-default); margin-bottom: 24px; overflow-x: auto; }
-.tab-btn {
-  padding: 10px 20px;
-  background: var(--bg-primary);
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  white-space: nowrap;
-  transition: color 0.15s;
-}
-.tab-btn.active {
-  background: var(--bg-secondary);
-  border-bottom: 2px solid var(--color-water);
-  color: var(--text-primary);
-}
-.tab-btn:hover:not(.active) { color: var(--text-primary); }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-
-.comment-count-badge {
-  display: inline-block;
-  margin-left: 6px;
-  background: var(--color-fire);
-  color: var(--bg-primary);
-  border-radius: 10px;
-  padding: 1px 7px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-/* Differentiators & list items */
-.diff-item {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  border-left: 3px solid var(--color-air);
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin-bottom: 10px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-/* Risk severity */
-.risk-high   { border-left-color: #f85149; }
-.risk-medium { border-left-color: var(--color-fire); }
-.risk-low    { border-left-color: var(--color-air); }
-
-.severity-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-left: 8px;
-}
-.severity-HIGH   { background: rgba(248,81,73,0.15); color: #f85149; }
-.severity-MEDIUM { background: rgba(240,160,0,0.15); color: var(--color-fire); }
-.severity-LOW    { background: rgba(57,211,83,0.15); color: var(--color-air); }
-
-/* Market size visual */
-.market-size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-.market-size-cell {
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  border: 1px solid var(--border-default);
-}
-.market-size-label { font-size: 12px; color: var(--text-dimmed); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-.market-size-value { font-size: 15px; color: var(--text-primary); font-weight: bold; line-height: 1.4; }
-
-/* Profile bar */
-.profile-bar-bg {
-  background: var(--bg-tertiary);
-  border-radius: 4px;
-  height: 8px;
-  width: 100%;
-  overflow: hidden;
-}
-.profile-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  background: var(--color-water);
-  transition: width 0.3s;
-}
-
-/* Profile level badge */
-.level-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(88,166,255,0.15);
-  color: var(--color-water);
-  font-weight: bold;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-/* Profile section header */
-.profile-section-header {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  padding: 10px 16px;
-  margin-bottom: 12px;
-  margin-top: 24px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.profile-section-header:first-of-type { margin-top: 0; }
-
-/* Cascade connector */
-.cascade-note {
-  font-size: 12px;
-  color: var(--text-dimmed);
-  font-style: italic;
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background: rgba(57,211,83,0.05);
-  border-radius: 4px;
-  border-left: 2px solid var(--color-air);
-}
-
-/* Scope lists */
-.scope-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-.scope-item .scope-icon { flex-shrink: 0; margin-top: 2px; }
-.scope-icon-in  { color: var(--color-air); }
-.scope-icon-out { color: #f85149; }
-
-/* Assumptions */
-.assumption-item {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  border-left: 3px solid var(--color-water);
-  border-radius: 6px;
-  padding: 10px 16px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-/* Strategic goals */
-.goal-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  border-left: 3px solid var(--color-air);
-  border-radius: 8px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
-}
-.goal-id {
-  font-size: 11px;
-  color: var(--color-air);
-  font-family: monospace;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-.goal-title {
-  font-size: 16px;
-  color: var(--text-primary);
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-.goal-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-}
-.goal-metrics-label {
-  font-size: 12px;
-  color: var(--text-dimmed);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-}
-.goal-metric-item {
-  font-size: 13px;
-  color: var(--text-secondary);
-  padding: 3px 0;
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
-.goal-metric-dot { color: var(--color-air); flex-shrink: 0; }
-
-/* Persona card extras */
-.persona-label {
-  font-size: 11px;
-  color: var(--text-dimmed);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 2px;
-}
-.persona-value {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-}
-.persona-name {
-  font-size: 17px;
-  color: var(--text-primary);
-  font-weight: bold;
-  margin-bottom: 14px;
-}
-
-/* Footer */
-.footer {
-  margin-top: 48px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-default);
-  font-size: 12px;
-  color: var(--text-dimmed);
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* Action buttons */
-.action-btn {
-  padding: 8px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: bold;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  transition: opacity 0.15s;
-}
-.action-btn:hover { opacity: 0.8; }
-
-/* Comment highlight */
-.comment-highlight {
-  background: var(--comment-highlight);
-  cursor: pointer;
-  border-bottom: 2px solid var(--color-fire);
-}
-.comment-highlight:hover { background: var(--comment-highlight-hover); }
-
-/* Collapsible */
-.collapsible-toggle {
-  background: none;
-  border: none;
-  color: var(--color-water);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  padding: 0;
-  margin-top: 6px;
-}
-.collapsible-toggle:hover { text-decoration: underline; }
-.collapsible-content { margin-top: 8px; }
-.collapsible-content.collapsed { display: none; }
-
-@media (max-width: 600px) {
-  .container { padding: 16px 12px; }
-  .market-size-grid { grid-template-columns: 1fr; }
-  .header-top { flex-direction: column; gap: 8px; }
-}
-
-@media print {
-  .tab-bar, .comment-popup, #comment-popup, .action-btn { display: none !important; }
-  .tab-panel { display: block !important; }
-  body { background: white; color: black; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Brief: felly-club</title>
+  <!-- Template: product-brief.html -->
+  <!-- Used by: generate-product-brief skill -->
+  <!-- Source data: product.yaml -->
+  <!-- Placeholder syntax: {VARIABLE} for simple substitution, {BLOCK} for rendered HTML blocks -->
+  <!-- All CSS and JS inline — no external dependencies -->
+  <style>
+    /* LifeOS Dark — Brief Design System (inlined from brief-common.css) */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0D1117;
+      --bg-secondary: #161B22;
+      --bg-tertiary: #21262D;
+      --text-primary: #E6EDF3;
+      --text-secondary: #8B949E;
+      --text-dimmed: #484f58;
+      --text-muted: #6E7681;
+      --color-air: #39D353;
+      --color-water: #58A6FF;
+      --color-earth: #8B949E;
+      --color-fire: #F0A000;
+      --glow-air: rgba(57,211,83,0.35);
+      --glow-water: rgba(88,166,255,0.35);
+      --glow-earth: rgba(139,148,158,0.35);
+      --glow-fire: rgba(240,160,0,0.35);
+      --status-draft: #fbbf24;
+      --status-validated: #4ade80;
+      --status-locked: #58A6FF;
+      --border-default: #30363d;
+      --border-accent: #58A6FF;
+      --shadow-retro: 4px 4px 0 rgba(33,38,45,1);
+      --shadow-retro-sm: 2px 2px 0 #000;
+      --comment-highlight: rgba(240,160,0,0.2);
+      --comment-highlight-hover: rgba(240,160,0,0.35);
+      --comment-popup-bg: #21262D;
+      --font-heading: 'Arial Rounded MT Bold','Arial Rounded MT','Nunito',system-ui,sans-serif;
+      --font-body: 'Arial Rounded MT Bold','Nunito','Varela Round',system-ui,sans-serif;
+      --font-code: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+      --space-xs: 8px; --space-sm: 12px; --space-md: 16px;
+      --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+    }
+    body { font-family: var(--font-body); font-size: 15px; line-height: 1.6; color: var(--text-primary); background: var(--bg-primary); }
+    code, pre, .mono { font-family: var(--font-code); font-size: 13px; }
+    .container { max-width: 900px; margin: 0 auto; padding: var(--space-xl) var(--space-lg); }
+    h1 { font-family: var(--font-heading); font-size: 28px; color: var(--color-water); border-bottom: 1px solid var(--border-default); padding-bottom: var(--space-xs); margin-bottom: var(--space-lg); }
+    h2 { font-size: 20px; color: var(--color-air); border-bottom: 1px solid var(--border-default); padding-bottom: var(--space-xs); margin-bottom: var(--space-md); margin-top: var(--space-lg); }
+    h3 { font-size: 16px; color: var(--text-primary); margin-bottom: var(--space-sm); }
+    p { margin-bottom: var(--space-sm); }
+    .brief-header { margin-bottom: var(--space-lg); padding-bottom: var(--space-md); border-bottom: 1px solid var(--border-default); }
+    .brief-title { font-family: var(--font-heading); font-size: 28px; color: var(--color-water); margin-bottom: var(--space-xs); }
+    .brief-meta { font-size: 13px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: var(--space-md); }
+    .brief-meta span { white-space: nowrap; }
+    .source-path { font-size: 12px; color: var(--text-dimmed); font-family: var(--font-code); margin-top: 4px; }
+    .hub-link { display: inline-block; color: var(--color-water); text-decoration: none; font-size: 13px; margin-bottom: var(--space-md); }
+    .hub-link:hover { text-decoration: underline; }
+    /* Tabs */
+    .tab-bar { display: flex; border-bottom: 1px solid var(--border-default); margin-bottom: var(--space-lg); gap: 4px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 18px; background: var(--bg-primary); border: none; border-bottom: 2px solid transparent; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 14px; transition: all 0.15s; }
+    .tab-btn:hover:not(.active) { color: var(--text-primary); }
+    .tab-btn.active { background: var(--bg-secondary); border-bottom-color: var(--color-water); color: var(--text-primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .comment-count-badge { display: inline-block; margin-left: 6px; background: var(--color-fire); color: var(--bg-primary); border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: bold; }
+    /* Cards */
+    .card { background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 8px; box-shadow: var(--shadow-retro); padding: 20px; margin-bottom: var(--space-md); }
+    .card:hover { border-color: var(--border-accent); }
+    .card-air   { border-left: 4px solid var(--color-air); }
+    .card-water { border-left: 4px solid var(--color-water); }
+    .card-earth { border-left: 4px solid var(--color-earth); }
+    .card-fire  { border-left: 4px solid var(--color-fire); }
+    .highlight-box { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); border-radius: 8px; padding: var(--space-md) 20px; margin-bottom: var(--space-md); }
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-draft     { background: rgba(251,191,36,0.15); color: var(--status-draft); }
+    .badge-validated { background: rgba(74,222,128,0.15); color: var(--status-validated); }
+    .badge-locked    { background: rgba(88,166,255,0.15); color: var(--status-locked); }
+    .badge-count     { background: var(--bg-tertiary); color: var(--text-secondary); margin-left: 4px; }
+    .badge-low    { background: rgba(57,211,83,0.15); color: var(--color-air); }
+    .badge-medium { background: rgba(240,160,0,0.15); color: var(--color-fire); }
+    .badge-high   { background: rgba(248,81,73,0.15); color: #F85149; }
+    .badge-p1 { background: rgba(88,166,255,0.15); color: var(--color-water); }
+    .badge-p2 { background: rgba(139,148,158,0.15); color: var(--color-earth); }
+    .badge-p3 { background: rgba(139,148,158,0.1); color: var(--text-dimmed); }
+    .badge-near { background: rgba(57,211,83,0.15); color: var(--color-air); }
+    .badge-mid  { background: rgba(240,160,0,0.15); color: var(--color-fire); }
+    .badge-long { background: rgba(139,148,158,0.15); color: var(--color-earth); }
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: var(--space-md); }
+    th { background: var(--bg-tertiary); color: var(--text-primary); padding: 10px 12px; text-align: left; }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border-default); color: var(--text-secondary); }
+    tr:hover { background: rgba(88,166,255,0.05); }
+    /* Profile tables */
+    .profile-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: var(--space-lg); }
+    .profile-table th { background: var(--bg-tertiary); color: var(--text-primary); padding: 8px 12px; text-align: left; }
+    .profile-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-default); color: var(--text-secondary); }
+    .profile-table .level-cell { text-align: center; font-weight: bold; color: var(--text-primary); min-width: 50px; }
+    /* Epic cards */
+    .epic-card { background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 8px; box-shadow: var(--shadow-retro); padding: var(--space-lg); margin-bottom: var(--space-md); }
+    .epic-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-md); gap: var(--space-md); }
+    .epic-header h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .epic-badges { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+    .epic-field { margin-bottom: var(--space-sm); }
+    .epic-field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+    .epic-field-value { font-size: 14px; color: var(--text-primary); }
+    .epic-field-value ul { padding-left: 18px; }
+    .epic-field-value li { margin-bottom: 4px; color: var(--text-secondary); }
+    .idd-section { margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border-default); }
+    .idd-paragraph { margin-bottom: var(--space-sm); color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+    .idd-label { font-size: 12px; font-weight: 700; color: var(--color-water); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .scenario-item { padding: 8px 12px; background: var(--bg-tertiary); border-radius: 4px; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary); border-left: 3px solid var(--color-air); }
+    .failure-item { padding: 8px 12px; background: var(--bg-tertiary); border-radius: 4px; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary); border-left: 3px solid var(--color-fire); }
+    /* Stat cards */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-lg); }
+    .stat-card { background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 8px; padding: var(--space-md); text-align: center; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+    .stat-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-fire .stat-value { color: var(--color-fire); }
+    /* Lists */
+    .item-list { list-style: none; padding: 0; }
+    .item-list li { padding: 10px 0; border-bottom: 1px solid var(--border-default); font-size: 14px; color: var(--text-secondary); }
+    .item-list li:last-child { border-bottom: none; }
+    /* Context sections */
+    .context-section { opacity: 0.7; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 8px; padding: var(--space-md) 20px; margin-bottom: 20px; pointer-events: none; }
+    .context-section h3 { color: var(--text-secondary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .context-label { font-size: 11px; color: var(--text-dimmed); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--space-xs); }
+    /* Inline comment system */
+    .comment-highlight { background: var(--comment-highlight); cursor: pointer; border-bottom: 2px solid var(--color-fire); border-radius: 2px; }
+    .comment-highlight:hover { background: var(--comment-highlight-hover); }
+    .comment-popup { position: fixed; background: var(--comment-popup-bg); border: 1px solid var(--border-accent); border-radius: 8px; padding: var(--space-md); min-width: 280px; max-width: 360px; z-index: 1000; box-shadow: 0 4px 16px rgba(0,0,0,0.4); display: none; }
+    .comment-popup.visible { display: block; }
+    .comment-selected-text { background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: 4px; padding: var(--space-xs); font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; max-height: 60px; overflow: hidden; font-style: italic; }
+    .comment-textarea { width: 100%; min-height: 80px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-primary); font-family: inherit; font-size: 13px; padding: var(--space-xs); resize: vertical; box-sizing: border-box; }
+    .comment-textarea:focus { border-color: var(--border-accent); outline: none; }
+    .comment-popup-actions { display: flex; justify-content: flex-end; gap: var(--space-xs); margin-top: 10px; }
+    .comment-btn { padding: 5px 14px; border: 1px solid var(--border-default); border-radius: 4px; background: transparent; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 13px; }
+    .comment-btn-save { background: var(--color-water); color: var(--bg-primary); border-color: var(--color-water); font-weight: bold; }
+    .comment-item { background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 6px; padding: 14px var(--space-md); margin-bottom: var(--space-sm); }
+    .comment-excerpt { font-style: italic; color: var(--text-secondary); font-size: 13px; margin-bottom: 6px; padding-left: var(--space-xs); border-left: 2px solid var(--color-fire); }
+    .comment-tab-label { font-size: 11px; color: var(--text-dimmed); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .comment-body { color: var(--text-primary); font-size: 14px; margin-bottom: 10px; }
+    .comment-delete-btn { padding: 3px 10px; border: 1px solid var(--border-default); border-radius: 4px; background: transparent; color: var(--color-fire); cursor: pointer; font-size: 12px; font-family: inherit; }
+    /* Export / action buttons */
+    .export-section { margin-top: var(--space-lg); padding-top: 20px; border-top: 1px solid var(--border-default); }
+    .action-btns { display: flex; gap: 10px; margin-top: var(--space-sm); flex-wrap: wrap; }
+    .action-btn { padding: 8px 20px; border-radius: 6px; border: 1px solid var(--border-default); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold; background: transparent; color: var(--text-secondary); transition: all 0.15s; }
+    .action-btn-tether { border-color: var(--color-air); color: var(--color-air); }
+    .action-btn-tether:hover { background: rgba(57,211,83,0.1); }
+    .action-btn-vanish { border-color: var(--color-fire); color: var(--color-fire); }
+    .action-btn-vanish:hover { background: rgba(240,160,0,0.1); }
+    .action-btn-orbit  { border-color: var(--color-water); color: var(--color-water); }
+    .action-btn-orbit:hover  { background: rgba(88,166,255,0.1); }
+    /* Card field layouts */
+    .card-field { margin-bottom: var(--space-xs); }
+    .card-field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 2px; }
+    .card-field-value { font-size: 14px; color: var(--text-secondary); }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-sm); }
+    .card-subtitle { font-size: 12px; color: var(--text-dimmed); font-family: var(--font-code); margin-bottom: var(--space-sm); }
+    /* Pre/code block */
+    .code-block { background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 6px; padding: var(--space-md); overflow-x: auto; margin-bottom: var(--space-md); }
+    .code-block pre { color: var(--color-air); font-family: var(--font-code); font-size: 13px; line-height: 1.5; white-space: pre; }
+    /* Tag chips */
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: var(--bg-tertiary); color: var(--text-secondary); }
+    /* Quality Standards */
+    .qs-dimension { background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 8px; padding: var(--space-md); margin-bottom: var(--space-md); }
+    .qs-dimension-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); }
+    .qs-dimension-name { font-weight: 700; color: var(--text-primary); }
+    .qs-dimension-level { font-size: 12px; color: var(--color-water); }
+    .qs-field { margin-bottom: var(--space-xs); }
+    .qs-field-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .qs-field-value { font-size: 13px; color: var(--text-secondary); }
+    /* Debt table */
+    .debt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .debt-table th { background: var(--bg-tertiary); color: var(--text-primary); padding: 8px 12px; text-align: left; }
+    .debt-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-default); }
+    .debt-gap { color: var(--color-fire); font-weight: 700; }
+    .debt-ok { color: var(--color-air); }
+    /* Toast */
+    #toast { display: none; position: fixed; bottom: 24px; right: 24px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-accent); border-radius: 6px; padding: 10px 18px; font-size: 13px; z-index: 2000; }
+    /* Responsive */
+    @media (max-width: 640px) { .container { padding: var(--space-md); } .tab-btn { padding: 8px 12px; font-size: 13px; } .stat-grid { grid-template-columns: 1fr 1fr; } .epic-header { flex-direction: column; } }
+  </style>
 </head>
 <body>
 
+<!-- ─────────────────────────────────────────────────────── -->
+<!-- COMMENT POPUP (fixed, hidden by default) -->
+<div class="comment-popup" id="comment-popup">
+  <div class="comment-selected-text" id="comment-selected-text"></div>
+  <textarea class="comment-textarea" id="comment-textarea" placeholder="Add a comment on this selection..."></textarea>
+  <div class="comment-popup-actions">
+    <button class="comment-btn" onclick="hidePopup()">Cancel</button>
+    <button class="comment-btn comment-btn-save" onclick="saveComment()">Save</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
 <div class="container">
 
+  <!-- ─────────────────────────────────────────────────────── -->
   <!-- HEADER -->
-  <div class="header">
-    <div class="header-top">
-      <div>
-        <div class="header-meta">
-          <span class="badge badge-draft">DRAFT</span>
-          <span class="badge badge-type">product</span>
-          <span class="domain-text">mentorship-marketplace</span>
-        </div>
-        <h1>Felly Club</h1>
-        <div class="slug-text">felly-club</div>
-        <div class="generated-at">Generated: 2026-03-25 &nbsp;|&nbsp; Recipe: discover-product</div>
-        <div class="source-path">.meridian/project/product/felly-club/product.yaml</div>
-      </div>
-      <a href="hub.html" class="hub-link">← Hub</a>
+  <a class="hub-link" href="hub.html">← Hub</a>
+  <div class="brief-header">
+    <div class="brief-title">Product Brief <span class="badge badge-draft">DRAFT</span></div>
+    <div class="brief-meta">
+      <span><strong>Product:</strong> felly-club</span>
+      <span><strong>Generated:</strong> 2026-03-25</span>
     </div>
+    <div class="source-path">Source: .meridian/project/product/felly-club/product.yaml</div>
   </div>
 
+  <!-- ─────────────────────────────────────────────────────── -->
   <!-- TAB BAR -->
   <div class="tab-bar">
-    <button class="tab-btn active" data-tab="market-context" onclick="switchTab('market-context')">Market Context</button>
-    <button class="tab-btn" data-tab="vision" onclick="switchTab('vision')">Vision</button>
-    <button class="tab-btn" data-tab="scope" onclick="switchTab('scope')">Scope</button>
-    <button class="tab-btn" data-tab="profiles" onclick="switchTab('profiles')">Profiles</button>
-    <button class="tab-btn" data-tab="comments" onclick="switchTab('comments')">Comments<span id="comment-tab-badge" class="comment-count-badge" style="display:none;"></span></button>
+    <button class="tab-btn active" data-tab="market">Market Context</button>
+    <button class="tab-btn" data-tab="vision">Vision</button>
+    <button class="tab-btn" data-tab="scope">Scope</button>
+    <button class="tab-btn" data-tab="profiles">Profiles</button>
+    <button class="tab-btn" data-tab="comments">Comments<span class="comment-count-badge" id="comment-badge" style="display:none">0</span></button>
   </div>
 
-  <!-- TAB 1: MARKET CONTEXT -->
-  <div id="tab-market-context" class="tab-panel active">
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- TAB: MARKET CONTEXT -->
+  <div class="tab-panel active" id="market">
 
-    <h2>Problem Statement</h2>
-    <div class="card">
-      <p style="color:var(--text-secondary); font-size:14px; white-space:pre-line;">The mentorship landscape is fragmented across informal networks, LinkedIn DMs, and niche platforms that rarely span beyond tech and business domains. Individuals seeking guidance in Sport, Entertainment, Entrepreneurship, and Business face several systemic friction points:
-
-1. Discovery gap: No single marketplace aggregates verified mentors across Sport, Entertainment, Business, and Entrepreneurship verticals. Existing platforms (MentorCruise, GrowthMentor, ADPList) are tech/startup-centric. Sports mentorship is scattered across NGO programs (Living Sport, WeCOACH) and informal networks with no transactional layer.
-
-2. Trust deficit: Mentor credentials are self-reported on most platforms. There is no standardized domain-verification process, leaving mentees unable to distinguish credentialed experts from self-proclaimed coaches.
-
-3. Pricing opacity: Rates range from free (ADPList) to $960/hour (Clarity.fm) with no standardization. Per-minute billing (Clarity.fm) creates anxiety; flat monthly subscriptions (MentorCruise at $200-400/month) lock mentees into commitments before trust is established.
-
-4. Payment risk: Most platforms lack escrow mechanisms. Mentors risk non-payment for completed sessions; mentees risk paying for no-shows or subpar sessions with limited recourse.
-
-5. Multi-geography compliance: Platforms operating across India, EU (Germany), Switzerland, and USA must navigate GDPR, India's DPDP Act (formerly TPDP), PCI DSS for payments, and Germany's FernUSG (Distance Learning Protection Act) which now applies to online mentoring/coaching.
-
-6. Session accountability: No mainstream mentorship platform offers session recordings for dispute resolution, creating a he-said/she-said dynamic when quality disputes arise.</p>
-    </div>
+    <h2>Problem</h2>
+    <p>The global mentorship landscape is fragmented and opaque. Aspiring individuals struggle to identify credible, accessible mentors, while accomplished professionals lack a structured, trustworthy channel to offer guidance. Key pain points include no standardized discovery mechanism for domain-specific mentors, absence of transparent pricing and quality indicators, high friction in scheduling and payment, limited accountability and dispute resolution, and no data-driven insights for participants. The niche of Sport and Entertainment mentorship is particularly underserved — existing platforms focus heavily on tech, business, and design, leaving athletes, performers, and creative professionals without a curated marketplace for domain-verified mentors.</p>
 
     <h2>Target Users</h2>
 
     <div class="card card-fire">
-      <div class="persona-name">Ambitious Mentee</div>
-      <div class="persona-label">Goal</div>
-      <div class="persona-value">Find a verified, domain-specific mentor and book a focused 1-on-1 video session to accelerate career or skill development</div>
-      <div class="persona-label">Frustration</div>
-      <div class="persona-value">Cannot find credible mentors in Sport or Entertainment verticals; existing platforms are tech-only; pricing is opaque; no recourse for bad sessions</div>
-      <div class="persona-label">Context</div>
-      <div class="persona-value" style="margin-bottom:0;">Early-to-mid career professionals or aspiring athletes/entertainers in India, Switzerland, USA, or Germany seeking structured mentorship outside their immediate network</div>
+      <div class="card-title">Ambitious Mentee</div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Find and book sessions with credible, domain-verified mentors in Sport, Entrepreneurship, Business, or Entertainment</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Frustration</div>
+        <div class="card-field-value">Cannot discover quality mentors in niche domains; existing platforms are tech/business-centric with no curation for sport or entertainment verticals</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Context</div>
+        <div class="card-field-value">Early-to-mid career professionals, aspiring athletes, entrepreneurs, and creatives in India, Switzerland, USA, and Germany seeking structured guidance</div>
+      </div>
     </div>
 
     <div class="card card-fire">
-      <div class="persona-name">Domain-Expert Mentor</div>
-      <div class="persona-label">Goal</div>
-      <div class="persona-value">Monetize expertise through structured sessions with a reliable payment guarantee and minimal administrative overhead</div>
-      <div class="persona-label">Frustration</div>
-      <div class="persona-value">Informal mentoring yields no income; existing platforms either pay nothing (ADPList) or take high commissions (Clarity.fm 15%, MentorCruise 16-20%); no protection against mentee no-shows</div>
-      <div class="persona-label">Context</div>
-      <div class="persona-value" style="margin-bottom:0;">Accomplished professionals, former athletes, entrepreneurs, or entertainment industry veterans with verifiable credentials who want a side-income channel</div>
+      <div class="card-title">Domain-Expert Mentor</div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Monetize expertise through a structured, trustworthy channel with minimal operational overhead</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Frustration</div>
+        <div class="card-field-value">No platform offers verified credentialing, transparent pricing bands, and reliable payout mechanisms for niche domain experts</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Context</div>
+        <div class="card-field-value">Accomplished professionals, athletes, entrepreneurs, and entertainers willing to mentor but lacking a frictionless channel</div>
+      </div>
     </div>
 
     <div class="card card-fire">
-      <div class="persona-name">Platform Administrator</div>
-      <div class="persona-label">Goal</div>
-      <div class="persona-value">Manage mentor verification, content moderation, dispute resolution, compliance, and marketplace health</div>
-      <div class="persona-label">Frustration</div>
-      <div class="persona-value">Manual mentor vetting does not scale; cross-jurisdiction compliance is complex; dispute resolution without session evidence is subjective</div>
-      <div class="persona-label">Context</div>
-      <div class="persona-value" style="margin-bottom:0;">Felly Club operations team responsible for marketplace integrity across four geographies with different regulatory requirements</div>
+      <div class="card-title">Platform Administrator</div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Curate mentor quality, manage disputes, oversee financial operations, and ensure regulatory compliance across multiple geographies</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Frustration</div>
+        <div class="card-field-value">Multi-geography compliance (GDPR, TPDP, PCI DSS) and escrow/payout operations are complex and error-prone without dedicated tooling</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Context</div>
+        <div class="card-field-value">Operations team managing a four-country marketplace with commission-based revenue model</div>
+      </div>
     </div>
 
-    <h2>Competitor Landscape</h2>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Competitor</th>
-            <th>Type</th>
-            <th>Strengths</th>
-            <th>Weaknesses</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">MentorCruise</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Direct competitor — paid marketplace</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>5,500+ vetted mentors, &lt;5% acceptance rate</li>
-                <li>23,700+ successful matches in 130+ countries</li>
-                <li>Long-term subscriptions ($200-400/month)</li>
-                <li>$506K revenue 2024 (76% YoY growth)</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Tech/startup-centric — no Sport or Entertainment</li>
-                <li>16-20% platform commission</li>
-                <li>No escrow or session recording</li>
-                <li>Monthly subscription creates commitment friction</li>
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">ADPList</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Direct competitor — freemium</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>38,024 mentors, 602,934 sessions, 310M+ minutes</li>
-                <li>Free tier drives massive network effects</li>
-                <li>Strong brand in design/product communities</li>
-                <li>Backed by Sequoia Capital India ($1.3M seed)</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>No mentor monetization transactional layer</li>
-                <li>Skewed toward design/UX and product management</li>
-                <li>No payment infrastructure or escrow</li>
-                <li>Inconsistent quality — low entry barriers</li>
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">GrowthMentor</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Direct competitor — subscription</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>750+ curated mentors, startup-growth focused</li>
-                <li>Flat subscription ($50-75/month) — affordable</li>
-                <li>Session recordings with AI summaries (Pro)</li>
-                <li>Fully bootstrapped, lean operation</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Narrow focus: growth, marketing, fundraising only</li>
-                <li>Mentors not directly compensated — limits supply</li>
-                <li>Single-session model discourages long-term bonds</li>
-                <li>Small pool vs. MentorCruise and ADPList</li>
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">Clarity.fm</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Direct competitor — per-minute</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Established brand with high-profile entrepreneurs</li>
-                <li>Per-minute pricing ($2-30/min) — flexible lengths</li>
-                <li>Low barrier to entry for mentors</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Per-minute billing creates anxiety ($120-960/hr effective)</li>
-                <li>15% service fee on every call</li>
-                <li>Transactional — no relationship continuity</li>
-                <li>Limited credential vetting</li>
-                <li>No Sport or Entertainment vertical</li>
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">MicroMentor</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Indirect competitor — nonprofit</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Largest free mentoring platform (500K+ users, 180 countries)</li>
-                <li>Strong institutional partnerships</li>
-                <li>Multilingual, global reach</li>
-                <li>Pioneering Mentoring-as-a-Service (MaaS)</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>No monetization for individual mentors</li>
-                <li>Business-only — no Sport or Entertainment</li>
-                <li>No built-in video or session management</li>
-                <li>Variable quality — open access model</li>
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">Sports Mentorship Hub</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Niche competitor — sports-specific</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Domain-specific: sports performance &amp; careers</li>
-                <li>Expert mentors in sports industry</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Limited scale and technology platform</li>
-                <li>No marketplace transaction layer or payments</li>
-                <li>Limited geographic reach</li>
-                <li>No cross-vertical coverage</li>
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold; white-space:nowrap;">SCORE.org</td>
-            <td><span style="font-size:12px; color:var(--text-dimmed);">Indirect competitor — nonprofit SBA</span></td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>Backed by SBA — 10,000+ volunteer mentors</li>
-                <li>Free mentoring for entrepreneurs</li>
-              </ul>
-            </td>
-            <td>
-              <ul style="padding-left:16px; font-size:13px;">
-                <li>U.S.-only — no international coverage</li>
-                <li>Volunteer model — no mentor monetization</li>
-                <li>Business-only — no Sport or Entertainment</li>
-                <li>Limited tech: primarily matching, no video or payments</li>
-              </ul>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <h2>Competitors</h2>
+    <table>
+      <thead>
+        <tr><th>Competitor</th><th>Strengths</th><th>Weaknesses</th><th>Our Advantage</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>MentorCruise</strong><br><span style="font-size:12px;color:var(--text-dimmed)">Monthly $50-$400; one-off from $39 (30 min)</span></td>
+          <td>Rigorous vetting (&lt;5% acceptance); long-term model with 7-day trial; async messaging; 130+ countries</td>
+          <td>Tech/design focused — no Sport or Entertainment; no built-in video; no escrow or dispute resolution; no multi-geography compliance</td>
+          <td>Sport &amp; Entertainment verticals; built-in video; escrow payments; multi-geography compliance</td>
+        </tr>
+        <tr>
+          <td><strong>Clarity.fm</strong><br><span style="font-size:12px;color:var(--text-dimmed)">$2-$30/min; 15% service fee</span></td>
+          <td>High-profile expert roster; simple per-minute billing; established brand in startup advisory</td>
+          <td>Phone-only — no video; very expensive for longer sessions; no ongoing relationship support; no domain verification; no Sport/Entertainment</td>
+          <td>Video sessions; ongoing mentorship relationships; domain-verified credentials; niche vertical curation</td>
+        </tr>
+        <tr>
+          <td><strong>GrowthMentor</strong><br><span style="font-size:12px;color:var(--text-dimmed)">$50-$75/month subscription</span></td>
+          <td>Extremely selective (&lt;3% acceptance); unlimited calls on Pro; strong startup/growth focus</td>
+          <td>Narrow startup/growth focus only; no Sport, Entertainment, or general Business; subscription limits mentor earnings; no video delivery</td>
+          <td>Multi-vertical coverage; per-session pricing with transparent bands; built-in video; Sport &amp; Entertainment</td>
+        </tr>
+        <tr>
+          <td><strong>ADPList</strong><br><span style="font-size:12px;color:var(--text-dimmed)">Free for 1:1; paid beta ~$599/3 sessions</span></td>
+          <td>Massive scale (38,000+ mentors); free model drives acquisition; group sessions; strong community</td>
+          <td>Free model — mentors cannot monetize; design/tech focus; paid tier in closed beta; quality control challenges at scale</td>
+          <td>Monetization for mentors; Sport &amp; Entertainment; production-grade quality controls; transparent pricing</td>
+        </tr>
+        <tr>
+          <td><strong>MentorPass</strong><br><span style="font-size:12px;color:var(--text-dimmed)">$300-$1,200/month</span></td>
+          <td>Credit-based flexibility; structured mentoring journeys; founder-to-advisor focus</td>
+          <td>Very expensive entry ($300/month); startup/business only; small mentor pool; no built-in video</td>
+          <td>Accessible pricing; multi-vertical; built-in video; larger addressable mentor pool</td>
+        </tr>
+        <tr>
+          <td><strong>SCORE</strong><br><span style="font-size:12px;color:var(--text-dimmed)">Completely free (volunteer)</span></td>
+          <td>Free and accessible; large US volunteer network; backed by SBA</td>
+          <td>US-only; volunteer model means inconsistent quality; small business only; no video platform</td>
+          <td>International (4 countries); paid verified mentors; Sport &amp; Entertainment; tech-enabled delivery</td>
+        </tr>
+        <tr>
+          <td><strong>Voice In Sport (VIS)</strong><br><span style="font-size:12px;color:var(--text-dimmed)">Membership-based</span></td>
+          <td>Only major platform with explicit sports mentorship; professional athlete mentors; virtual 1:1 and group sessions</td>
+          <td>Female athletes only; sports-only; small scale; no marketplace pricing or commission model</td>
+          <td>All genders; multi-vertical (Sport + Business + Entertainment + Entrepreneurship); commission marketplace model</td>
+        </tr>
+      </tbody>
+    </table>
 
     <h2>Market Size</h2>
-    <div class="market-size-grid">
-      <div class="market-size-cell">
-        <div class="market-size-label">TAM</div>
-        <div class="market-size-value">USD 849M – 1.53B</div>
-        <div style="font-size:11px; color:var(--text-dimmed); margin-top:4px;">2025 global mentoring software market</div>
+    <div class="card card-water">
+      <div class="card-field">
+        <div class="card-field-label">TAM</div>
+        <div class="card-field-value">USD 1.5–3.4 billion — Global mentoring software market (2025–2033 projections; consensus 2025 estimate USD 850M–1.5B, CAGR 14–22%)</div>
       </div>
-      <div class="market-size-cell">
-        <div class="market-size-label">SAM</div>
-        <div class="market-size-value">USD 200 – 350M</div>
-        <div style="font-size:11px; color:var(--text-dimmed); margin-top:4px;">Online mentorship marketplace segment (~25% of TAM)</div>
+      <div class="card-field">
+        <div class="card-field-label">SAM</div>
+        <div class="card-field-value">USD 200–400 million — Mentorship marketplace segment (B2C/B2B2C platforms connecting individual mentors with mentees, excluding enterprise-only tools)</div>
       </div>
-      <div class="market-size-cell">
-        <div class="market-size-label">SOM</div>
-        <div class="market-size-value">USD 5 – 15M</div>
-        <div style="font-size:11px; color:var(--text-dimmed); margin-top:4px;">Achievable within 3 years — 4 geographies, 4 verticals</div>
+      <div class="card-field">
+        <div class="card-field-label">SOM</div>
+        <div class="card-field-value">USD 5–15 million — Curated mentorship in Sport, Entertainment, Business, and Entrepreneurship across India, Switzerland, USA, and Germany within first 3 years</div>
       </div>
-    </div>
-    <div class="card" style="font-size:13px; color:var(--text-secondary);">
-      Market growing at 14.9% CAGR, projected to reach USD 2.25B by 2032. North America holds 40-45% of global revenue, Europe 25-30%, Asia-Pacific is fastest growing with high-teens annual growth. An estimated 25-30 million active mentors and mentees on digital platforms globally. The Sport and Entertainment mentorship sub-segments are largely undigitized, representing greenfield opportunity. <span style="color:var(--text-dimmed);">Sources: 360iResearch, Research and Markets, Market Growth Reports (2025-2026 estimates).</span>
+      <div class="card-field" style="margin-top:var(--space-sm);padding-top:var(--space-sm);border-top:1px solid var(--border-default)">
+        <div class="card-field-label">Note</div>
+        <div class="card-field-value">Market size estimates vary significantly across research firms. Growth is driven by remote work trends, AI-powered matching, and demand for personalized professional development. The Sport and Entertainment mentorship niche is notably underserved by existing platforms, representing a greenfield opportunity.</div>
+      </div>
     </div>
 
     <h2>Differentiators</h2>
-    <div class="diff-item">Vertical breadth beyond tech: Sport and Entertainment verticals are unserved by existing marketplace platforms — Felly Club is the first curated marketplace spanning Sport, Entrepreneurship, Business, and Entertainment</div>
-    <div class="diff-item">Domain-verified mentors: Structured credential verification process (not self-reported) with &lt;10% target acceptance rate, ensuring trust before first session</div>
-    <div class="diff-item">Escrow-backed payments: Session fees held in escrow until session completion, protecting both mentors (guaranteed payment) and mentees (recourse for no-shows or disputes)</div>
-    <div class="diff-item">Session recordings for dispute resolution: Video sessions can be recorded and used as evidence in quality disputes — no other mentorship marketplace offers this</div>
-    <div class="diff-item">Multi-geography compliance by design: Built for GDPR (EU/Germany), DPDP Act (India), Swiss data protection (nFADP), PCI DSS, and German FernUSG from day one</div>
-    <div class="diff-item">Per-session transactional model: No monthly lock-in subscriptions — mentees pay per session, reducing commitment friction and enabling trust-building before repeat booking</div>
-    <div class="diff-item">Referral-driven growth: Built-in referral program to drive organic acquisition in network-effect-dependent marketplace</div>
 
-    <h2>Market Risks</h2>
-
-    <div class="card card-fire risk-high">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Supply-side / Cold start</span>
-        <span class="severity-badge severity-HIGH">HIGH</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">Recruiting verified mentors in Sport and Entertainment is harder than tech — these professionals are less digitally native and less accustomed to platform-mediated mentoring</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: Seed supply through partnerships with sports academies, entertainment industry guilds, and entrepreneur networks in target geographies; offer early mentors favorable commission rates</div>
+    <div class="card card-air">
+      <div class="card-field-value">Multi-vertical curation across Sport, Entrepreneurship, Business, and Entertainment — no existing platform covers all four with domain-verified mentors</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Domain-verified mentor badges with structured credentialing — goes beyond self-reported profiles used by most competitors</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Built-in video session delivery (30/60 min) with optional recording — eliminates dependency on external tools like Zoom or Skype</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Transparent pricing bands with platform-enforced min/max ranges and 10–20% commission — contrasts with opaque per-minute billing (Clarity.fm) or flat subscriptions (GrowthMentor)</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Escrow-based payment with structured refund and dispute resolution — addresses a gap in MentorCruise, ADPList, and most competitors</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Multi-geography compliance by design (GDPR, India TPDP, PCI DSS) — enables operation in India, Switzerland, USA, and Germany from day one</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Sport and Entertainment verticals are a greenfield opportunity — existing platforms focus almost exclusively on tech, design, and startup advisory</div>
+    </div>
+    <div class="card card-air">
+      <div class="card-field-value">Referral-driven acquisition model targeting mentee network effects within niche communities</div>
     </div>
 
-    <div class="card card-fire risk-high">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Marketplace liquidity</span>
-        <span class="severity-badge severity-HIGH">HIGH</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">Two-sided marketplace chicken-and-egg problem — mentees won't join without mentors, mentors won't join without mentees</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: Launch vertical-by-vertical (Entrepreneurship first where supply is most available), concentrate on 1-2 geographies initially, use referral program to bootstrap demand</div>
+    <h2>Risks</h2>
+
+    <div class="card card-fire">
+      <div class="card-field-value">Cold-start problem: Attracting sufficient high-quality mentors in Sport and Entertainment verticals before mentee demand materializes — chicken-and-egg marketplace challenge</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Budget constraint: EUR 50K budget and 16-week timeline limits MVP scope significantly compared to well-funded competitors (ADPList raised $1.3M seed; MentorCruise is established and profitable)</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Multi-geography compliance complexity: GDPR (EU/Switzerland), India TPDP, PCI DSS across four countries increases legal and engineering cost disproportionate to early-stage revenue</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Mentor monetization expectations: Domain experts in Sport and Entertainment may have higher earning expectations than the platform's commission model can sustain at low volume</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Video infrastructure cost: Built-in video delivery (vs. redirecting to Zoom) adds significant infrastructure cost and reliability burden for an MVP</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Trust and safety: Recording mentorship sessions raises privacy concerns and may deter mentors, especially high-profile individuals in Entertainment and Sport</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Market education: Mentees in Sport and Entertainment may not yet associate online platforms with mentorship — demand generation requires category creation, not just capture</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Competition from free alternatives: ADPList's free model and SCORE's volunteer network set low price anchors that complicate willingness-to-pay for a new entrant</div>
+    </div>
+    <div class="card card-fire">
+      <div class="card-field-value">Regulatory variance: Payment processing (escrow, cross-border payouts, refunds) across India, Switzerland, USA, and Germany involves multiple payment rails and regulatory regimes</div>
     </div>
 
-    <div class="card card-fire risk-high">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Regulatory complexity</span>
-        <span class="severity-badge severity-HIGH">HIGH</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">Operating across India, Germany, Switzerland, and USA requires compliance with GDPR, DPDP Act, nFADP, PCI DSS, and Germany's FernUSG (which now applies to online mentoring). Non-compliance carries significant fines.</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: GDPR-first architecture with data residency controls; engage local legal counsel per geography; FernUSG classification review before Germany launch</div>
-    </div>
+  </div><!-- /market -->
 
-    <div class="card card-fire risk-high">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Budget and timeline</span>
-        <span class="severity-badge severity-HIGH">HIGH</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">EUR 125,000 fixed budget for 16-week delivery across web, iOS, Android, and admin portal is aggressive for a multi-geography marketplace with payment escrow, video integration, and regulatory compliance</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: Strict MVP scoping — defer non-essential features; use third-party services (Zoom for video, Stripe for payments) to reduce custom build; prioritize web app, defer native mobile to post-MVP if needed</div>
-    </div>
-
-    <div class="card card-fire risk-medium">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Competitive response</span>
-        <span class="severity-badge severity-MEDIUM">MEDIUM</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">MentorCruise or ADPList could add Sport/Entertainment verticals or launch in target geographies, leveraging existing network effects</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: First-mover advantage in underserved verticals; deep domain verification creates a defensible quality moat; curated approach is harder to replicate than horizontal expansion</div>
-    </div>
-
-    <div class="card card-fire risk-medium">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Payment processing</span>
-        <span class="severity-badge severity-MEDIUM">MEDIUM</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">Escrow payments across four jurisdictions involve different payment regulations, tax withholding requirements, and currency conversion complexities</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: Use Stripe Connect or equivalent with built-in multi-currency and compliance features; start with primary currencies (EUR, USD, INR, CHF) only</div>
-    </div>
-
-    <div class="card card-fire risk-medium">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Mentor quality control</span>
-        <span class="severity-badge severity-MEDIUM">MEDIUM</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">Verification of credentials in Sport and Entertainment lacks standardized credentialing bodies compared to tech certifications</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: Develop domain-specific verification rubrics; partner with industry bodies for credential validation; use session ratings as ongoing quality signal</div>
-    </div>
-
-    <div class="card card-fire risk-low">
-      <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <span style="font-size:14px; font-weight:bold; color:var(--text-primary);">Video platform dependency</span>
-        <span class="severity-badge severity-LOW">LOW</span>
-      </div>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">Reliance on Zoom for video conferencing creates vendor lock-in and limits control over session recording, quality, and user experience</p>
-      <div style="font-size:12px; color:var(--text-dimmed); font-style:italic;">Mitigation: Abstract video provider behind an integration layer; evaluate alternatives (Daily.co, Whereby) for future flexibility</div>
-    </div>
-
-  </div><!-- /tab-market-context -->
-
-  <!-- TAB 2: VISION -->
-  <div id="tab-vision" class="tab-panel">
-
-    <h2>Mission</h2>
-    <div class="highlight-box" style="margin-bottom:24px;">
-      <div style="font-size:13px; color:var(--text-dimmed); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.8px;">Mission</div>
-      <p style="font-size:15px; color:var(--text-primary);">Democratize access to world-class mentorship by connecting ambitious individuals with domain-verified experts across Sport, Entrepreneurship, Business, and Entertainment through a trust-first, technology-enabled marketplace.</p>
-    </div>
-
-    <div class="card" style="background:rgba(57,211,83,0.05); border-color:rgba(57,211,83,0.2); text-align:center; padding:20px;">
-      <div style="font-size:12px; color:var(--text-dimmed); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Tagline</div>
-      <div style="font-size:20px; color:var(--color-air); font-style:italic;">"Verified mentors. Trusted sessions. Real growth."</div>
-    </div>
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- TAB: VISION -->
+  <div class="tab-panel" id="vision">
 
     <h2>Value Proposition</h2>
     <div class="highlight-box">
-      <p style="font-size:15px; color:var(--text-primary); line-height:1.7;">Felly Club is the first curated mentorship marketplace that spans beyond tech into Sport, Entrepreneurship, Business, and Entertainment verticals. Unlike platforms where credentials are self-reported and payment is uncertain, Felly Club verifies every mentor's domain expertise, holds session fees in escrow until completion, and records sessions for dispute resolution. Mentees get guaranteed quality and financial protection. Mentors get guaranteed payment and professional credibility. The platform operates across India, Switzerland, USA, and Germany with compliance built in from day one — not bolted on later.</p>
+      <p style="margin-bottom:var(--space-sm);"><strong style="color:var(--color-water)">Vision:</strong> To establish Felly Club as the premier tech-enabled mentorship ecosystem for Sport, Entrepreneurship, Business, and Entertainment — connecting aspiring individuals with domain-verified mentors through a transparent, trust-driven marketplace. Felly Club bridges the gap between raw ambition and structured guidance by delivering curated discovery, frictionless scheduling, secure payments, and quality-assured sessions across four countries, all within a EUR 50K budget and 16-week delivery window.</p>
+      <p style="margin-bottom:var(--space-sm);"><strong style="color:var(--color-fire)">For Ambitious Mentees:</strong> Discover credible, domain-verified mentors in Sport, Entertainment, Business, and Entrepreneurship — verticals ignored by existing platforms. Book sessions with transparent pricing, built-in video delivery, and quality guarantees backed by ratings, refund policies, and dispute resolution. No more guessing if a mentor is legitimate or overpaying through opaque billing models.</p>
+      <p style="margin-bottom:var(--space-sm);"><strong style="color:var(--color-fire)">For Domain-Expert Mentors:</strong> Monetize your expertise through a structured channel that handles scheduling, payments, and compliance. Receive domain-verified badges that signal credibility, set your own rates within transparent pricing bands, and get reliable payouts with escrow protection. Focus on mentoring — the platform handles the operational overhead.</p>
+      <p style="margin-bottom:0;"><strong style="color:var(--color-fire)">For Platform Administrators:</strong> Manage a multi-geography mentorship marketplace with purpose-built tooling for mentor curation, dispute resolution, financial operations, and compliance monitoring. Role-based access, audit trails, and dashboard analytics reduce manual oversight and enable confident decision-making across India, Switzerland, USA, and Germany.</p>
     </div>
 
     <h2>Strategic Goals</h2>
 
-    <div class="goal-card">
-      <div class="goal-id">SG-1</div>
-      <div class="goal-title">Establish a Trusted Mentor Supply</div>
-      <div class="goal-desc">Build a curated, domain-verified mentor network across Sport, Entrepreneurship, Business, and Entertainment with a target acceptance rate below 10%, creating a quality moat that competitors cannot easily replicate.</div>
-      <div class="goal-metrics-label">Success Metrics</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>100+ verified mentors onboarded within 90 days of launch</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Mentor acceptance rate maintained below 10%</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>At least 2 verticals (Entrepreneurship + 1 other) with 25+ active mentors each</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Mentor credential verification completed within 5 business days of application</div>
-    </div>
-
-    <div class="goal-card">
-      <div class="goal-id">SG-2</div>
-      <div class="goal-title">Deliver a Friction-Free Session Experience</div>
-      <div class="goal-desc">Enable mentees to discover, book, and complete 1-on-1 video mentorship sessions in under 5 minutes of decision-to-booking, with escrow-backed payments and session recording for accountability.</div>
-      <div class="goal-metrics-label">Success Metrics</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Average discovery-to-booking time under 5 minutes</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Session completion rate above 90%</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Escrow payment release within 24 hours of session completion</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Dispute resolution achieved within 48 hours using session evidence</div>
-    </div>
-
-    <div class="goal-card">
-      <div class="goal-id">SG-3</div>
-      <div class="goal-title">Achieve Marketplace Liquidity in Target Geographies</div>
-      <div class="goal-desc">Reach sufficient mentor-mentee density in at least 2 of the 4 target geographies (India, Switzerland, USA, Germany) so that mentees can find a relevant mentor within their first search session.</div>
-      <div class="goal-metrics-label">Success Metrics</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>500+ completed sessions within 6 months of launch</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Mentee-to-mentor ratio between 5:1 and 15:1 in active geographies</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>70% of mentee searches return 3+ relevant mentor results</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>20% of mentees book a second session within 30 days of first session</div>
-    </div>
-
-    <div class="goal-card">
-      <div class="goal-id">SG-4</div>
-      <div class="goal-title">Build a Sustainable Revenue Engine</div>
-      <div class="goal-desc">Establish a commission-based revenue model (10-20% per transaction) with per-session pricing that enables sustainable unit economics while keeping the platform attractive to both sides of the marketplace.</div>
-      <div class="goal-metrics-label">Success Metrics</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Gross merchandise value (GMV) of EUR 50,000+ within 6 months</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Platform take rate averaging 15% across all transactions</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Payment processing cost below 3% of GMV</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Mentor payout reliability at 100% (zero missed or delayed payouts)</div>
-    </div>
-
-    <div class="goal-card">
-      <div class="goal-id">SG-5</div>
-      <div class="goal-title">Launch Compliant Across Four Jurisdictions</div>
-      <div class="goal-desc">Deliver a platform that meets GDPR (EU/Germany), DPDP Act (India), Swiss nFADP, PCI DSS, and German FernUSG requirements from launch day, avoiding regulatory risk that could shut down operations in any target geography.</div>
-      <div class="goal-metrics-label">Success Metrics</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Zero regulatory violations or data breaches in first 12 months</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Data subject access requests fulfilled within 30 days (GDPR requirement)</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>Payment data handling PCI DSS Level 4 compliant (via payment processor)</div>
-      <div class="goal-metric-item"><span class="goal-metric-dot">▸</span>FernUSG classification review completed before Germany launch</div>
-    </div>
-
-    <h2>Target Audience</h2>
-
-    <div class="card card-water">
-      <div class="persona-name">Ambitious Mentee</div>
-      <div class="persona-label">Demographics</div>
-      <div class="persona-value">Early-to-mid career professionals, aspiring athletes, and entertainment industry entrants aged 22-40</div>
-      <div class="persona-label">Geographies</div>
-      <div class="persona-value">India &nbsp;·&nbsp; Switzerland &nbsp;·&nbsp; USA &nbsp;·&nbsp; Germany</div>
-      <div class="persona-label">Needs</div>
-      <div style="margin-bottom:10px;">
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Access to credible, verified mentors outside the tech vertical</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Transparent per-session pricing without subscription lock-in</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Financial protection through escrow for prepaid sessions</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Session recordings as evidence for quality assurance</span></div>
+    <div class="card card-air">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+        <span class="badge badge-count">SG-01</span>
+        <div class="card-title" style="margin-bottom:0">Launch Functional MVP</div>
       </div>
-      <div class="persona-label">Channels</div>
-      <div class="persona-value" style="margin-bottom:0;">Web app (primary) &nbsp;·&nbsp; iOS &nbsp;·&nbsp; Android</div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Launch a functional mentorship marketplace MVP covering mentor onboarding, mentee discovery, session booking, and payment processing across four verticals within 16 weeks</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Success Metric</div>
+        <div class="card-field-value">Platform live with end-to-end flow (signup to session completion to payout) operational in at least 2 of 4 target countries within 16 weeks of development start</div>
+      </div>
     </div>
 
-    <div class="card card-water">
-      <div class="persona-name">Domain-Expert Mentor</div>
-      <div class="persona-label">Demographics</div>
-      <div class="persona-value">Accomplished professionals, former athletes, entrepreneurs, entertainment veterans aged 30-60 with verifiable domain credentials</div>
-      <div class="persona-label">Geographies</div>
-      <div class="persona-value">India &nbsp;·&nbsp; Switzerland &nbsp;·&nbsp; USA &nbsp;·&nbsp; Germany</div>
-      <div class="persona-label">Needs</div>
-      <div style="margin-bottom:10px;">
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Reliable income from mentoring with guaranteed payment</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Low commission rates (10-20%) compared to competitors (15-20%)</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Professional credibility through platform verification badge</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Minimal administrative overhead for scheduling and payments</span></div>
+    <div class="card card-air">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+        <span class="badge badge-count">SG-02</span>
+        <div class="card-title" style="margin-bottom:0">Establish Mentor Supply</div>
       </div>
-      <div class="persona-label">Channels</div>
-      <div class="persona-value" style="margin-bottom:0;">Web app (primary) &nbsp;·&nbsp; iOS &nbsp;·&nbsp; Android</div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Establish mentor supply in underserved verticals (Sport and Entertainment) through domain-verified credentialing and curated onboarding</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Success Metric</div>
+        <div class="card-field-value">Minimum 50 domain-verified mentors onboarded across Sport and Entertainment verticals within 8 weeks of platform launch</div>
+      </div>
     </div>
 
-    <div class="card card-water">
-      <div class="persona-name">Platform Administrator</div>
-      <div class="persona-label">Demographics</div>
-      <div class="persona-value">Felly Club operations team members managing marketplace integrity</div>
-      <div class="persona-label">Geographies</div>
-      <div class="persona-value">Global (managing all 4 target geographies)</div>
-      <div class="persona-label">Needs</div>
-      <div style="margin-bottom:10px;">
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Scalable mentor verification workflows</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Cross-jurisdiction compliance management tools</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Dispute resolution with session recording evidence</span></div>
-        <div class="goal-metric-item"><span class="goal-metric-dot" style="color:var(--color-water);">▸</span><span style="color:var(--text-secondary); font-size:14px;">Marketplace health monitoring dashboards</span></div>
+    <div class="card card-air">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+        <span class="badge badge-count">SG-03</span>
+        <div class="card-title" style="margin-bottom:0">Trust and Transparency</div>
       </div>
-      <div class="persona-label">Channels</div>
-      <div class="persona-value" style="margin-bottom:0;">Admin portal (web)</div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Deliver trust and transparency as core platform differentiators through escrow payments, structured dispute resolution, and quality ratings</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Success Metric</div>
+        <div class="card-field-value">Less than 5% dispute rate on completed sessions; greater than 80% of mentees rate sessions 4+ stars within first 3 months of operation</div>
+      </div>
+    </div>
+
+    <div class="card card-air">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+        <span class="badge badge-count">SG-04</span>
+        <div class="card-title" style="margin-bottom:0">Multi-Geography Compliance</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Achieve multi-geography regulatory compliance (GDPR, India TPDP, PCI DSS) as a built-in platform capability, not a retrofit</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Success Metric</div>
+        <div class="card-field-value">Zero compliance violations or data protection incidents across all four operating countries in the first 6 months post-launch</div>
+      </div>
+    </div>
+
+    <div class="card card-air">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+        <span class="badge badge-count">SG-05</span>
+        <div class="card-title" style="margin-bottom:0">Referral Acquisition Engine</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Goal</div>
+        <div class="card-field-value">Build a referral-driven acquisition engine that leverages niche community network effects to reduce customer acquisition cost</div>
+      </div>
+      <div class="card-field">
+        <div class="card-field-label">Success Metric</div>
+        <div class="card-field-value">Greater than 30% of new mentee signups originating from referral links within 3 months of launch; CAC below EUR 15 per mentee</div>
+      </div>
     </div>
 
     <h2>Success Metrics</h2>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th>Target</th>
-            <th>Measurement</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Mentor Supply Health</td>
-            <td>100+ verified mentors across 3+ verticals within 90 days</td>
-            <td>Count of mentors with verified status in platform database</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Session Volume</td>
-            <td>500+ completed sessions within 6 months of launch</td>
-            <td>Count of sessions with status=completed in booking system</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Marketplace Liquidity</td>
-            <td>70% of mentee searches return 3+ relevant results</td>
-            <td>Search result count analytics, sampled weekly</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Revenue Traction</td>
-            <td>EUR 50,000+ GMV within 6 months</td>
-            <td>Sum of all completed transaction values in payment system</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Session Completion Rate</td>
-            <td>Above 90%</td>
-            <td>Completed sessions / booked sessions ratio, excluding cancellations &gt;24h in advance</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Mentee Retention</td>
-            <td>20% of mentees book a second session within 30 days</td>
-            <td>Cohort analysis on first-session mentees tracked over 30-day window</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Platform Trust</td>
-            <td>Zero unresolved disputes beyond 48 hours</td>
-            <td>Dispute resolution time tracking in admin portal</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-primary); font-weight:bold;">Regulatory Compliance</td>
-            <td>Zero regulatory violations or data breaches in first 12 months</td>
-            <td>Compliance audit log and incident tracking</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr><th>Goal Ref</th><th>Metric</th><th>Target</th><th>Method</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-count">SG-01</span></td>
+          <td>Platform Activation Rate</td>
+          <td>Greater than 40% of registered mentees complete at least one session within 30 days of signup</td>
+          <td>Ratio of mentees with 1+ completed sessions to total registered mentees, measured monthly</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-count">SG-02</span></td>
+          <td>Mentor Utilization Rate</td>
+          <td>Greater than 25% of onboarded mentors conduct at least one session per month</td>
+          <td>Ratio of active mentors (1+ sessions/month) to total approved mentors, measured monthly</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-count">SG-03</span></td>
+          <td>Session Completion Rate</td>
+          <td>Greater than 85% of booked sessions are completed (not cancelled or no-showed)</td>
+          <td>Ratio of completed sessions to total booked sessions, measured weekly</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-count">SG-03</span></td>
+          <td>Net Promoter Score (Mentee)</td>
+          <td>NPS greater than 40 within first 3 months</td>
+          <td>Post-session NPS survey to mentees, aggregated monthly</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-count">SG-01</span></td>
+          <td>Revenue per Session</td>
+          <td>Average platform commission of EUR 8–15 per completed session</td>
+          <td>Total commission revenue divided by completed sessions, measured monthly</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-count">SG-02</span></td>
+          <td>Time to First Session</td>
+          <td>Median time from mentee signup to first completed session under 7 days</td>
+          <td>Median elapsed time between account creation and first session completion, measured weekly</td>
+        </tr>
+      </tbody>
+    </table>
 
-  </div><!-- /tab-vision -->
+  </div><!-- /vision -->
 
-  <!-- TAB 3: SCOPE -->
-  <div id="tab-scope" class="tab-panel">
-
-    <h2>In Scope</h2>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Mentor discovery and search with filters (vertical, geography, rating, price, availability)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Mentor profile pages with verified credentials, bio, session pricing, and availability</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Session booking with 30-min and 60-min duration options</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Escrow-based payment processing via PayU with multi-currency support (EUR, USD, INR, CHF)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>1-on-1 video mentorship sessions via Zoom integration</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Session recording for dispute resolution (opt-in with consent)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Mentor application and domain verification workflow</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Mentee and mentor registration with KeyCloak IAM</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Rating and review system for completed sessions</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Referral program for organic growth</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Admin portal for mentor verification, dispute resolution, and platform management</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Email notifications via Twilio SendGrid (booking confirmations, reminders, payouts)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>Web app (Next.js) as primary platform</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>iOS and Android apps (React Native)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-in">✓</span>GDPR, DPDP Act, and PCI DSS compliance foundations</div>
-
-    <h2>Out of Scope</h2>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Group mentorship sessions (1-on-many)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Subscription or membership-based pricing models</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>AI-powered mentor matching or recommendation engine</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>In-app messaging or chat between mentors and mentees outside sessions</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Mentor-created content (courses, articles, resources)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>White-label or B2B enterprise mentorship programs</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Advanced analytics dashboards for mentors (earnings trends, audience insights)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Multi-language interface (English-only for MVP)</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Offline session support or in-person mentorship coordination</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Integration with third-party calendars (Google Calendar, Outlook) beyond basic scheduling</div>
-    <div class="scope-item"><span class="scope-icon scope-icon-out">✗</span>Custom video infrastructure (using Zoom as managed service for MVP)</div>
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- TAB: SCOPE -->
+  <div class="tab-panel" id="scope">
 
     <h2>Assumptions</h2>
-    <div class="assumption-item">Mentors in Sport and Entertainment verticals are willing to adopt a digital platform for paid mentorship sessions</div>
-    <div class="assumption-item">Per-session pricing (vs. subscription) is preferred by the target mentee demographic for initial trust-building</div>
-    <div class="assumption-item">Zoom's video API provides sufficient quality and recording capabilities for MVP session delivery</div>
-    <div class="assumption-item">PayU can handle escrow-like payment flows across India, EU, Switzerland, and USA without requiring separate payment processor per geography</div>
-    <div class="assumption-item">KeyCloak provides adequate IAM capabilities including social login, MFA, and RBAC without significant customization</div>
-    <div class="assumption-item">A 10-20% commission rate is competitive enough to attract mentors while sustaining platform operations</div>
-    <div class="assumption-item">English-only MVP is sufficient for initial launch across all four target geographies</div>
-    <div class="assumption-item">16-week delivery timeline is achievable with strict MVP scope and third-party service integrations</div>
-    <div class="assumption-item">FernUSG classification will not require Felly Club to obtain distance learning approval for 1-on-1 mentorship sessions (as distinct from structured courses)</div>
-    <div class="assumption-item">Session recordings with explicit consent are legally permissible for dispute resolution across all target jurisdictions</div>
 
-  </div><!-- /tab-scope -->
-
-  <!-- TAB 4: PROFILES -->
-  <div id="tab-profiles" class="tab-panel">
-
-    <div class="cascade-note">
-      Profiles follow a cascade: <strong>Product Profile (PP)</strong> drives <strong>NFR Profile</strong>, which together drive <strong>Quality Profile (QP)</strong>. Each dimension is scored 1-5. The rationale for each dimension references its upstream derivation.
+    <div class="card card-water">
+      <div class="card-field-value">Domain experts in Sport and Entertainment are willing to mentor through an online platform at price points of EUR 30–150 per session</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">Mentees in Sport and Entertainment verticals will pay for structured mentorship when discovery, credentialing, and quality assurance reduce uncertainty</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">Zoom SDK integration provides sufficient video quality and reliability for MVP — custom video infrastructure is not needed at launch</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">PayU supports escrow-like hold-and-release payment flows across India, Switzerland, USA, and Germany without requiring a full escrow banking license</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">KeyCloak can be configured for multi-tenant RBAC with social login within the 16-week timeline without excessive customization</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">EUR 50K budget is sufficient for a 3-person engineering team over 16 weeks, covering infrastructure, third-party service costs, and contingency</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">Initial mentor supply (50+ mentors) can be seeded through founder networks and targeted outreach before paid acquisition is needed</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">GDPR and India TPDP compliance can be achieved at MVP level through consent management and data handling policies without dedicated legal counsel on retainer</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">Responsive web application provides adequate mobile experience for MVP — native mobile apps are not required for initial market validation</div>
+    </div>
+    <div class="card card-water">
+      <div class="card-field-value">A 10–20% platform commission rate is competitive and acceptable to mentors given the value of discovery, scheduling, payment, and quality infrastructure</div>
     </div>
 
-    <!-- PRODUCT PROFILE -->
-    <div class="profile-section-header">
-      <span style="color:var(--color-water); font-weight:bold;">PP</span>
-      <span style="color:var(--text-primary);">Product Profile</span>
-      <span style="color:var(--text-dimmed); font-size:12px;">— defines what kind of product this is</span>
+    <h2>In Scope</h2>
+    <table>
+      <thead>
+        <tr><th>Epic</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Authentication and Authorization</td><td>KeyCloak-based SSO, MFA, RBAC for mentee/mentor/admin roles</td></tr>
+        <tr><td>Mentor Discovery and Search</td><td>Elasticsearch-powered search with filters by domain, rating, pricing, availability, and language</td></tr>
+        <tr><td>Session Management</td><td>Booking flow for 30/60-min sessions, calendar integration, scheduling, rescheduling, and cancellation policies</td></tr>
+        <tr><td>Payment Processing</td><td>PayU integration with escrow, multi-currency support, commission calculation, mentor payouts, and refund workflows</td></tr>
+        <tr><td>Quality and Ratings</td><td>Post-session rating system, mentor badges, domain verification, and quality scoring</td></tr>
+        <tr><td>Analytics Dashboard</td><td>Platform metrics for admin (revenue, sessions, disputes), mentor (earnings, ratings, bookings), and mentee (session history, spending)</td></tr>
+        <tr><td>Admin Panel</td><td>Mentor approval workflow, dispute management, financial oversight, user management, and compliance monitoring</td></tr>
+        <tr><td>Communications</td><td>SendGrid email notifications, FCM push notifications, in-app messaging between mentor and mentee</td></tr>
+        <tr><td>Acquisition and Referrals</td><td>Referral link generation, tracking, reward mechanics, and attribution analytics</td></tr>
+        <tr><td>Video Sessions</td><td>Zoom SDK integration for in-platform video delivery with optional session recording</td></tr>
+        <tr><td>Compliance and Data Protection</td><td>GDPR consent flows, India TPDP compliance, data export/deletion, audit logging, and PCI DSS scope management via payment gateway</td></tr>
+        <tr><td>Platform Configuration</td><td>Pricing band management, commission rate settings, category/vertical management, and feature flags</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Out of Scope</h2>
+
+    <div class="card card-earth">
+      <div class="card-title">Group &amp; Cohort Programs</div>
+      <div class="card-field-value">Group mentorship sessions and cohort-based programs</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">AI Matching</div>
+      <div class="card-field-value">AI-powered mentor-mentee matching algorithms</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Native Mobile Apps</div>
+      <div class="card-field-value">React Native mobile applications — MVP targets responsive web; mobile apps deferred to Phase 2</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Digital Products Marketplace</div>
+      <div class="card-field-value">Marketplace for digital products (courses, templates, guides)</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Enterprise Licensing</div>
+      <div class="card-field-value">White-label or B2B2C enterprise licensing</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Advanced ML Analytics</div>
+      <div class="card-field-value">Advanced analytics with ML-based predictions (churn, LTV)</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Multi-Language UI</div>
+      <div class="card-field-value">Multi-language platform UI localization beyond English</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Content Publishing</div>
+      <div class="card-field-value">Mentor-led content publishing (blogs, articles, podcasts)</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">External Calendar Integrations</div>
+      <div class="card-field-value">Integration with external calendar providers beyond Google Calendar</div>
+    </div>
+    <div class="card card-earth">
+      <div class="card-title">Custom Video Infrastructure</div>
+      <div class="card-field-value">Custom video infrastructure — MVP uses Zoom SDK; proprietary video deferred to Phase 2</div>
     </div>
 
-    <div style="overflow-x:auto; margin-bottom:24px;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:40px;">#</th>
-            <th>Dimension</th>
-            <th style="width:80px;">Level</th>
-            <th style="width:160px;"></th>
-            <th>Label</th>
-            <th>Rationale</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-1</td>
-            <td style="color:var(--text-primary);">User Sophistication</td>
-            <td style="text-align:center;"><span class="level-badge">2</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:40%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Power User</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Primary mentee demographic is Gen Z digital natives highly comfortable with app-based interactions, social login, and mobile-first workflows. Mentors are accomplished professionals with strong digital literacy. Both sides expect modern UX patterns without hand-holding. Adjusted from Level 4 based on stakeholder input on target demographic.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-2</td>
-            <td style="color:var(--text-primary);">UX Maturity</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Multi-Channel Responsive</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Felly Club delivers across web (Next.js) and mobile (React Native iOS/Android) with shared state. A design system with component library is needed for consistency across channels. Accessibility AA compliance is appropriate. Full omni-channel continuity (Level 4) is deferred post-MVP.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-3</td>
-            <td style="color:var(--text-primary);">Persona Complexity</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(240,160,0,0.15); color:var(--color-fire);">5</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:100%; background:var(--color-fire);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(240,160,0,0.12); color:var(--color-fire); font-size:11px;">Multi-Sided Platform</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Three distinct personas (Mentee, Mentor, Platform Admin) with fundamentally different journeys, incentives, and feature access. Mentees browse and book; mentors manage availability and earnings; admins verify credentials and resolve disputes. Classic multi-sided marketplace.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-4</td>
-            <td style="color:var(--text-primary);">Geographic Scope</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Multi-Country</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Operating across 4 countries (India, Switzerland, USA, Germany) requiring multi-currency support (EUR, USD, INR, CHF), GDPR compliance for EU, DPDP Act for India, and nFADP for Switzerland. Not continental-scale (Level 4) since it targets specific countries rather than entire trade blocs.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-5</td>
-            <td style="color:var(--text-primary);">Integration Density</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(240,160,0,0.15); color:var(--color-fire);">4</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:80%; background:var(--color-fire);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(240,160,0,0.12); color:var(--color-fire); font-size:11px;">Event-Driven Ecosystem</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">6+ integration points (Zoom webhooks, PayU escrow callbacks, KeyCloak OIDC, SendGrid event tracking, Elasticsearch, FCM) with complex bidirectional event flows including escrow state machines, session recording lifecycle, and multi-provider payment callbacks. Elevated from Level 3 based on stakeholder assessment.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-6</td>
-            <td style="color:var(--text-primary);">Delivery Ambition</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Market-Ready v1</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">16-week fixed-price engagement targeting a production-ready marketplace with payment processing, video integration, and multi-geography compliance. Goes beyond MVP (Level 2) into market-ready territory with full primary flows, error handling, and production-grade infrastructure. Not yet competitive product (Level 4).</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">PP-7</td>
-            <td style="color:var(--text-primary);">Industry Vertical</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Professional Services</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Mentorship falls under professional services/education with moderate domain rules. Payment processing triggers PCI DSS and Germany's FernUSG applies to online mentoring. Not regulated commerce (Level 4) since mentorship sessions are not financial products and the platform does not hold funds beyond escrow pass-through.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  </div><!-- /scope -->
 
-    <!-- NFR PROFILE -->
-    <div class="profile-section-header">
-      <span style="color:var(--color-fire); font-weight:bold;">NFR</span>
-      <span style="color:var(--text-primary);">Non-Functional Requirements Profile</span>
-      <span style="color:var(--text-dimmed); font-size:12px;">— derived from Product Profile</span>
-    </div>
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- TAB: PROFILES -->
+  <div class="tab-panel" id="profiles">
 
-    <div style="overflow-x:auto; margin-bottom:24px;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:40px;">#</th>
-            <th>Dimension</th>
-            <th style="width:80px;">Level</th>
-            <th style="width:160px;"></th>
-            <th>Label</th>
-            <th>Rationale</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-1</td>
-            <td style="color:var(--text-primary);">Risk</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">2</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:40%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Low Risk</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Escrow mechanism limits direct financial exposure. Session delivery failures are contained to individual sessions with clear refund policies. Platform does not hold funds long-term or make financial decisions. Derived from PP-7=3 and stakeholder assessment that escrow pass-through keeps risk profile low.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-2</td>
-            <td style="color:var(--text-primary);">Security</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Business Grade</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">MFA via KeyCloak, RBAC for three persona types, API key management for integrations (Zoom, PayU, SendGrid), and encryption in transit are required. Payment card data is handled by PayU (not stored on platform), so enterprise-grade (Level 4) encryption at rest for PCI is not needed on-platform. Derived from PP-7=3 and PP-3=5.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-3</td>
-            <td style="color:var(--text-primary);">Performance</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Balanced</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Gen Z users (PP-1=2) expect snappy interactions — sub-second API responses and smooth search/filter experiences. Elasticsearch-powered mentor discovery needs tuned query performance. Booking and payment flows require responsive UX to avoid cart abandonment. Elevated from Level 2 based on stakeholder input.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-4</td>
-            <td style="color:var(--text-primary);">Availability</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Standard</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Customer-facing platform where downtime during booked sessions would cause trust damage and financial disputes. 99.9% uptime target with automated failover and health checks is appropriate. High availability (Level 4) with 99.99% is not justified for MVP scale. Derived from PP-4=3 and NFR Guidance.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-5</td>
-            <td style="color:var(--text-primary);">Compliance</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Standard</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">GDPR compliance with data subject rights and consent management is mandatory for EU/Germany operations. India's DPDP Act and Switzerland's nFADP add additional requirements. PCI DSS is handled through PayU's compliance. Privacy by design is essential. Derived from PP-4=3 elevated to 3 due to GDPR and DPDP explicit requirements.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-6</td>
-            <td style="color:var(--text-primary);">Scalability</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Growth-Oriented</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Multi-sided marketplace needs to handle growth in both mentor and mentee populations across 4 geographies. Horizontal scaling, load balancing, and database read replicas should be architected for 10x growth. Not high scale (Level 4) at MVP since initial user base will be in thousands, not hundreds of thousands. Derived from PP-3=5.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">NFR-7</td>
-            <td style="color:var(--text-primary);">Data Sensitivity</td>
-            <td style="text-align:center;"><span class="level-badge">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%;"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(88,166,255,0.12); color:var(--color-water); font-size:11px;">Confidential</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Platform stores PII (names, emails, professional credentials), session recordings, and user-generated reviews. Payment card data is tokenized through PayU and not stored on-platform. Session recordings contain personal conversations requiring encryption at rest and access logging. Derived from PP-7=3 and presence of session recordings.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <h2>Product Profile</h2>
+    <table class="profile-table">
+      <thead>
+        <tr><th>Dimension</th><th class="level-cell">Level</th><th>Rationale</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PP-1</strong> — User Sophistication<br><span style="font-size:12px;color:var(--color-water)">General Consumer</span></td>
+          <td class="level-cell">4</td>
+          <td>Mentees are general consumers seeking mentorship — expect zero learning curve, mobile-first UX, and intuitive flows without onboarding friction</td>
+        </tr>
+        <tr>
+          <td><strong>PP-2</strong> — UX Maturity<br><span style="font-size:12px;color:var(--color-water)">Multi-Channel Responsive</span></td>
+          <td class="level-cell">3</td>
+          <td>MVP targets responsive web with Zoom SDK integration; React Native mobile apps deferred to Phase 2 but responsive design must support mobile browsers from day one</td>
+        </tr>
+        <tr>
+          <td><strong>PP-3</strong> — Persona Complexity<br><span style="font-size:12px;color:var(--color-water)">Multi-Sided Platform</span></td>
+          <td class="level-cell">5</td>
+          <td>Three distinct personas (mentee, mentor, admin) with different flows, permissions, and value propositions — classic multi-sided marketplace dynamics with supply-demand interdependency</td>
+        </tr>
+        <tr>
+          <td><strong>PP-4</strong> — Geographic Scope<br><span style="font-size:12px;color:var(--color-water)">Multi-Country</span></td>
+          <td class="level-cell">3</td>
+          <td>Operations across India, Switzerland, USA, and Germany — four countries spanning three regulatory regimes (EU/GDPR, India/TPDP, US state-level) and multiple currencies</td>
+        </tr>
+        <tr>
+          <td><strong>PP-5</strong> — Integration Density<br><span style="font-size:12px;color:var(--color-water)">Bidirectional</span></td>
+          <td class="level-cell">3</td>
+          <td>Six external integrations (Zoom, PayU, SendGrid, FCM, KeyCloak, Elasticsearch) requiring bidirectional data flow — webhooks, callbacks, and event-driven sync</td>
+        </tr>
+        <tr>
+          <td><strong>PP-6</strong> — Delivery Ambition<br><span style="font-size:12px;color:var(--color-water)">Market-Ready v1</span></td>
+          <td class="level-cell">3</td>
+          <td>Production-grade MVP within 16 weeks and EUR 50K budget — must handle real payments, real users, and real compliance obligations from launch</td>
+        </tr>
+        <tr>
+          <td><strong>PP-7</strong> — Industry Vertical<br><span style="font-size:12px;color:var(--color-water)">Regulated Commerce</span></td>
+          <td class="level-cell">4</td>
+          <td>Financial transactions (escrow, payouts, refunds) trigger PCI DSS scope; cross-border operations require GDPR and India TPDP compliance; marketplace model adds consumer protection obligations</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <!-- QUALITY PROFILE -->
-    <div class="profile-section-header">
-      <span style="color:var(--color-air); font-weight:bold;">QP</span>
-      <span style="color:var(--text-primary);">Quality Profile</span>
-      <span style="color:var(--text-dimmed); font-size:12px;">— derived from PP + NFR</span>
-    </div>
+    <h2>NFR Profile</h2>
+    <table class="profile-table">
+      <thead>
+        <tr><th>Dimension</th><th class="level-cell">Level</th><th>Rationale</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>NFR-1</strong> — Risk<br><span style="font-size:12px;color:var(--color-water)">Significant</span></td>
+          <td class="level-cell">3</td>
+          <td>Customer-facing marketplace with financial transactions (PP-7: Regulated Commerce) and multi-sided platform dynamics (PP-3: Level 5) — failures impact real money and trust</td>
+        </tr>
+        <tr>
+          <td><strong>NFR-2</strong> — Security<br><span style="font-size:12px;color:var(--color-water)">Hardened</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-7 (Regulated Commerce) mandates PCI DSS scope via payment gateway; PP-3 (Multi-Sided Platform) requires RBAC and tenant isolation; MFA, encryption at rest and in transit, and session security are baseline requirements</td>
+        </tr>
+        <tr>
+          <td><strong>NFR-3</strong> — Performance<br><span style="font-size:12px;color:var(--color-water)">Optimized</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-1 (General Consumer) expects sub-500ms API response and under 3-second page loads; PP-4 (Multi-Country) means latency across geographies must be managed; search (Elasticsearch) and video (Zoom) are latency-sensitive</td>
+        </tr>
+        <tr>
+          <td><strong>NFR-4</strong> — Availability<br><span style="font-size:12px;color:var(--color-water)">Resilient</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-6 (Market-Ready v1) with real payment flows requires 99.5% uptime; PP-3 (Multi-Sided Platform) means downtime affects both supply and demand sides simultaneously; session booking is time-sensitive</td>
+        </tr>
+        <tr>
+          <td><strong>NFR-5</strong> — Compliance<br><span style="font-size:12px;color:var(--color-water)">Multi-Regime</span></td>
+          <td class="level-cell">4</td>
+          <td>PP-4 (Multi-Country across 4 nations) combined with PP-7 (Regulated Commerce) creates multi-regime compliance burden — GDPR, India TPDP, PCI DSS, and potentially consumer protection laws in each jurisdiction</td>
+        </tr>
+        <tr>
+          <td><strong>NFR-6</strong> — Scalability<br><span style="font-size:12px;color:var(--color-water)">Moderate</span></td>
+          <td class="level-cell">2</td>
+          <td>PP-6 (Market-Ready v1) at MVP stage with EUR 50K budget — initial user base is modest (target: 50 mentors, hundreds of mentees); architecture should not preclude scaling but premature optimization is wasteful</td>
+        </tr>
+        <tr>
+          <td><strong>NFR-7</strong> — Data Sensitivity<br><span style="font-size:12px;color:var(--color-water)">Highly Sensitive</span></td>
+          <td class="level-cell">4</td>
+          <td>PP-7 (Regulated Commerce) involves financial transaction data and payment credentials; session recordings contain personal conversations; PII across four jurisdictions with varying data protection requirements</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <div style="overflow-x:auto; margin-bottom:24px;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:40px;">#</th>
-            <th>Dimension</th>
-            <th style="width:80px;">Level</th>
-            <th style="width:160px;"></th>
-            <th>Label</th>
-            <th>Rationale</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-1</td>
-            <td style="color:var(--text-primary);">Testing Depth</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Layered Testing</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Market-ready product (PP-6=3) with multi-sided platform complexity (PP-3=5) requires unit + integration tests and basic e2e for critical paths (booking flow, payment escrow, mentor verification). CI must run tests on every PR. Coverage target 60-80%.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-2</td>
-            <td style="color:var(--text-primary);">Code Quality Standards</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Enforced Standards</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">16-week delivery with multiple integration points and multi-geography compliance requires disciplined code quality. Linter + formatter + pre-commit hooks, static analysis, PR review with checklist, and documented coding conventions are essential to maintain velocity without accumulating debt.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-3</td>
-            <td style="color:var(--text-primary);">Documentation Level</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Comprehensive</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Multi-geography compliance (NFR-5=3) requires comprehensive documentation including API specs, architecture overview, and compliance-relevant decision records. Multiple integrations (PP-5=3) need documented API contracts.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-4</td>
-            <td style="color:var(--text-primary);">CI/CD Maturity</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Continuous Delivery</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Market-ready product (PP-6=3) with standard availability (NFR-4=3) requires automated build + test + deploy to staging with production deploy via manual approval. Multiple environments (dev, staging, prod) and automated database migrations are essential for 16-week delivery cadence.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-5</td>
-            <td style="color:var(--text-primary);">Observability Maturity</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Monitored</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Customer-facing marketplace (NFR-1=2) with standard availability (NFR-4=3) needs structured logging, application metrics (request latency, error rates, booking throughput), alerting on key thresholds, and operational dashboards. Distributed tracing (Level 4) is not justified at MVP scale.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-6</td>
-            <td style="color:var(--text-primary);">Accessibility Standard</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">2</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:40%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">Basic</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Gen Z digital natives (PP-1=2) are comfortable with standard web patterns. Semantic HTML, alt text, and keyboard navigation for primary flows are sufficient. Full WCAG AA (Level 3) is not justified for MVP given EUR 50K budget constraint. No regulatory mandate for accessibility in the target verticals. Can be elevated post-MVP.</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dimmed); font-family:monospace; font-size:12px;">QP-7</td>
-            <td style="color:var(--text-primary);">Security Testing</td>
-            <td style="text-align:center;"><span class="level-badge" style="background:rgba(57,211,83,0.15); color:var(--color-air);">3</span></td>
-            <td>
-              <div class="profile-bar-bg"><div class="profile-bar-fill" style="width:60%; background:var(--color-air);"></div></div>
-            </td>
-            <td><span class="badge" style="background:rgba(57,211,83,0.12); color:var(--color-air); font-size:11px;">SAST + Dependencies</span></td>
-            <td style="font-size:13px; color:var(--text-secondary);">Business-grade security (NFR-2=3) with payment processing and PII handling requires static application security testing in CI, dependency vulnerability scanning, security-focused PR review, and secret scanning. Annual pen testing (Level 4) is deferred to post-MVP given budget constraints.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <h2>Quality Profile</h2>
+    <table class="profile-table">
+      <thead>
+        <tr><th>Dimension</th><th class="level-cell">Level</th><th>Rationale</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>QP-1</strong> — Testing Depth<br><span style="font-size:12px;color:var(--color-water)">Layered</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-6 (Market-Ready v1) demands production-grade reliability; NFR-1 (Significant Risk) with financial transactions means defects have real monetary impact — unit, integration, and E2E testing required for critical paths</td>
+        </tr>
+        <tr>
+          <td><strong>QP-2</strong> — Code Quality Standards<br><span style="font-size:12px;color:var(--color-water)">Enforced</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-6 (Market-Ready v1) with NFR-2 (Hardened Security) requires consistent code standards — linting, static analysis, and code review gates to prevent security regressions in payment and auth flows</td>
+        </tr>
+        <tr>
+          <td><strong>QP-3</strong> — Documentation Level<br><span style="font-size:12px;color:var(--color-water)">Comprehensive</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-5 (Bidirectional Integration) across six external services requires integration documentation; PP-3 (Multi-Sided Platform) needs API documentation for each persona's flow; NFR-5 (Multi-Regime Compliance) requires compliance documentation</td>
+        </tr>
+        <tr>
+          <td><strong>QP-4</strong> — CI/CD Maturity<br><span style="font-size:12px;color:var(--color-water)">Continuous Delivery</span></td>
+          <td class="level-cell">3</td>
+          <td>PP-6 (Market-Ready v1) within 16-week timeline requires automated build, test, and deploy pipelines; GitHub Actions with staging and production environments; NFR-4 (Resilient Availability) requires zero-downtime deployment capability</td>
+        </tr>
+        <tr>
+          <td><strong>QP-5</strong> — Observability Maturity<br><span style="font-size:12px;color:var(--color-water)">Monitored</span></td>
+          <td class="level-cell">3</td>
+          <td>NFR-4 (Resilient Availability at 99.5%) requires uptime monitoring and alerting; NFR-1 (Significant Risk) with financial transactions demands transaction tracing; PP-5 (Bidirectional Integration) needs health checks across six external dependencies</td>
+        </tr>
+        <tr>
+          <td><strong>QP-6</strong> — Accessibility Standard<br><span style="font-size:12px;color:var(--color-water)">Basic</span></td>
+          <td class="level-cell">2</td>
+          <td>PP-1 (General Consumer) requires usable interfaces but PP-6 (Market-Ready v1) with EUR 50K budget constrains accessibility investment; mobile-responsive design and semantic HTML as baseline; WCAG AA deferred to Phase 2</td>
+        </tr>
+        <tr>
+          <td><strong>QP-7</strong> — Security Testing<br><span style="font-size:12px;color:var(--color-water)">Proactive</span></td>
+          <td class="level-cell">3</td>
+          <td>NFR-2 (Hardened Security) with PP-7 (Regulated Commerce) requires SAST in CI pipeline and dependency vulnerability scanning; PCI DSS scope (even via gateway) mandates documented security testing; penetration testing recommended pre-launch</td>
+        </tr>
+      </tbody>
+    </table>
 
-  </div><!-- /tab-profiles -->
+  </div><!-- /profiles -->
 
-  <!-- TAB 5: COMMENTS -->
-  <div id="tab-comments" class="tab-panel">
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- TAB: COMMENTS -->
+  <div class="tab-panel" id="comments">
+
     <h2>Comments</h2>
-    <p style="font-size:13px; color:var(--text-dimmed); margin-bottom:16px;">Select any text in Market Context, Vision, Scope, or Profiles tabs to add an inline comment. Comments are saved in your browser and persist across page reloads.</p>
-    <div id="comments-list">
-      <p style="color:var(--text-dimmed);">No comments yet. Select text in any tab to add a comment.</p>
-    </div>
-    <div style="margin-top:24px; border-top:1px solid var(--border-default); padding-top:16px;">
-      <div style="font-size:12px; color:var(--text-dimmed); margin-bottom:12px;">Export feedback with a decision signal. Tether = keep, Vanish = remove, Orbit = revisit. Exporting clears comments from this browser.</div>
-      <button onclick="exportFeedback('tether')" class="action-btn" style="background:rgba(57,211,83,0.15); color:var(--color-air); border:1px solid var(--color-air);">Tether</button>
-      <button onclick="exportFeedback('vanish')" class="action-btn" style="background:rgba(240,160,0,0.15); color:var(--color-fire); border:1px solid var(--color-fire);">Vanish</button>
-      <button onclick="exportFeedback('orbit')" class="action-btn" style="background:rgba(88,166,255,0.15); color:var(--color-water); border:1px solid var(--color-water);">Orbit</button>
-      <button onclick="exportFeedback(null)" class="action-btn" style="background:var(--bg-tertiary); color:var(--text-secondary); border:1px solid var(--border-default);">Export JSON</button>
-    </div>
-  </div><!-- /tab-comments -->
+    <p style="color: var(--text-secondary); font-size: 14px;">Select text on any tab to annotate. Comments are saved locally.</p>
+    <div id="comment-list" style="margin-top: var(--space-md);"></div>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    <span>Generated: 2026-03-25 &nbsp;|&nbsp; Recipe: discover-product</span>
-    <span class="mono">.meridian/project/product/felly-club/product.yaml</span>
-  </div>
+    <div class="export-section">
+      <h3>Export Review Decision</h3>
+      <p style="color: var(--text-secondary); font-size: 14px; margin-top: var(--space-xs);">
+        <strong style="color: var(--color-air);">Tether</strong> — approve and proceed &nbsp;|&nbsp;
+        <strong style="color: var(--color-fire);">Vanish</strong> — reject / request revision &nbsp;|&nbsp;
+        <strong style="color: var(--color-water);">Orbit</strong> — hold for discussion
+      </p>
+      <div class="action-btns">
+        <button class="action-btn action-btn-tether" onclick="exportAction('tether')">Tether</button>
+        <button class="action-btn action-btn-vanish" onclick="exportAction('vanish')">Vanish</button>
+        <button class="action-btn action-btn-orbit"  onclick="exportAction('orbit')">Orbit</button>
+      </div>
+    </div>
+
+  </div><!-- /comments -->
 
 </div><!-- /container -->
 
-<!-- COMMENT POPUP -->
-<div id="comment-popup" style="display:none; position:fixed; z-index:1000; background:var(--comment-popup-bg); border:1px solid var(--border-accent); border-radius:8px; padding:16px; max-width:320px; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
-  <div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Add Comment</div>
-  <div id="popup-selected-text" style="font-size:12px; color:var(--text-dimmed); background:var(--bg-primary); padding:6px 8px; border-radius:4px; margin-bottom:8px; max-height:60px; overflow:hidden; font-style:italic;"></div>
-  <textarea id="popup-comment-input" placeholder="Your comment..." style="width:100%; min-height:80px; background:var(--bg-primary); border:1px solid var(--border-default); border-radius:4px; color:var(--text-primary); font-family:inherit; font-size:13px; padding:8px; resize:vertical; box-sizing:border-box;"></textarea>
-  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
-    <button onclick="cancelComment()" style="padding:5px 14px; background:transparent; border:1px solid var(--border-default); border-radius:4px; color:var(--text-secondary); cursor:pointer; font-family:inherit;">Cancel</button>
-    <button onclick="saveComment()" style="padding:5px 14px; background:var(--color-water); border:none; border-radius:4px; color:var(--bg-primary); cursor:pointer; font-family:inherit; font-weight:bold;">Save</button>
-  </div>
-</div>
-
 <script>
-(function() {
-  var pendingSelection = null;
+  // ─── Storage key ───────────────────────────────────────────
   var STORAGE_KEY = 'meridian-comments-product-felly-club';
-  var comments = [];
 
-  function switchTab(tabName) {
+  // ─── Tab switching ─────────────────────────────────────────
+  function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-    var btn = document.querySelector('[data-tab="' + tabName + '"]');
-    var panel = document.getElementById('tab-' + tabName);
+    var btn = document.querySelector('[data-tab="' + tabId + '"]');
+    var panel = document.getElementById(tabId);
     if (btn) btn.classList.add('active');
     if (panel) panel.classList.add('active');
-    if (tabName === 'comments') renderComments();
-    window.location.hash = tabName;
+    if (tabId === 'comments') renderComments();
   }
-  window.switchTab = switchTab;
 
-  function handleTextSelection() {
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+  });
+
+  // ─── Comment storage ───────────────────────────────────────
+  function getComments() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+  }
+
+  function saveComments(comments) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+  }
+
+  function updateCommentBadge() {
+    var count = getComments().length;
+    var badge = document.getElementById('comment-badge');
+    if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-block' : 'none'; }
+  }
+
+  // ─── Text selection → popup ────────────────────────────────
+  var currentSelection = null;
+
+  document.addEventListener('mouseup', function(e) {
+    if (e.target.closest('#comment-popup')) return;
     var sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+    if (!sel || sel.isCollapsed) { hidePopup(); return; }
+    var text = sel.toString().trim();
+    if (!text) { hidePopup(); return; }
+    var activeBtn = document.querySelector('.tab-btn.active');
+    var tabId = activeBtn ? activeBtn.dataset.tab : 'unknown';
+    if (tabId === 'comments') return;
+    currentSelection = { text: text, tab: tabId };
     var range = sel.getRangeAt(0);
-    var node = range.commonAncestorContainer;
-    var el = node.nodeType === 3 ? node.parentElement : node;
-    var panel = el.closest('.tab-panel');
-    if (!panel || panel.id === 'tab-comments') return;
     var rect = range.getBoundingClientRect();
-    pendingSelection = {
-      text: sel.toString().trim(),
-      range: range,
-      tab: panel.id.replace('tab-', '')
-    };
+    showPopup(rect, text);
+  });
+
+  function showPopup(rect, text) {
     var popup = document.getElementById('comment-popup');
-    document.getElementById('popup-selected-text').textContent = '"' + pendingSelection.text.slice(0, 100) + (pendingSelection.text.length > 100 ? '...' : '') + '"';
-    document.getElementById('popup-comment-input').value = '';
-    popup.style.display = 'block';
-    var popupH = popup.offsetHeight || 200;
-    var top = rect.top + window.scrollY - popupH - 10;
-    var left = rect.left + window.scrollX;
-    top = Math.max(window.scrollY + 10, top);
-    left = Math.min(left, window.scrollX + window.innerWidth - 340);
+    document.getElementById('comment-selected-text').textContent = text.length > 120 ? text.slice(0, 120) + '…' : text;
+    document.getElementById('comment-textarea').value = '';
+    var top = window.scrollY + rect.bottom + 8;
+    var left = Math.min(rect.left, window.innerWidth - 380);
     popup.style.top = top + 'px';
-    popup.style.left = left + 'px';
+    popup.style.left = Math.max(8, left) + 'px';
+    popup.classList.add('visible');
   }
 
-  function cancelComment() {
-    document.getElementById('comment-popup').style.display = 'none';
-    pendingSelection = null;
-    window.getSelection().removeAllRanges();
+  function hidePopup() {
+    var popup = document.getElementById('comment-popup');
+    if (popup) popup.classList.remove('visible');
+    currentSelection = null;
   }
-  window.cancelComment = cancelComment;
 
   function saveComment() {
-    if (!pendingSelection) return;
-    var text = document.getElementById('popup-comment-input').value.trim();
-    if (!text) { document.getElementById('popup-comment-input').focus(); return; }
-    var id = 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-    var comment = {
-      id: id,
-      tab: pendingSelection.tab,
-      selected_text: pendingSelection.text,
-      comment: text,
-      created_at: new Date().toISOString()
-    };
-    try {
-      var span = document.createElement('span');
-      span.className = 'comment-highlight';
-      span.dataset.commentId = id;
-      span.onclick = (function(cid) { return function() { showCommentDetail(cid); }; })(id);
-      pendingSelection.range.surroundContents(span);
-    } catch(e) { /* overlapping ranges — skip wrapping */ }
-    comments.push(comment);
-    saveCommentsToStorage();
+    if (!currentSelection) return;
+    var text = document.getElementById('comment-textarea').value.trim();
+    if (!text) return;
+    var comments = getComments();
+    comments.push({
+      id: Date.now(),
+      excerpt: currentSelection.text.slice(0, 100),
+      tab: currentSelection.tab,
+      body: text,
+      created: new Date().toISOString()
+    });
+    saveComments(comments);
     updateCommentBadge();
-    document.getElementById('comment-popup').style.display = 'none';
-    pendingSelection = null;
-    window.getSelection().removeAllRanges();
-  }
-  window.saveComment = saveComment;
-
-  function showCommentDetail(id) {
-    switchTab('comments');
-    renderComments();
-    setTimeout(function() {
-      var el = document.querySelector('[data-comment-id-card="' + id + '"]');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    hidePopup();
+    if (window.getSelection) window.getSelection().removeAllRanges();
   }
 
-  function deleteComment(id) {
-    comments = comments.filter(function(c) { return c.id !== id; });
-    var span = document.querySelector('[data-comment-id="' + id + '"]');
-    if (span) { span.replaceWith(document.createTextNode(span.textContent)); }
-    saveCommentsToStorage();
-    updateCommentBadge();
-    renderComments();
-  }
-  window.deleteComment = deleteComment;
-
+  // ─── Comments tab render ───────────────────────────────────
   function renderComments() {
-    var list = document.getElementById('comments-list');
+    var list = document.getElementById('comment-list');
+    var comments = getComments();
     if (comments.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-dimmed)">No comments yet. Select text in any tab to add a comment.</p>';
+      list.innerHTML = '<p style="color:var(--text-secondary)">No comments yet. Select text on any tab to add a comment.</p>';
       return;
     }
-    list.innerHTML = comments.map(function(c, i) {
-      return '<div class="card" data-comment-id-card="' + c.id + '" style="margin-bottom:12px;">' +
-        '<div style="font-size:12px; color:var(--text-dimmed); margin-bottom:6px;">' + (i + 1) + '. Tab: ' + c.tab + ' &nbsp;|&nbsp; ' + c.created_at.slice(0, 10) + '</div>' +
-        '<div style="font-size:13px; color:var(--text-secondary); font-style:italic; margin-bottom:8px;">"' + c.selected_text.slice(0, 120) + (c.selected_text.length > 120 ? '...' : '') + '"</div>' +
-        '<div style="font-size:14px; color:var(--text-primary); margin-bottom:10px;">' + c.comment + '</div>' +
-        '<button onclick="deleteComment(\'' + c.id + '\')" style="font-size:12px; padding:3px 10px; background:transparent; border:1px solid var(--color-fire); color:var(--color-fire); border-radius:4px; cursor:pointer;">Delete</button>' +
+    list.innerHTML = comments.map(function(c) {
+      return '<div class="comment-item">' +
+        '<div class="comment-tab-label">' + c.tab + '</div>' +
+        '<div class="comment-excerpt">' + escapeHtml(c.excerpt) + '</div>' +
+        '<div class="comment-body">' + escapeHtml(c.body) + '</div>' +
+        '<button class="comment-delete-btn" onclick="deleteComment(' + c.id + ')">Delete</button>' +
         '</div>';
     }).join('');
   }
 
-  function updateCommentBadge() {
-    var badge = document.getElementById('comment-tab-badge');
-    if (!badge) return;
-    badge.textContent = comments.length || '';
-    badge.style.display = comments.length ? 'inline-block' : 'none';
-  }
-
-  function loadComments() {
-    try { comments = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { comments = []; }
+  function deleteComment(id) {
+    saveComments(getComments().filter(function(c) { return c.id !== id; }));
     updateCommentBadge();
+    renderComments();
   }
 
-  function saveCommentsToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function exportFeedback(action) {
+  // ─── Export (Tether / Vanish / Orbit) ─────────────────────
+  function exportAction(action) {
     var payload = {
       artifact: 'product-brief',
       slug: 'felly-club',
-      timestamp: new Date().toISOString(),
-      comments: comments,
-      action: action
+      action: action,
+      comments: getComments(),
+      timestamp: new Date().toISOString()
     };
-    var json = JSON.stringify(payload, null, 2);
-    try { navigator.clipboard.writeText(json); } catch(e) {}
-    if (action) {
-      localStorage.removeItem(STORAGE_KEY);
-      comments = [];
-      updateCommentBadge();
-      renderComments();
-    }
-    alert('Feedback copied to clipboard' + (action ? ' and comments cleared.' : '.'));
-  }
-  window.exportFeedback = exportFeedback;
-
-  document.addEventListener('mouseup', handleTextSelection);
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cancelComment(); });
-
-  window.addEventListener('load', function() {
-    loadComments();
-    var hash = window.location.hash.replace('#', '');
-    if (hash && ['market-context','vision','scope','profiles','comments'].indexOf(hash) !== -1) {
-      switchTab(hash);
+    var text = JSON.stringify(payload, null, 2);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
     } else {
-      switchTab('market-context');
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('Copied to clipboard');
     }
-  });
-})();
+  }
+
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg; toast.style.display = 'block';
+    setTimeout(function() { toast.style.display = 'none'; }, 2000);
+  }
+
+  // ─── Init ─────────────────────────────────────────────────
+  updateCommentBadge();
 </script>
 
 </body>

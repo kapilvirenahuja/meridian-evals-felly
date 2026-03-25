@@ -1,81 +1,132 @@
-validation:
-  slug: "felly-club"
-  product_type: "product"
-  validated_at: "2026-03-25T00:00:00Z"
+validation_result:
+  slug: felly-club
+  validated_at: "2026-03-25"
   ready_for_lock: true
-  completeness_score: 100
+  completeness_score: 98
 
   checklist:
-    - item: "name present"
+    - item: "slug field present"
       status: "pass"
-    - item: "slug present"
+
+    - item: "type field present and valid ('product' or 'library')"
       status: "pass"
-    - item: "type present and valid (product)"
+
+    - item: "status field present"
       status: "pass"
-    - item: "status present and is DRAFT"
+
+    - item: "domain field present"
       status: "pass"
-    - item: "domain present and non-empty"
+
+    - item: "market_context.problem_statement present and non-empty"
       status: "pass"
-    - item: "market_context present with all sub-sections (problem, target_users, competitors, market_size, differentiators, risks)"
+
+    - item: "market_context.target_users present with 1+ entries"
       status: "pass"
-    - item: "vision present with mission and tagline"
+      note: "3 personas defined: Ambitious Mentee, Domain-Expert Mentor, Platform Administrator"
+
+    - item: "market_context.competitors present with 1+ entries"
       status: "pass"
-    - item: "value_proposition present and non-empty"
+      note: "7 competitors with strengths/weaknesses: MentorCruise, Clarity.fm, GrowthMentor, ADPList, MentorPass, SCORE, Voice In Sport"
+
+    - item: "market_context.market_size present"
       status: "pass"
-    - item: "strategic_goals present with 3+ entries, each with id, title, description, success_metrics"
+      note: "TAM, SAM, SOM all defined with sourcing note"
+
+    - item: "market_context.differentiators present with 1+ entries"
       status: "pass"
-    - item: "target_audience present with at least one persona"
+      note: "8 differentiators, all product-specific and tied to competitive analysis"
+
+    - item: "market_context.risks present with 1+ entries"
       status: "pass"
-    - item: "scope present with in_scope and out_of_scope"
+      note: "9 risks, all specific to Felly Club — cold-start, budget, compliance, video infra, recording privacy, market education, free competitor anchors"
+
+    - item: "vision statement present and non-empty"
       status: "pass"
-    - item: "assumptions present and non-empty array"
+      note: "Present under vision.statement"
+
+    - item: "value_proposition present"
       status: "pass"
-    - item: "success_metrics present with measurable outcomes"
+      note: "Structured as per-persona propositions (3 personas); richer than scalar but fully present"
+
+    - item: "strategic_goals present with 3+ entries"
       status: "pass"
-    - item: "profiles present with product_profile (7 dims), nfr_profile (7 dims), quality_profile (7 dims)"
+      note: "5 strategic goals (SG-01 through SG-05)"
+
+    - item: "Each strategic goal has id, goal, success_metric"
       status: "pass"
-    - item: "Strategic Goals terminology used (no OKR language)"
+      note: "All 5 goals have id, goal, and success_metric — all success_metrics are quantified"
+
+    - item: "scope.in_scope present"
       status: "pass"
-    - item: "No placeholder values (TBD, unclear, to be determined, ?)"
+      note: "12 epics defined with descriptions"
+
+    - item: "scope.out_of_scope present"
       status: "pass"
-    - item: "Target users have goals and frustrations"
+      note: "10 items explicitly excluded"
+
+    - item: "success_metrics present"
       status: "pass"
-    - item: "Competitors have strengths and weaknesses"
+      note: "6 metrics with quantified targets and measurement methods"
+
+    - item: "assumptions present"
       status: "pass"
-    - item: "Market size has TAM, SAM, SOM"
+      note: "10 assumptions, all specific to Felly Club operations"
+
+    - item: "profiles.product_profile present with 7 dimensions (level + rationale)"
       status: "pass"
-    - item: "Risks have severity and mitigation"
+      note: "PP-1 through PP-7 all present with level and rationale"
+
+    - item: "profiles.nfr_profile present with 7 dimensions (level + rationale)"
       status: "pass"
-    - item: "Success metrics are measurable (have targets and measurement methods)"
+      note: "NFR-1 through NFR-7 all present with level and rationale"
+
+    - item: "profiles.quality_profile present with 7 dimensions (level + rationale)"
       status: "pass"
-    - item: "Profile cascade is evident (NFR rationale references PP, QP rationale references PP+NFR)"
+      note: "QP-1 through QP-7 all present with level and rationale"
+
+    - item: "No OKR terminology ('Objectives', 'Key Results', 'OKR') present"
       status: "pass"
-    - item: "Strategic goals align with problem statement"
+
+    - item: "Strategic goals are specific and measurable"
       status: "pass"
-    - item: "Success metrics align with strategic goals"
+      note: "All 5 goals have time-bound, quantified success metrics (e.g., '>50 mentors in 8 weeks', '<5% dispute rate', '>30% referral signups')"
+
+    - item: "Success metrics are quantifiable"
       status: "pass"
-    - item: "Scope items are achievable within stated assumptions"
+      note: "All 6 metrics have numeric targets and defined measurement cadence"
+
+    - item: "Risks are product-specific, not generic"
       status: "pass"
-    - item: "Profile levels are internally consistent"
+      note: "All 9 risks are grounded in Felly Club's specific constraints — budget (EUR 50K), geography (4 countries), verticals (Sport/Entertainment), and integrations (Zoom, PayU)"
+
+    - item: "NFR profile rationale references product profile cascade"
       status: "pass"
+      note: "All NFR rationales explicitly cite PP dimensions (e.g., NFR-1 cites PP-7+PP-3, NFR-2 cites PP-7+PP-3, NFR-3 cites PP-1+PP-4, NFR-5 cites PP-4+PP-7)"
+
+    - item: "QP profile rationale references PP + NFR cascade"
+      status: "pass"
+      note: "All QP rationales cite both PP and NFR dimensions (e.g., QP-1 cites PP-6+NFR-1, QP-2 cites PP-6+NFR-2, QP-3 cites PP-5+PP-3+NFR-5, QP-7 cites NFR-2+PP-7)"
+
+    - item: "Placeholder scan — no TBD, 'to be determined', or trailing ? in product-owned fields"
+      status: "warning"
+      note: "The word 'unclear' appears once at line 90 in the competitor analysis section (ADPList weakness: 'unclear monetization path'). This is a competitor observation, not a placeholder in a Felly Club product field. No TBD or trailing ? found anywhere."
 
   issues:
-    - severity: "warning"
-      field: "market_context.market_size.tam"
-      message: "TAM is expressed as a range (USD 849M - 1.53B) rather than a single figure. This is acceptable given multiple source methodologies but may need narrowing for investor-facing materials."
-    - severity: "warning"
-      field: "market_context.market_size.sam"
-      message: "SAM is an estimate (~25% of TAM) rather than a bottom-up calculation. Acceptable for DRAFT but should be validated with primary research before fundraising."
-    - severity: "warning"
-      field: "profiles.product_profile.PP-1"
-      message: "PP-1 User Sophistication is Level 2 (Power User) but rationale mentions Gen Z digital natives. Level 2 is reasonable but the label 'Power User' may overstate if the mentee side includes first-time platform users in Sport verticals."
+    - message: "The word 'unclear' appears in competitor analysis for ADPList ('Paid tier still in closed beta — unclear monetization path'). This describes a competitor's situation, not a gap in the product artifact itself. Not a blocker."
+      field: "market_context.competitors[ADPList].weaknesses"
+      severity: "warning"
 
-  summary: |
-    The Felly Club product vision is comprehensive and ready for lock. All 26 validation checks pass.
-    The artifact covers all required structural sections including market context with 7 competitors,
-    5 strategic goals with measurable success metrics, 3 target personas, well-defined scope boundaries,
-    10 assumptions, 8 measurable success metrics with targets and measurement methods, and a complete
-    three-tier profile cascade (PP/NFR/QP) with 7 dimensions each. Profile rationale correctly
-    references upstream profiles (NFR references PP, QP references PP+NFR). Three minor warnings
-    are noted regarding market size precision and a profile label nuance, none of which are blockers.
-    The vision is well-structured, internally consistent, and ready for LOCK status transition.
+  placeholder_scan:
+    found: false
+    items:
+      - location: "market_context.competitors[ADPList].weaknesses[3]"
+        value: "Paid tier still in closed beta — unclear monetization path"
+        assessment: "NOT a product placeholder — describes competitor's ambiguous status; no action required on product.yaml"
+
+  judge_notes:
+    - "All 5 strategic goals carry specific, time-bound, measurable success metrics. No vague platitudes detected."
+    - "Profile cascade is well-formed: NFR rationales consistently cite PP dimensions; QP rationales consistently cite PP+NFR dimensions."
+    - "value_proposition is structured as a list of persona-keyed propositions rather than a scalar string. Content is complete and substantive — this is a richer structure than the minimum requirement, not a gap."
+    - "Competitor analysis is thorough with 7 named platforms, pricing data, and specific weaknesses tied to Felly Club's differentiators."
+    - "Risks are highly specific to Felly Club's context — budget constraints, niche verticals, multi-geography compliance, and cold-start dynamics are all addressed."
+    - "The single 'warning' on the placeholder scan is a competitor weakness observation, not a field gap. It does not affect readiness to lock."

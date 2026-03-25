@@ -1,100 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Felly Club — Briefs Hub</title>
-<style>
-:root {
-  --bg-primary: #0D1117;
-  --bg-secondary: #161B22;
-  --bg-tertiary: #21262D;
-  --text-primary: #e0e0e8;
-  --text-secondary: #8B949E;
-  --text-dimmed: #484f58;
-  --color-air: #39D353;
-  --color-water: #58A6FF;
-  --color-fire: #F0A000;
-  --status-draft: #fbbf24;
-  --border-default: #30363d;
-  --border-accent: #58A6FF;
-  --shadow-retro: 4px 4px 0 rgba(33,38,45,1);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--text-primary);
-  background: var(--bg-primary);
-}
-.container { max-width: 720px; margin: 0 auto; padding: 48px 24px; }
-h1 { font-size: 28px; color: var(--color-water); border-bottom: 1px solid var(--border-default); padding-bottom: 8px; margin-bottom: 6px; }
-.subtitle { font-size: 13px; color: var(--text-dimmed); font-family: monospace; margin-bottom: 32px; }
-h2 { font-size: 15px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; margin-top: 32px; }
-h2:first-of-type { margin-top: 0; }
-.brief-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  box-shadow: var(--shadow-retro);
-  padding: 18px 20px;
-  margin-bottom: 12px;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s;
-}
-.brief-card:hover { border-color: var(--border-accent); }
-.brief-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-}
-.brief-title { font-size: 16px; color: var(--text-primary); font-weight: bold; margin-bottom: 3px; }
-.brief-meta { font-size: 12px; color: var(--text-dimmed); font-family: monospace; }
-.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 8px; }
-.badge-draft { background: rgba(251,191,36,0.15); color: var(--status-draft); }
-.badge-type { background: rgba(57,211,83,0.12); color: var(--color-air); }
-.footer {
-  margin-top: 48px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-default);
-  font-size: 12px;
-  color: var(--text-dimmed);
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub — felly-club</title>
+  <style>
+    :root {
+      --bg-primary: #0D1117;
+      --bg-secondary: #161B22;
+      --bg-tertiary: #21262D;
+      --text-primary: #e0e0e8;
+      --text-secondary: #8B949E;
+      --text-dimmed: #484f58;
+      --color-air: #39D353;
+      --color-water: #58A6FF;
+      --color-earth: #8B949E;
+      --color-fire: #F0A000;
+      --status-draft: #fbbf24;
+      --status-validated: #4ade80;
+      --status-locked: #58A6FF;
+      --border-default: #30363d;
+      --border-accent: #58A6FF;
+      --shadow-retro: 4px 4px 0 rgba(33,38,45,1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--text-primary); background: var(--bg-primary);
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+    h1 { font-size: 28px; color: var(--color-water); border-bottom: 1px solid var(--border-default); padding-bottom: 8px; margin-bottom: 4px; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-draft { background: rgba(251,191,36,0.15); color: var(--status-draft); }
+    .badge-validated { background: rgba(74,222,128,0.15); color: var(--status-validated); }
+    .badge-locked { background: rgba(88,166,255,0.15); color: var(--status-locked); }
+    .artifact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .artifact-card {
+      background: var(--bg-secondary); border: 1px solid var(--border-default);
+      border-radius: 8px; box-shadow: var(--shadow-retro); padding: 20px;
+      text-decoration: none; color: inherit; transition: border-color 0.15s;
+      display: block;
+    }
+    .artifact-card:hover { border-color: var(--border-accent); }
+    .artifact-card.disabled { opacity: 0.4; pointer-events: none; cursor: default; }
+    .artifact-name { font-size: 16px; font-weight: bold; color: var(--text-primary); margin-bottom: 8px; }
+    .artifact-stat { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+    .artifact-stat span { color: var(--color-water); font-weight: bold; }
+    .dep-flow { font-size: 12px; color: var(--text-dimmed); margin-top: 32px; text-align: center; letter-spacing: 0.3px; }
+    .generated { font-size: 12px; color: var(--text-dimmed); margin-top: 4px; margin-bottom: 0; }
+    @media (max-width: 600px) { .artifact-grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>Felly Club</h1>
-  <div class="subtitle">felly-club &nbsp;·&nbsp; mentorship-marketplace &nbsp;·&nbsp; discover-product</div>
+  <div class="container">
+    <h1>Felly Club <span class="badge badge-draft">DRAFT</span></h1>
+    <p class="generated">felly-club &mdash; Generated: 2026-03-25 &mdash; mentorship-marketplace</p>
 
-  <h2>Product Briefs</h2>
+    <div class="artifact-grid">
 
-  <a href="product-brief.html" class="brief-card">
-    <div class="brief-icon">&#128196;</div>
-    <div>
-      <div class="brief-title">
-        Product Brief
+      <!-- product.yaml — brief exists -->
+      <a class="artifact-card" href="product-brief.html">
+        <div class="artifact-name">Product</div>
         <span class="badge badge-draft">DRAFT</span>
-        <span class="badge badge-type">product</span>
-      </div>
-      <div class="brief-meta">product-brief.html &nbsp;·&nbsp; Market Context · Vision · Scope · Profiles · Comments</div>
-    </div>
-  </a>
+        <div class="artifact-stat"><span>5</span> strategic goals</div>
+      </a>
 
-  <div class="footer">
-    Generated: 2026-03-25 &nbsp;·&nbsp; Recipe: discover-product &nbsp;·&nbsp; Artifact: .meridian/project/product/felly-club/briefs/
+      <!-- roadmap.yaml — not present -->
+      <div class="artifact-card disabled">
+        <div class="artifact-name">Roadmap</div>
+        <span class="badge badge-draft" style="opacity:0.5">—</span>
+        <div class="artifact-stat">Not yet generated</div>
+      </div>
+
+      <!-- features.yaml — not present -->
+      <div class="artifact-card disabled">
+        <div class="artifact-name">Features</div>
+        <span class="badge badge-draft" style="opacity:0.5">—</span>
+        <div class="artifact-stat">Not yet generated</div>
+      </div>
+
+      <!-- architecture.yaml — not present -->
+      <div class="artifact-card disabled">
+        <div class="artifact-name">Architecture</div>
+        <span class="badge badge-draft" style="opacity:0.5">—</span>
+        <div class="artifact-stat">Not yet generated</div>
+      </div>
+
+      <!-- tech.yaml — not present -->
+      <div class="artifact-card disabled">
+        <div class="artifact-name">Tech</div>
+        <span class="badge badge-draft" style="opacity:0.5">—</span>
+        <div class="artifact-stat">Not yet generated</div>
+      </div>
+
+      <!-- scenarios.yaml — not present -->
+      <div class="artifact-card disabled">
+        <div class="artifact-name">Scenarios</div>
+        <span class="badge badge-draft" style="opacity:0.5">—</span>
+        <div class="artifact-stat">Not yet generated</div>
+      </div>
+
+      <!-- plan.yaml — not present -->
+      <div class="artifact-card disabled">
+        <div class="artifact-name">Plan</div>
+        <span class="badge badge-draft" style="opacity:0.5">—</span>
+        <div class="artifact-stat">Not yet generated</div>
+      </div>
+
+    </div>
+
+    <p class="dep-flow">product &rarr; roadmap &rarr; features &rarr; architecture &rarr; tech &rarr; scenarios &rarr; plan</p>
   </div>
-</div>
 </body>
 </html>

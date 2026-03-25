@@ -1,513 +1,418 @@
-name: "Felly Club"
-slug: "felly-club"
-type: "product"
-status: "LOCKED"
+slug: felly-club
+type: product
+status: LOCKED
 domain: "mentorship-marketplace"
 created_at: "2026-03-25"
-updated_at: "2026-03-25T10:30:00+0530"
+updated_at: "2026-03-25T22:42:00+0530"
 
 market_context:
-  problem: |
-    The mentorship landscape is fragmented across informal networks, LinkedIn DMs, and niche platforms
-    that rarely span beyond tech and business domains. Individuals seeking guidance in Sport,
-    Entertainment, Entrepreneurship, and Business face several systemic friction points:
-
-    1. Discovery gap: No single marketplace aggregates verified mentors across Sport, Entertainment,
-       Business, and Entrepreneurship verticals. Existing platforms (MentorCruise, GrowthMentor, ADPList)
-       are tech/startup-centric. Sports mentorship is scattered across NGO programs (Living Sport,
-       WeCOACH) and informal networks with no transactional layer.
-
-    2. Trust deficit: Mentor credentials are self-reported on most platforms. There is no standardized
-       domain-verification process, leaving mentees unable to distinguish credentialed experts from
-       self-proclaimed coaches.
-
-    3. Pricing opacity: Rates range from free (ADPList) to $960/hour (Clarity.fm) with no
-       standardization. Per-minute billing (Clarity.fm) creates anxiety; flat monthly subscriptions
-       (MentorCruise at $200-400/month) lock mentees into commitments before trust is established.
-
-    4. Payment risk: Most platforms lack escrow mechanisms. Mentors risk non-payment for completed
-       sessions; mentees risk paying for no-shows or subpar sessions with limited recourse.
-
-    5. Multi-geography compliance: Platforms operating across India, EU (Germany), Switzerland, and
-       USA must navigate GDPR, India's DPDP Act (formerly TPDP), PCI DSS for payments, and Germany's
-       FernUSG (Distance Learning Protection Act) which now applies to online mentoring/coaching.
-
-    6. Session accountability: No mainstream mentorship platform offers session recordings for
-       dispute resolution, creating a he-said/she-said dynamic when quality disputes arise.
+  problem_statement: >
+    The global mentorship landscape is fragmented and opaque. Aspiring individuals
+    struggle to identify credible, accessible mentors, while accomplished professionals
+    lack a structured, trustworthy channel to offer guidance. Key pain points include
+    no standardized discovery mechanism for domain-specific mentors, absence of
+    transparent pricing and quality indicators, high friction in scheduling and payment,
+    limited accountability and dispute resolution, and no data-driven insights for
+    participants. The niche of Sport and Entertainment mentorship is particularly
+    underserved — existing platforms focus heavily on tech, business, and design,
+    leaving athletes, performers, and creative professionals without a curated
+    marketplace for domain-verified mentors.
 
   target_users:
     - persona: "Ambitious Mentee"
-      goal: "Find a verified, domain-specific mentor and book a focused 1-on-1 video session to accelerate career or skill development"
-      frustration: "Cannot find credible mentors in Sport or Entertainment verticals; existing platforms are tech-only; pricing is opaque; no recourse for bad sessions"
-      context: "Early-to-mid career professionals or aspiring athletes/entertainers in India, Switzerland, USA, or Germany seeking structured mentorship outside their immediate network"
+      goal: "Find and book sessions with credible, domain-verified mentors in Sport, Entrepreneurship, Business, or Entertainment"
+      frustration: "Cannot discover quality mentors in niche domains; existing platforms are tech/business-centric with no curation for sport or entertainment verticals"
+      context: "Early-to-mid career professionals, aspiring athletes, entrepreneurs, and creatives in India, Switzerland, USA, and Germany seeking structured guidance"
 
     - persona: "Domain-Expert Mentor"
-      goal: "Monetize expertise through structured sessions with a reliable payment guarantee and minimal administrative overhead"
-      frustration: "Informal mentoring yields no income; existing platforms either pay nothing (ADPList) or take high commissions (Clarity.fm 15%, MentorCruise 16-20%); no protection against mentee no-shows"
-      context: "Accomplished professionals, former athletes, entrepreneurs, or entertainment industry veterans with verifiable credentials who want a side-income channel"
+      goal: "Monetize expertise through a structured, trustworthy channel with minimal operational overhead"
+      frustration: "No platform offers verified credentialing, transparent pricing bands, and reliable payout mechanisms for niche domain experts"
+      context: "Accomplished professionals, athletes, entrepreneurs, and entertainers willing to mentor but lacking a frictionless channel"
 
     - persona: "Platform Administrator"
-      goal: "Manage mentor verification, content moderation, dispute resolution, compliance, and marketplace health"
-      frustration: "Manual mentor vetting does not scale; cross-jurisdiction compliance is complex; dispute resolution without session evidence is subjective"
-      context: "Felly Club operations team responsible for marketplace integrity across four geographies with different regulatory requirements"
+      goal: "Curate mentor quality, manage disputes, oversee financial operations, and ensure regulatory compliance across multiple geographies"
+      frustration: "Multi-geography compliance (GDPR, TPDP, PCI DSS) and escrow/payout operations are complex and error-prone without dedicated tooling"
+      context: "Operations team managing a four-country marketplace with commission-based revenue model"
 
   competitors:
     - name: "MentorCruise"
-      type: "Direct competitor - paid mentorship marketplace"
+      description: "Online mentorship marketplace with 6,200+ vetted mentors across 130+ countries. Focuses on tech, data science, AI, and design."
+      pricing: "Monthly plans $50-$400/month; one-off sessions from $39 (30 min) to $99 (60 min). Platform takes ~20% markup on mentor fees."
       strengths:
-        - "5,500+ vetted mentors with <5% acceptance rate"
-        - "23,700+ successful matches across 130+ countries"
-        - "Long-term mentorship model with monthly subscriptions ($200-400/month)"
-        - "$506K revenue in 2024, growing from $288K in 2023 (76% YoY growth)"
+        - "Rigorous vetting — less than 5% mentor acceptance rate"
+        - "Long-term mentorship model with 7-day trial"
+        - "Async messaging included between sessions"
+        - "Large mentor pool across 130+ countries"
       weaknesses:
-        - "Tech/startup-centric - no Sport or Entertainment verticals"
-        - "16-20% platform commission is high for mentors"
-        - "No escrow or session recording for dispute resolution"
-        - "Monthly subscription model creates commitment friction before trust is established"
-
-    - name: "ADPList"
-      type: "Direct competitor - freemium mentorship platform"
-      strengths:
-        - "38,024 mentors, 602,934 sessions, 310M+ mentorship minutes (2025)"
-        - "Free tier drives massive adoption and network effects"
-        - "Strong brand in design and product management communities"
-        - "Backed by Sequoia Capital India (Surge program, $1.3M seed)"
-      weaknesses:
-        - "Free model limits mentor monetization - no transactional layer for paid sessions"
-        - "Heavily skewed toward design/UX and product management verticals"
-        - "No payment infrastructure, escrow, or session-based commerce"
-        - "Mentor quality is inconsistent due to low barriers to entry"
-
-    - name: "GrowthMentor"
-      type: "Direct competitor - subscription mentorship platform"
-      strengths:
-        - "750+ curated mentors focused on startup growth"
-        - "Flat subscription ($50-75/month) makes sessions affordable"
-        - "Session recordings with AI summaries (Pro plan)"
-        - "Fully bootstrapped, lean operation"
-      weaknesses:
-        - "Narrow vertical focus: growth, marketing, fundraising only"
-        - "Mentors are not directly compensated - limits supply-side growth"
-        - "Single-session model discourages long-term mentor-mentee relationships"
-        - "Small mentor pool compared to MentorCruise and ADPList"
+        - "Tech and design focused — no Sport or Entertainment verticals"
+        - "No video session delivery built-in (relies on external tools)"
+        - "No escrow or dispute resolution mechanism"
+        - "No multi-currency or multi-geography compliance"
 
     - name: "Clarity.fm"
-      type: "Direct competitor - per-minute expert call platform"
+      description: "Per-minute expert call marketplace. Connects users with experts via phone bridge for paid consultations."
+      pricing: "Per-minute billing: $2-$30/minute ($120-$960/hour effective). Platform takes 15% service fee."
       strengths:
-        - "Established brand with high-profile entrepreneurs as experts"
-        - "Per-minute pricing ($2-30/min) allows flexible session lengths"
-        - "Low barrier to entry for mentors"
+        - "High-profile expert roster (CEOs, investors)"
+        - "Simple per-minute billing model"
+        - "Established brand in startup advisory space"
       weaknesses:
-        - "Per-minute billing creates anxiety and rushed conversations ($120-960/hour effective rate)"
-        - "15% service fee on every call"
-        - "Transactional, single-call model with no relationship continuity"
-        - "Limited vetting of expert credentials"
-        - "No vertical specialization in Sport or Entertainment"
+        - "Phone-only sessions — no video capability"
+        - "Very expensive for longer sessions"
+        - "No ongoing mentorship relationship support"
+        - "No domain verification or curation beyond self-reported profiles"
+        - "No Sport or Entertainment verticals"
 
-    - name: "MicroMentor"
-      type: "Indirect competitor - free nonprofit mentoring platform"
+    - name: "GrowthMentor"
+      description: "Subscription-based mentorship platform for startup founders and marketers. Less than 3% mentor acceptance rate."
+      pricing: "Light plan $50/month (3 calls); Pro plan $75/month (unlimited calls). Flat subscription model."
       strengths:
-        - "World's largest free business mentoring platform (500,000+ users, 180 countries)"
-        - "Strong institutional partnerships (corporations, governments, foundations)"
-        - "Multilingual platform with global reach"
-        - "Pioneering Mentoring-as-a-Service (MaaS) for enterprise clients"
+        - "Extremely selective vetting — less than 3% acceptance"
+        - "Unlimited calls on Pro plan — predictable cost"
+        - "Strong startup and growth marketing focus"
       weaknesses:
-        - "Nonprofit model - no monetization for individual mentors"
-        - "Business-only focus, no Sport or Entertainment verticals"
-        - "No video conferencing or session management built in"
-        - "Matching quality varies due to open access model"
+        - "Narrow focus on startup growth and marketing only"
+        - "No Sport, Entertainment, or general Business verticals"
+        - "Subscription model limits mentor earnings potential"
+        - "No built-in video delivery or recording"
 
-    - name: "Sports Mentorship Hub / SC Mentor Hub"
-      type: "Niche competitor - sports-specific mentoring"
+    - name: "ADPList"
+      description: "Free mentorship platform with 38,000+ mentors and 600,000+ sessions completed. Primarily serves design, product, and engineering communities."
+      pricing: "Free for 1:1 mentoring. ADPList Advance (paid, closed beta) around $599 for 3-session packages."
       strengths:
-        - "Domain-specific focus on sports performance and careers"
-        - "Expert mentors in sports industry"
+        - "Massive scale — 38,000+ mentors, 310M+ mentorship minutes"
+        - "Free model drives high mentee acquisition"
+        - "Group sessions and townhall formats"
+        - "Strong community and feedback mechanisms"
       weaknesses:
-        - "Limited scale and technology platform"
-        - "No marketplace transaction layer or payment processing"
-        - "Geographic reach is limited"
-        - "No cross-vertical coverage (Sport only, no Entertainment or Business)"
+        - "Free model means mentors cannot effectively monetize"
+        - "Design and tech focused — no Sport or Entertainment"
+        - "Paid tier still in closed beta — unclear monetization path"
+        - "Quality control challenges at scale with volunteer mentors"
 
-    - name: "SCORE.org"
-      type: "Indirect competitor - free small business mentoring"
+    - name: "MentorPass"
+      description: "Subscription mentorship platform for startup founders. Positioned as 'ClassPass for mentorship' with credit-based booking."
+      pricing: "Lite $300/month; Standard $600/month; Premium $1,200/month (120 credits, VIP mentors)."
       strengths:
-        - "Backed by SBA (U.S. Small Business Administration)"
-        - "Large volunteer mentor network (10,000+ mentors)"
-        - "Free mentoring for entrepreneurs"
+        - "Credit-based model offers flexibility"
+        - "Structured mentoring journeys on specific topics"
+        - "Focus on founder-to-advisor relationships"
       weaknesses:
-        - "U.S.-only, no international coverage"
-        - "Volunteer model - no mentor monetization"
-        - "Business-only, no Sport or Entertainment"
-        - "Limited technology platform - primarily matching, no video or payments"
+        - "Very expensive — entry at $300/month"
+        - "Startup/business only — no Sport or Entertainment"
+        - "Small mentor pool compared to MentorCruise or ADPList"
+        - "No built-in video session delivery"
+
+    - name: "SCORE"
+      description: "Largest volunteer mentor network in the US for small businesses. Mentors matched by zip code."
+      pricing: "Completely free — all mentors are volunteers."
+      strengths:
+        - "Free and accessible"
+        - "Large volunteer network across the US"
+        - "Backed by SBA (Small Business Administration)"
+      weaknesses:
+        - "US-only — no international coverage"
+        - "Volunteer model means inconsistent availability and quality"
+        - "Small business focus only — no Sport or Entertainment"
+        - "No tech platform for video sessions or scheduling"
+
+    - name: "Voice In Sport (VIS)"
+      description: "Sports-focused mentorship platform connecting female athletes with professional and college athlete mentors."
+      pricing: "Membership-based. 1:1 and group virtual sessions."
+      strengths:
+        - "Only major platform with explicit sports mentorship focus"
+        - "Professional and college athlete mentors"
+        - "Virtual 1:1 and group session formats"
+      weaknesses:
+        - "Female athletes only — limited audience"
+        - "Sports-only — no Business, Entrepreneurship, or Entertainment"
+        - "Small scale compared to general mentorship platforms"
+        - "No marketplace pricing or commission model"
 
   market_size:
-    tam: "USD 849M - 1.53B (2025 global mentoring software market, varying by research firm methodology)"
-    sam: "USD 200-350M (online mentorship marketplace segment - consumer/SMB platforms excluding enterprise-only mentoring software; estimated at ~25% of total mentoring software market)"
-    som: "USD 5-15M (achievable within 3 years across India, Switzerland, USA, Germany in Sport/Entrepreneurship/Business/Entertainment verticals; assumes 2-4% capture of SAM in target geographies and verticals)"
-    note: |
-      Market growing at 14.9% CAGR, projected to reach USD 2.25B by 2032. North America holds
-      40-45% of global revenue, Europe 25-30%, Asia-Pacific is fastest growing with high-teens
-      annual growth. An estimated 25-30 million active mentors and mentees on digital platforms
-      globally. The Sport and Entertainment mentorship sub-segments are largely undigitized,
-      representing greenfield opportunity. Sources: 360iResearch, Research and Markets,
-      Market Growth Reports (2025-2026 estimates).
+    tam: "USD 1.5-3.4 billion — Global mentoring software market (2025-2033 projections vary by source; consensus estimates place 2025 at USD 850M-1.5B with CAGR of 14-22%)"
+    sam: "USD 200-400 million — Mentorship marketplace segment (B2C/B2B2C platforms connecting individual mentors with mentees, excluding enterprise-only mentoring software like Chronus, MentorCliQ)"
+    som: "USD 5-15 million — Curated mentorship in Sport, Entertainment, Business, and Entrepreneurship across India, Switzerland, USA, and Germany within first 3 years"
+    note: >
+      Market size estimates vary significantly across research firms due to differing
+      definitions (mentoring software vs. mentoring marketplace vs. coaching platforms).
+      The mentoring software market was valued at approximately USD 850M-1.5B in 2025
+      (sources: 360iResearch, Business Research Insights, Research Nester). Growth is
+      driven by remote work trends, AI-powered matching, and increasing demand for
+      personalized professional development. The Sport and Entertainment mentorship
+      niche is notably underserved by existing platforms, representing a greenfield
+      opportunity.
 
   differentiators:
-    - "Vertical breadth beyond tech: Sport and Entertainment verticals are unserved by existing marketplace platforms - Felly Club is the first curated marketplace spanning Sport, Entrepreneurship, Business, and Entertainment"
-    - "Domain-verified mentors: Structured credential verification process (not self-reported) with <10% target acceptance rate, ensuring trust before first session"
-    - "Escrow-backed payments: Session fees held in escrow until session completion, protecting both mentors (guaranteed payment) and mentees (recourse for no-shows or disputes)"
-    - "Session recordings for dispute resolution: Video sessions can be recorded and used as evidence in quality disputes - no other mentorship marketplace offers this"
-    - "Multi-geography compliance by design: Built for GDPR (EU/Germany), DPDP Act (India), Swiss data protection (nFADP), PCI DSS, and German FernUSG from day one"
-    - "Per-session transactional model: No monthly lock-in subscriptions - mentees pay per session, reducing commitment friction and enabling trust-building before repeat booking"
-    - "Referral-driven growth: Built-in referral program to drive organic acquisition in network-effect-dependent marketplace"
+    - "Multi-vertical curation across Sport, Entrepreneurship, Business, and Entertainment — no existing platform covers all four with domain-verified mentors"
+    - "Domain-verified mentor badges with structured credentialing — goes beyond self-reported profiles used by most competitors"
+    - "Built-in video session delivery (30/60 min) with optional recording — eliminates dependency on external tools like Zoom or Skype"
+    - "Transparent pricing bands with platform-enforced min/max ranges and 10-20% commission — contrasts with opaque per-minute billing (Clarity.fm) or flat subscriptions (GrowthMentor)"
+    - "Escrow-based payment with structured refund and dispute resolution — addresses a gap in MentorCruise, ADPList, and most competitors"
+    - "Multi-geography compliance by design (GDPR, India TPDP, PCI DSS) — enables operation in India, Switzerland, USA, and Germany from day one"
+    - "Sport and Entertainment verticals are a greenfield opportunity — existing platforms focus almost exclusively on tech, design, and startup advisory"
+    - "Referral-driven acquisition model targeting mentee network effects within niche communities"
 
   risks:
-    - category: "Supply-side / Cold start"
-      description: "Recruiting verified mentors in Sport and Entertainment is harder than tech - these professionals are less digitally native and less accustomed to platform-mediated mentoring"
-      severity: "HIGH"
-      mitigation: "Seed supply through partnerships with sports academies, entertainment industry guilds, and entrepreneur networks in target geographies; offer early mentors favorable commission rates"
-
-    - category: "Marketplace liquidity"
-      description: "Two-sided marketplace chicken-and-egg problem - mentees won't join without mentors, mentors won't join without mentees"
-      severity: "HIGH"
-      mitigation: "Launch vertical-by-vertical (Entrepreneurship first where supply is most available), concentrate on 1-2 geographies initially, use referral program to bootstrap demand"
-
-    - category: "Regulatory complexity"
-      description: "Operating across India, Germany, Switzerland, and USA requires compliance with GDPR, DPDP Act, nFADP, PCI DSS, and Germany's FernUSG (which now applies to online mentoring). Non-compliance carries significant fines."
-      severity: "HIGH"
-      mitigation: "GDPR-first architecture with data residency controls; engage local legal counsel per geography; FernUSG classification review before Germany launch"
-
-    - category: "Budget and timeline"
-      description: "EUR 125,000 fixed budget for 16-week delivery across web, iOS, Android, and admin portal is aggressive for a multi-geography marketplace with payment escrow, video integration, and regulatory compliance"
-      severity: "HIGH"
-      mitigation: "Strict MVP scoping - defer non-essential features; use third-party services (Zoom for video, Stripe for payments) to reduce custom build; prioritize web app, defer native mobile to post-MVP if needed"
-
-    - category: "Competitive response"
-      description: "MentorCruise or ADPList could add Sport/Entertainment verticals or launch in target geographies, leveraging existing network effects"
-      severity: "MEDIUM"
-      mitigation: "First-mover advantage in underserved verticals; deep domain verification creates a defensible quality moat; curated approach is harder to replicate than horizontal expansion"
-
-    - category: "Payment processing"
-      description: "Escrow payments across four jurisdictions involve different payment regulations, tax withholding requirements, and currency conversion complexities"
-      severity: "MEDIUM"
-      mitigation: "Use Stripe Connect or equivalent with built-in multi-currency and compliance features; start with primary currencies (EUR, USD, INR, CHF) only"
-
-    - category: "Mentor quality control"
-      description: "Verification of credentials in Sport and Entertainment lacks standardized credentialing bodies compared to tech certifications"
-      severity: "MEDIUM"
-      mitigation: "Develop domain-specific verification rubrics; partner with industry bodies for credential validation; use session ratings as ongoing quality signal"
-
-    - category: "Video platform dependency"
-      description: "Reliance on Zoom for video conferencing creates vendor lock-in and limits control over session recording, quality, and user experience"
-      severity: "LOW"
-      mitigation: "Abstract video provider behind an integration layer; evaluate alternatives (Daily.co, Whereby) for future flexibility"
+    - "Cold-start problem: Attracting sufficient high-quality mentors in Sport and Entertainment verticals before mentee demand materializes — chicken-and-egg marketplace challenge"
+    - "Budget constraint: EUR 50K budget and 16-week timeline limits MVP scope significantly compared to well-funded competitors (ADPList raised $1.3M seed; MentorCruise is established and profitable)"
+    - "Multi-geography compliance complexity: GDPR (EU/Switzerland), India TPDP, PCI DSS across four countries increases legal and engineering cost disproportionate to early-stage revenue"
+    - "Mentor monetization expectations: Domain experts in Sport and Entertainment may have higher earning expectations than the platform's commission model can sustain at low volume"
+    - "Video infrastructure cost: Built-in video delivery (vs. redirecting to Zoom) adds significant infrastructure cost and reliability burden for an MVP"
+    - "Trust and safety: Recording mentorship sessions raises privacy concerns and may deter mentors, especially high-profile individuals in Entertainment and Sport"
+    - "Market education: Mentees in Sport and Entertainment may not yet associate online platforms with mentorship — demand generation requires category creation, not just capture"
+    - "Competition from free alternatives: ADPList's free model and SCORE's volunteer network set low price anchors that complicate willingness-to-pay for a new entrant"
+    - "Regulatory variance: Payment processing (escrow, cross-border payouts, refunds) across India, Switzerland, USA, and Germany involves multiple payment rails and regulatory regimes"
 
 vision:
-  mission: "Democratize access to world-class mentorship by connecting ambitious individuals with domain-verified experts across Sport, Entrepreneurship, Business, and Entertainment through a trust-first, technology-enabled marketplace."
-  tagline: "Verified mentors. Trusted sessions. Real growth."
+  statement: >
+    To establish Felly Club as the premier tech-enabled mentorship ecosystem for Sport,
+    Entrepreneurship, Business, and Entertainment — connecting aspiring individuals with
+    domain-verified mentors through a transparent, trust-driven marketplace. Felly Club
+    bridges the gap between raw ambition and structured guidance by delivering curated
+    discovery, frictionless scheduling, secure payments, and quality-assured sessions
+    across four countries, all within a EUR 50K budget and 16-week delivery window.
 
-value_proposition: |
-  Felly Club is the first curated mentorship marketplace that spans beyond tech into Sport,
-  Entrepreneurship, Business, and Entertainment verticals. Unlike platforms where credentials
-  are self-reported and payment is uncertain, Felly Club verifies every mentor's domain expertise,
-  holds session fees in escrow until completion, and records sessions for dispute resolution.
-  Mentees get guaranteed quality and financial protection. Mentors get guaranteed payment and
-  professional credibility. The platform operates across India, Switzerland, USA, and Germany
-  with compliance built in from day one — not bolted on later.
+value_proposition:
+  - persona: "Ambitious Mentee"
+    proposition: >
+      Discover credible, domain-verified mentors in Sport, Entertainment, Business, and
+      Entrepreneurship — verticals ignored by existing platforms. Book sessions with
+      transparent pricing, built-in video delivery, and quality guarantees backed by
+      ratings, refund policies, and dispute resolution. No more guessing if a mentor is
+      legitimate or overpaying through opaque billing models.
+  - persona: "Domain-Expert Mentor"
+    proposition: >
+      Monetize your expertise through a structured channel that handles scheduling,
+      payments, and compliance. Receive domain-verified badges that signal credibility,
+      set your own rates within transparent pricing bands, and get reliable payouts with
+      escrow protection. Focus on mentoring — the platform handles the operational
+      overhead.
+  - persona: "Platform Administrator"
+    proposition: >
+      Manage a multi-geography mentorship marketplace with purpose-built tooling for
+      mentor curation, dispute resolution, financial operations, and compliance
+      monitoring. Role-based access, audit trails, and dashboard analytics reduce manual
+      oversight and enable confident decision-making across India, Switzerland, USA,
+      and Germany.
 
 strategic_goals:
-  - id: "SG-1"
-    title: "Establish a Trusted Mentor Supply"
-    description: "Build a curated, domain-verified mentor network across Sport, Entrepreneurship, Business, and Entertainment with a target acceptance rate below 10%, creating a quality moat that competitors cannot easily replicate."
-    success_metrics:
-      - "100+ verified mentors onboarded within 90 days of launch"
-      - "Mentor acceptance rate maintained below 10%"
-      - "At least 2 verticals (Entrepreneurship + 1 other) with 25+ active mentors each"
-      - "Mentor credential verification completed within 5 business days of application"
+  - id: "SG-01"
+    goal: "Launch a functional mentorship marketplace MVP covering mentor onboarding, mentee discovery, session booking, and payment processing across four verticals within 16 weeks"
+    success_metric: "Platform live with end-to-end flow (signup to session completion to payout) operational in at least 2 of 4 target countries within 16 weeks of development start"
 
-  - id: "SG-2"
-    title: "Deliver a Friction-Free Session Experience"
-    description: "Enable mentees to discover, book, and complete 1-on-1 video mentorship sessions in under 5 minutes of decision-to-booking, with escrow-backed payments and session recording for accountability."
-    success_metrics:
-      - "Average discovery-to-booking time under 5 minutes"
-      - "Session completion rate above 90%"
-      - "Escrow payment release within 24 hours of session completion"
-      - "Dispute resolution achieved within 48 hours using session evidence"
+  - id: "SG-02"
+    goal: "Establish mentor supply in underserved verticals (Sport and Entertainment) through domain-verified credentialing and curated onboarding"
+    success_metric: "Minimum 50 domain-verified mentors onboarded across Sport and Entertainment verticals within 8 weeks of platform launch"
 
-  - id: "SG-3"
-    title: "Achieve Marketplace Liquidity in Target Geographies"
-    description: "Reach sufficient mentor-mentee density in at least 2 of the 4 target geographies (India, Switzerland, USA, Germany) so that mentees can find a relevant mentor within their first search session."
-    success_metrics:
-      - "500+ completed sessions within 6 months of launch"
-      - "Mentee-to-mentor ratio between 5:1 and 15:1 in active geographies"
-      - "70% of mentee searches return 3+ relevant mentor results"
-      - "20% of mentees book a second session within 30 days of first session"
+  - id: "SG-03"
+    goal: "Deliver trust and transparency as core platform differentiators through escrow payments, structured dispute resolution, and quality ratings"
+    success_metric: "Less than 5% dispute rate on completed sessions; greater than 80% of mentees rate sessions 4+ stars within first 3 months of operation"
 
-  - id: "SG-4"
-    title: "Build a Sustainable Revenue Engine"
-    description: "Establish a commission-based revenue model (10-20% per transaction) with per-session pricing that enables sustainable unit economics while keeping the platform attractive to both sides of the marketplace."
-    success_metrics:
-      - "Gross merchandise value (GMV) of EUR 50,000+ within 6 months"
-      - "Platform take rate averaging 15% across all transactions"
-      - "Payment processing cost below 3% of GMV"
-      - "Mentor payout reliability at 100% (zero missed or delayed payouts)"
+  - id: "SG-04"
+    goal: "Achieve multi-geography regulatory compliance (GDPR, India TPDP, PCI DSS) as a built-in platform capability, not a retrofit"
+    success_metric: "Zero compliance violations or data protection incidents across all four operating countries in the first 6 months post-launch"
 
-  - id: "SG-5"
-    title: "Launch Compliant Across Four Jurisdictions"
-    description: "Deliver a platform that meets GDPR (EU/Germany), DPDP Act (India), Swiss nFADP, PCI DSS, and German FernUSG requirements from launch day, avoiding regulatory risk that could shut down operations in any target geography."
-    success_metrics:
-      - "Zero regulatory violations or data breaches in first 12 months"
-      - "Data subject access requests fulfilled within 30 days (GDPR requirement)"
-      - "Payment data handling PCI DSS Level 4 compliant (via payment processor)"
-      - "FernUSG classification review completed before Germany launch"
-
-target_audience:
-  - persona: "Ambitious Mentee"
-    demographics: "Early-to-mid career professionals, aspiring athletes, and entertainment industry entrants aged 22-40"
-    geographies:
-      - "India"
-      - "Switzerland"
-      - "USA"
-      - "Germany"
-    needs:
-      - "Access to credible, verified mentors outside the tech vertical"
-      - "Transparent per-session pricing without subscription lock-in"
-      - "Financial protection through escrow for prepaid sessions"
-      - "Session recordings as evidence for quality assurance"
-    channels:
-      - "Web app (primary)"
-      - "iOS and Android mobile apps"
-
-  - persona: "Domain-Expert Mentor"
-    demographics: "Accomplished professionals, former athletes, entrepreneurs, entertainment veterans aged 30-60 with verifiable domain credentials"
-    geographies:
-      - "India"
-      - "Switzerland"
-      - "USA"
-      - "Germany"
-    needs:
-      - "Reliable income from mentoring with guaranteed payment"
-      - "Low commission rates (10-20%) compared to competitors (15-20%)"
-      - "Professional credibility through platform verification badge"
-      - "Minimal administrative overhead for scheduling and payments"
-    channels:
-      - "Web app (primary)"
-      - "iOS and Android mobile apps"
-
-  - persona: "Platform Administrator"
-    demographics: "Felly Club operations team members managing marketplace integrity"
-    geographies:
-      - "Global (managing all 4 target geographies)"
-    needs:
-      - "Scalable mentor verification workflows"
-      - "Cross-jurisdiction compliance management tools"
-      - "Dispute resolution with session recording evidence"
-      - "Marketplace health monitoring dashboards"
-    channels:
-      - "Admin portal (web)"
+  - id: "SG-05"
+    goal: "Build a referral-driven acquisition engine that leverages niche community network effects to reduce customer acquisition cost"
+    success_metric: "Greater than 30% of new mentee signups originating from referral links within 3 months of launch; CAC below EUR 15 per mentee"
 
 scope:
   in_scope:
-    - "Mentor discovery and search with filters (vertical, geography, rating, price, availability)"
-    - "Mentor profile pages with verified credentials, bio, session pricing, and availability"
-    - "Session booking with 30-min and 60-min duration options"
-    - "Escrow-based payment processing via PayU with multi-currency support (EUR, USD, INR, CHF)"
-    - "1-on-1 video mentorship sessions via Zoom integration"
-    - "Session recording for dispute resolution (opt-in with consent)"
-    - "Mentor application and domain verification workflow"
-    - "Mentee and mentor registration with KeyCloak IAM"
-    - "Rating and review system for completed sessions"
-    - "Referral program for organic growth"
-    - "Admin portal for mentor verification, dispute resolution, and platform management"
-    - "Email notifications via Twilio SendGrid (booking confirmations, reminders, payouts)"
-    - "Web app (Next.js) as primary platform"
-    - "iOS and Android apps (React Native)"
-    - "GDPR, DPDP Act, and PCI DSS compliance foundations"
-
+    - epic: "Authentication and Authorization"
+      description: "KeyCloak-based SSO, MFA, RBAC for mentee/mentor/admin roles"
+    - epic: "Mentor Discovery and Search"
+      description: "Elasticsearch-powered search with filters by domain, rating, pricing, availability, and language"
+    - epic: "Session Management"
+      description: "Booking flow for 30/60-min sessions, calendar integration, scheduling, rescheduling, and cancellation policies"
+    - epic: "Payment Processing"
+      description: "PayU integration with escrow, multi-currency support, commission calculation, mentor payouts, and refund workflows"
+    - epic: "Quality and Ratings"
+      description: "Post-session rating system, mentor badges, domain verification, and quality scoring"
+    - epic: "Analytics Dashboard"
+      description: "Platform metrics for admin (revenue, sessions, disputes), mentor (earnings, ratings, bookings), and mentee (session history, spending)"
+    - epic: "Admin Panel"
+      description: "Mentor approval workflow, dispute management, financial oversight, user management, and compliance monitoring"
+    - epic: "Communications"
+      description: "SendGrid email notifications, FCM push notifications, in-app messaging between mentor and mentee"
+    - epic: "Acquisition and Referrals"
+      description: "Referral link generation, tracking, reward mechanics, and attribution analytics"
+    - epic: "Video Sessions"
+      description: "Zoom SDK integration for in-platform video delivery with optional session recording"
+    - epic: "Compliance and Data Protection"
+      description: "GDPR consent flows, India TPDP compliance, data export/deletion, audit logging, and PCI DSS scope management via payment gateway"
+    - epic: "Platform Configuration"
+      description: "Pricing band management, commission rate settings, category/vertical management, and feature flags"
   out_of_scope:
-    - "Group mentorship sessions (1-on-many)"
-    - "Subscription or membership-based pricing models"
-    - "AI-powered mentor matching or recommendation engine"
-    - "In-app messaging or chat between mentors and mentees outside sessions"
-    - "Mentor-created content (courses, articles, resources)"
-    - "White-label or B2B enterprise mentorship programs"
-    - "Advanced analytics dashboards for mentors (earnings trends, audience insights)"
-    - "Multi-language interface (English-only for MVP)"
-    - "Offline session support or in-person mentorship coordination"
-    - "Integration with third-party calendars (Google Calendar, Outlook) beyond basic scheduling"
-    - "Custom video infrastructure (using Zoom as managed service for MVP)"
-
-assumptions:
-  - "Mentors in Sport and Entertainment verticals are willing to adopt a digital platform for paid mentorship sessions"
-  - "Per-session pricing (vs. subscription) is preferred by the target mentee demographic for initial trust-building"
-  - "Zoom's video API provides sufficient quality and recording capabilities for MVP session delivery"
-  - "PayU can handle escrow-like payment flows across India, EU, Switzerland, and USA without requiring separate payment processor per geography"
-  - "KeyCloak provides adequate IAM capabilities including social login, MFA, and RBAC without significant customization"
-  - "A 10-20% commission rate is competitive enough to attract mentors while sustaining platform operations"
-  - "English-only MVP is sufficient for initial launch across all four target geographies"
-  - "16-week delivery timeline is achievable with strict MVP scope and third-party service integrations"
-  - "FernUSG classification will not require Felly Club to obtain distance learning approval for 1-on-1 mentorship sessions (as distinct from structured courses)"
-  - "Session recordings with explicit consent are legally permissible for dispute resolution across all target jurisdictions"
+    - "Group mentorship sessions and cohort-based programs"
+    - "AI-powered mentor-mentee matching algorithms"
+    - "Native mobile applications (React Native) — MVP targets responsive web; mobile apps deferred to Phase 2"
+    - "Marketplace for digital products (courses, templates, guides)"
+    - "White-label or B2B2C enterprise licensing"
+    - "Advanced analytics with ML-based predictions (churn, LTV)"
+    - "Multi-language platform UI localization beyond English"
+    - "Mentor-led content publishing (blogs, articles, podcasts)"
+    - "Integration with external calendar providers beyond Google Calendar"
+    - "Custom video infrastructure — MVP uses Zoom SDK; proprietary video deferred to Phase 2"
 
 success_metrics:
-  - metric: "Mentor Supply Health"
-    target: "100+ verified mentors across 3+ verticals within 90 days"
-    measurement: "Count of mentors with verified status in platform database"
-
-  - metric: "Session Volume"
-    target: "500+ completed sessions within 6 months of launch"
-    measurement: "Count of sessions with status=completed in booking system"
-
-  - metric: "Marketplace Liquidity"
-    target: "70% of mentee searches return 3+ relevant results"
-    measurement: "Search result count analytics, sampled weekly"
-
-  - metric: "Revenue Traction"
-    target: "EUR 50,000+ GMV within 6 months"
-    measurement: "Sum of all completed transaction values in payment system"
-
+  - metric: "Platform Activation Rate"
+    target: "Greater than 40% of registered mentees complete at least one session within 30 days of signup"
+    measurement: "Ratio of mentees with 1+ completed sessions to total registered mentees, measured monthly"
+  - metric: "Mentor Utilization Rate"
+    target: "Greater than 25% of onboarded mentors conduct at least one session per month"
+    measurement: "Ratio of active mentors (1+ sessions/month) to total approved mentors, measured monthly"
   - metric: "Session Completion Rate"
-    target: "Above 90%"
-    measurement: "Completed sessions / booked sessions ratio, excluding cancellations >24h in advance"
+    target: "Greater than 85% of booked sessions are completed (not cancelled or no-showed)"
+    measurement: "Ratio of completed sessions to total booked sessions, measured weekly"
+  - metric: "Net Promoter Score (Mentee)"
+    target: "NPS greater than 40 within first 3 months"
+    measurement: "Post-session NPS survey to mentees, aggregated monthly"
+  - metric: "Revenue per Session"
+    target: "Average platform commission of EUR 8-15 per completed session"
+    measurement: "Total commission revenue divided by completed sessions, measured monthly"
+  - metric: "Time to First Session"
+    target: "Median time from mentee signup to first completed session under 7 days"
+    measurement: "Median elapsed time between account creation and first session completion, measured weekly"
 
-  - metric: "Mentee Retention"
-    target: "20% of mentees book a second session within 30 days"
-    measurement: "Cohort analysis on first-session mentees tracked over 30-day window"
-
-  - metric: "Platform Trust"
-    target: "Zero unresolved disputes beyond 48 hours"
-    measurement: "Dispute resolution time tracking in admin portal"
-
-  - metric: "Regulatory Compliance"
-    target: "Zero regulatory violations or data breaches in first 12 months"
-    measurement: "Compliance audit log and incident tracking"
+assumptions:
+  - "Domain experts in Sport and Entertainment are willing to mentor through an online platform at price points of EUR 30-150 per session"
+  - "Mentees in Sport and Entertainment verticals will pay for structured mentorship when discovery, credentialing, and quality assurance reduce uncertainty"
+  - "Zoom SDK integration provides sufficient video quality and reliability for MVP — custom video infrastructure is not needed at launch"
+  - "PayU supports escrow-like hold-and-release payment flows across India, Switzerland, USA, and Germany without requiring a full escrow banking license"
+  - "KeyCloak can be configured for multi-tenant RBAC with social login within the 16-week timeline without excessive customization"
+  - "EUR 50K budget is sufficient for a 3-person engineering team over 16 weeks, covering infrastructure, third-party service costs, and contingency"
+  - "Initial mentor supply (50+ mentors) can be seeded through founder networks and targeted outreach before paid acquisition is needed"
+  - "GDPR and India TPDP compliance can be achieved at MVP level through consent management and data handling policies without dedicated legal counsel on retainer"
+  - "Responsive web application provides adequate mobile experience for MVP — native mobile apps are not required for initial market validation"
+  - "A 10-20% platform commission rate is competitive and acceptable to mentors given the value of discovery, scheduling, payment, and quality infrastructure"
 
 profiles:
   product_profile:
-    - id: "PP-1"
-      dimension: "User Sophistication"
-      level: 2
-      label: "Power User"
-      rationale: "Primary mentee demographic is Gen Z digital natives who are highly comfortable with app-based interactions, social login, and mobile-first workflows. Mentors are accomplished professionals with strong digital literacy. Both sides expect modern UX patterns without hand-holding. Adjusted from Level 4 based on stakeholder input on target demographic."
+    - dimension: "PP-1"
+      name: "User Sophistication"
+      level: 4
+      label: "General Consumer"
+      rationale: "Mentees are general consumers seeking mentorship — expect zero learning curve, mobile-first UX, and intuitive flows without onboarding friction"
 
-    - id: "PP-2"
-      dimension: "UX Maturity"
+    - dimension: "PP-2"
+      name: "UX Maturity"
       level: 3
       label: "Multi-Channel Responsive"
-      rationale: "Felly Club delivers across web (Next.js) and mobile (React Native iOS/Android) with shared state. A design system with component library is needed for consistency across channels. Accessibility AA compliance is appropriate for a consumer marketplace. Full omni-channel continuity (Level 4) is deferred post-MVP."
+      rationale: "MVP targets responsive web with Zoom SDK integration; React Native mobile apps deferred to Phase 2 but responsive design must support mobile browsers from day one"
 
-    - id: "PP-3"
-      dimension: "Persona Complexity"
+    - dimension: "PP-3"
+      name: "Persona Complexity"
       level: 5
       label: "Multi-Sided Platform"
-      rationale: "Three distinct personas (Mentee, Mentor, Platform Admin) with fundamentally different journeys, incentives, and feature access. Mentees browse and book; mentors manage availability and earnings; admins verify credentials and resolve disputes. This is a classic multi-sided marketplace."
+      rationale: "Three distinct personas (mentee, mentor, admin) with different flows, permissions, and value propositions — classic multi-sided marketplace dynamics with supply-demand interdependency"
 
-    - id: "PP-4"
-      dimension: "Geographic Scope"
+    - dimension: "PP-4"
+      name: "Geographic Scope"
       level: 3
       label: "Multi-Country"
-      rationale: "Operating across 4 countries (India, Switzerland, USA, Germany) requiring multi-currency support (EUR, USD, INR, CHF), GDPR compliance for EU, DPDP Act for India, and nFADP for Switzerland. Not continental-scale (Level 4) since it targets specific countries rather than entire trade blocs."
+      rationale: "Operations across India, Switzerland, USA, and Germany — four countries spanning three regulatory regimes (EU/GDPR, India/TPDP, US state-level) and multiple currencies"
 
-    - id: "PP-5"
-      dimension: "Integration Density"
-      level: 4
-      label: "Event-Driven Ecosystem"
-      rationale: "6+ integration points (Zoom webhooks, PayU escrow callbacks, KeyCloak OIDC, SendGrid event tracking, Elasticsearch, FCM) with complex bidirectional event flows including escrow state machines, session recording lifecycle, and multi-provider payment callbacks. The escrow-based payment flow alone involves multiple async state transitions across PayU and the platform. Elevated from Level 3 based on stakeholder assessment of integration complexity."
+    - dimension: "PP-5"
+      name: "Integration Density"
+      level: 3
+      label: "Bidirectional"
+      rationale: "Six external integrations (Zoom, PayU, SendGrid, FCM, KeyCloak, Elasticsearch) requiring bidirectional data flow — webhooks, callbacks, and event-driven sync"
 
-    - id: "PP-6"
-      dimension: "Delivery Ambition"
+    - dimension: "PP-6"
+      name: "Delivery Ambition"
       level: 3
       label: "Market-Ready v1"
-      rationale: "16-week fixed-price engagement targeting a production-ready marketplace with payment processing, video integration, and multi-geography compliance. This goes beyond MVP (Level 2) into market-ready territory with full primary flows, error handling, and production-grade infrastructure. Not yet competitive product (Level 4) as it serves primary persona flows only."
+      rationale: "Production-grade MVP within 16 weeks and EUR 50K budget — must handle real payments, real users, and real compliance obligations from launch"
 
-    - id: "PP-7"
-      dimension: "Industry Vertical"
-      level: 3
-      label: "Professional Services"
-      rationale: "Mentorship falls under professional services/education with moderate domain rules. Payment processing triggers PCI DSS and Germany's FernUSG applies to online mentoring. However, it is not regulated commerce (Level 4) since mentorship sessions are not financial products and the platform does not hold or manage funds beyond escrow pass-through."
+    - dimension: "PP-7"
+      name: "Industry Vertical"
+      level: 4
+      label: "Regulated Commerce"
+      rationale: "Financial transactions (escrow, payouts, refunds) trigger PCI DSS scope; cross-border operations require GDPR and India TPDP compliance; marketplace model adds consumer protection obligations"
 
   nfr_profile:
-    - id: "NFR-1"
-      dimension: "Risk"
+    - dimension: "NFR-1"
+      name: "Risk"
+      level: 3
+      label: "Significant"
+      rationale: "Customer-facing marketplace with financial transactions (PP-7: Regulated Commerce) and multi-sided platform dynamics (PP-3: Level 5) — failures impact real money and trust"
+
+    - dimension: "NFR-2"
+      name: "Security"
+      level: 3
+      label: "Hardened"
+      rationale: "PP-7 (Regulated Commerce) mandates PCI DSS scope via payment gateway; PP-3 (Multi-Sided Platform) requires RBAC and tenant isolation; MFA, encryption at rest and in transit, and session security are baseline requirements"
+
+    - dimension: "NFR-3"
+      name: "Performance"
+      level: 3
+      label: "Optimized"
+      rationale: "PP-1 (General Consumer) expects sub-500ms API response and under 3-second page loads; PP-4 (Multi-Country) means latency across geographies must be managed; search (Elasticsearch) and video (Zoom) are latency-sensitive"
+
+    - dimension: "NFR-4"
+      name: "Availability"
+      level: 3
+      label: "Resilient"
+      rationale: "PP-6 (Market-Ready v1) with real payment flows requires 99.5% uptime; PP-3 (Multi-Sided Platform) means downtime affects both supply and demand sides simultaneously; session booking is time-sensitive"
+
+    - dimension: "NFR-5"
+      name: "Compliance"
+      level: 4
+      label: "Multi-Regime"
+      rationale: "PP-4 (Multi-Country across 4 nations) combined with PP-7 (Regulated Commerce) creates multi-regime compliance burden — GDPR, India TPDP, PCI DSS, and potentially consumer protection laws in each jurisdiction"
+
+    - dimension: "NFR-6"
+      name: "Scalability"
       level: 2
-      label: "Low Risk"
-      rationale: "Escrow mechanism limits direct financial exposure. Session delivery failures are contained to individual sessions with clear refund policies. Platform does not hold funds long-term or make financial decisions. Derived from PP-7=3 (professional services, not regulated finance) and stakeholder assessment that escrow pass-through keeps risk profile low."
+      label: "Moderate"
+      rationale: "PP-6 (Market-Ready v1) at MVP stage with EUR 50K budget — initial user base is modest (target: 50 mentors, hundreds of mentees); architecture should not preclude scaling but premature optimization is wasteful"
 
-    - id: "NFR-2"
-      dimension: "Security"
-      level: 3
-      label: "Business Grade"
-      rationale: "MFA via KeyCloak, RBAC for three persona types, API key management for integrations (Zoom, PayU, SendGrid), and encryption in transit are required. Payment card data is handled by PayU (not stored on platform), so enterprise-grade (Level 4) encryption at rest for PCI is not needed on-platform. Derived from PP-7=3 and PP-3=5 (multi-sided platform with sensitive role boundaries)."
-
-    - id: "NFR-3"
-      dimension: "Performance"
-      level: 3
-      label: "Balanced"
-      rationale: "Gen Z users (PP-1=2) expect snappy interactions — sub-second API responses and smooth search/filter experiences. Elasticsearch-powered mentor discovery needs tuned query performance. Booking and payment flows require responsive UX to avoid cart abandonment. Video latency is Zoom's responsibility but session join flow must be instant. Elevated from Level 2 based on stakeholder input that balanced performance is expected for the target demographic."
-
-    - id: "NFR-4"
-      dimension: "Availability"
-      level: 3
-      label: "Standard"
-      rationale: "Customer-facing platform where downtime during booked sessions would cause trust damage and financial disputes. 99.9% uptime target with automated failover and health checks is appropriate. High availability (Level 4) with 99.99% is not justified for MVP scale. Derived from PP-4=3 (multi-country operations across time zones) and NFR Guidance (PP-5>=3)."
-
-    - id: "NFR-5"
-      dimension: "Compliance"
-      level: 3
-      label: "Standard"
-      rationale: "GDPR compliance with data subject rights and consent management is mandatory for EU/Germany operations. India's DPDP Act and Switzerland's nFADP add additional requirements. PCI DSS is handled through PayU's compliance (Level 4 not needed on-platform). Privacy by design is essential. Derived from PP-4=3 (multi-country triggers NFR-5>=2 per guidance) elevated to 3 due to GDPR and DPDP explicit requirements."
-
-    - id: "NFR-6"
-      dimension: "Scalability"
-      level: 3
-      label: "Growth-Oriented"
-      rationale: "Multi-sided marketplace needs to handle growth in both mentor and mentee populations across 4 geographies. Horizontal scaling, load balancing, and database read replicas should be architected for 10x growth. Not high scale (Level 4) at MVP since initial user base will be in thousands, not hundreds of thousands. Derived from PP-3=5 (multi-sided platform triggers NFR-6>=3 per guidance)."
-
-    - id: "NFR-7"
-      dimension: "Data Sensitivity"
-      level: 3
-      label: "Confidential"
-      rationale: "Platform stores PII (names, emails, professional credentials), session recordings, and user-generated reviews. Payment card data is tokenized through PayU and not stored on-platform, avoiding Level 4. Session recordings contain personal conversations requiring encryption at rest recommendation and access logging. Derived from PP-7=3 (professional services with PII) and the presence of session recordings as sensitive personal content."
+    - dimension: "NFR-7"
+      name: "Data Sensitivity"
+      level: 4
+      label: "Highly Sensitive"
+      rationale: "PP-7 (Regulated Commerce) involves financial transaction data and payment credentials; session recordings contain personal conversations; PII across four jurisdictions with varying data protection requirements"
 
   quality_profile:
-    - id: "QP-1"
-      dimension: "Testing Depth"
+    - dimension: "QP-1"
+      name: "Testing Depth"
       level: 3
-      label: "Layered Testing"
-      rationale: "Market-ready product (PP-6=3) with multi-sided platform complexity (PP-3=5) requires unit + integration tests and basic e2e for critical paths (booking flow, payment escrow, mentor verification). CI must run tests on every PR. Coverage target 60-80%. Per PP+NFR guidance: PP-6>=3 suggests QP-1>=3, PP-3>=4 suggests QP-1>=3."
+      label: "Layered"
+      rationale: "PP-6 (Market-Ready v1) demands production-grade reliability; NFR-1 (Significant Risk) with financial transactions means defects have real monetary impact — unit, integration, and E2E testing required for critical paths"
 
-    - id: "QP-2"
-      dimension: "Code Quality Standards"
+    - dimension: "QP-2"
+      name: "Code Quality Standards"
       level: 3
-      label: "Enforced Standards"
-      rationale: "16-week delivery with multiple integration points and multi-geography compliance requires disciplined code quality. Linter + formatter + pre-commit hooks, static analysis, PR review with checklist, and documented coding conventions are essential to maintain velocity without accumulating debt. Per PP+NFR guidance: PP-6>=3 market-ready products need maintainable codebases."
+      label: "Enforced"
+      rationale: "PP-6 (Market-Ready v1) with NFR-2 (Hardened Security) requires consistent code standards — linting, static analysis, and code review gates to prevent security regressions in payment and auth flows"
 
-    - id: "QP-3"
-      dimension: "Documentation Level"
+    - dimension: "QP-3"
+      name: "Documentation Level"
       level: 3
       label: "Comprehensive"
-      rationale: "Multi-geography compliance (NFR-5=3) requires comprehensive documentation including API specs, architecture overview, and compliance-relevant decision records. Multiple integrations (PP-5=3) need documented API contracts. Per PP+NFR guidance: NFR-5>=3 suggests QP-3>=3."
+      rationale: "PP-5 (Bidirectional Integration) across six external services requires integration documentation; PP-3 (Multi-Sided Platform) needs API documentation for each persona's flow; NFR-5 (Multi-Regime Compliance) requires compliance documentation"
 
-    - id: "QP-4"
-      dimension: "CI/CD Maturity"
+    - dimension: "QP-4"
+      name: "CI/CD Maturity"
       level: 3
       label: "Continuous Delivery"
-      rationale: "Market-ready product (PP-6=3) with standard availability (NFR-4=3) requires automated build + test + deploy to staging with production deploy via manual approval. Multiple environments (dev, staging, prod) and automated database migrations are essential for 16-week delivery cadence. Per PP+NFR guidance: PP-6>=3 suggests QP-4>=3, NFR-4>=3 suggests QP-4>=3."
+      rationale: "PP-6 (Market-Ready v1) within 16-week timeline requires automated build, test, and deploy pipelines; GitHub Actions with staging and production environments; NFR-4 (Resilient Availability) requires zero-downtime deployment capability"
 
-    - id: "QP-5"
-      dimension: "Observability Maturity"
+    - dimension: "QP-5"
+      name: "Observability Maturity"
       level: 3
       label: "Monitored"
-      rationale: "Customer-facing marketplace (NFR-1=2) with standard availability (NFR-4=3) needs structured logging, application metrics (request latency, error rates, booking throughput), alerting on key thresholds, and operational dashboards. Distributed tracing (Level 4) is not justified at MVP scale. Per PP+NFR guidance: NFR-4>=3 suggests QP-5>=3."
+      rationale: "NFR-4 (Resilient Availability at 99.5%) requires uptime monitoring and alerting; NFR-1 (Significant Risk) with financial transactions demands transaction tracing; PP-5 (Bidirectional Integration) needs health checks across six external dependencies"
 
-    - id: "QP-6"
-      dimension: "Accessibility Standard"
+    - dimension: "QP-6"
+      name: "Accessibility Standard"
       level: 2
       label: "Basic"
-      rationale: "Gen Z digital natives (PP-1=2) are comfortable with standard web patterns. Semantic HTML, alt text, and keyboard navigation for primary flows are sufficient. Full WCAG AA (Level 3) is not justified for MVP given EUR 50K budget constraint. No regulatory mandate for accessibility compliance in the target verticals (mentorship is not government or healthcare). Can be elevated post-MVP based on user feedback."
+      rationale: "PP-1 (General Consumer) requires usable interfaces but PP-6 (Market-Ready v1) with EUR 50K budget constrains accessibility investment; mobile-responsive design and semantic HTML as baseline; WCAG AA deferred to Phase 2"
 
-    - id: "QP-7"
-      dimension: "Security Testing"
+    - dimension: "QP-7"
+      name: "Security Testing"
       level: 3
-      label: "SAST + Dependencies"
-      rationale: "Business-grade security (NFR-2=3) with payment processing and PII handling requires static application security testing in CI, dependency vulnerability scanning, security-focused PR review, and secret scanning. Annual pen testing (Level 4) is deferred to post-MVP given budget constraints but should be planned for within 6 months of launch. Per PP+NFR guidance: NFR-2>=3 suggests QP-7>=3."
+      label: "Proactive"
+      rationale: "NFR-2 (Hardened Security) with PP-7 (Regulated Commerce) requires SAST in CI pipeline and dependency vulnerability scanning; PCI DSS scope (even via gateway) mandates documented security testing; penetration testing recommended pre-launch"
