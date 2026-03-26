@@ -1,239 +1,880 @@
 feasibility:
   slug: "felly-club"
-  assessed_at: "2026-03-25T23:15:00+0530"
+  assessed_at: "2026-03-26T08:30:00Z"
+  codebase_state: "greenfield — no existing code in repository"
+  budget_context: "€125,000 fixed-price, 16-week delivery (8 sprints), external partner Nagarro"
 
   epics:
+    # ─── E1: User Identity & Profile Foundation ─────────────────────────────
     - epic_ref: "E1"
-      epic_name: "Identity and Access Foundation"
+      epic_name: "User Identity & Profile Foundation"
       risk_level: "medium"
       technical_risks:
-        - risk: "KeyCloak is an operationally heavyweight IdP — it requires a dedicated JVM process, a PostgreSQL backing store, and non-trivial initial configuration for realm setup, client registration, and RBAC policy authoring. For a 3-person team under a EUR 50K budget, the operational footprint of KeyCloak may consume disproportionate infrastructure spend and setup time compared to a managed SaaS IdP alternative."
+        - risk: >
+            KeyCloak integration complexity — KeyCloak is a full IAM system requiring
+            dedicated infrastructure setup, realm configuration, client registration,
+            and RBAC role mapping for 3 distinct personas (mentee, mentor, admin).
+            Misconfiguration risks silent auth bypasses and broken session management.
           severity: "medium"
-          affected_systems: "Authentication layer, infrastructure budget, deployment pipeline"
-          mitigation: "Containerize KeyCloak with Docker Compose for local dev and a managed Kubernetes/Railway deployment for production. Pre-configure realm, clients, and roles as Infrastructure-as-Code (IaC) templates. Budget 3-4 days for initial KeyCloak setup before other epics begin."
-        - risk: "Social login integration (Google, Apple) via KeyCloak requires registering OAuth2 clients in each provider's developer console and configuring identity provider federation inside KeyCloak. Apple's Sign In requires additional App Store developer account setup and callback URL HTTPS enforcement. Any misconfiguration silently breaks the auth flow without clear error messages."
+          affected_systems: "Authentication service, API gateway, all persona-specific dashboards"
+          mitigation: >
+            Use KeyCloak's official SDKs and Docker Compose for local dev, provision
+            a managed cloud KeyCloak instance (or Keycloak-as-a-Service) for prod.
+            Define realm, roles, and client scopes in IaC from day one. E2E auth
+            tests covering all 3 persona login paths on every PR.
+        - risk: >
+            Social login OAuth flow (Google and Apple) adds 2 external OAuth provider
+            integrations on top of KeyCloak's identity brokering. Apple's Sign In
+            requires a paid Apple Developer account and is more restrictive than Google.
+            Token bridging between OAuth providers and KeyCloak's internal token system
+            adds implementation surface area.
+          severity: "medium"
+          affected_systems: "KeyCloak identity brokering, registration flow, session JWT"
+          mitigation: >
+            Implement Google first and validate the KeyCloak identity broker pattern.
+            Apple's OAuth requirements (server-side token exchange) must be validated
+            in Sprint 1 — defer if Apple Developer account is not provisioned by kick-off.
+        - risk: >
+            Admin-driven mentor onboarding is a multi-step workflow with file uploads
+            (LinkedIn, portfolio, proof-of-expertise artefacts). Verification artefact
+            storage (S3 or equivalent), upload validation, and admin review queue all
+            need to be built from scratch in a greenfield environment. File upload
+            handling, virus scanning, and storage cost are often underestimated.
           severity: "low"
-          affected_systems: "Registration and login flows, KeyCloak identity provider config"
-          mitigation: "Implement email/password auth first and validate the full registration-to-RBAC flow before adding social login. Treat social login as additive once the core auth pipeline is stable."
-        - risk: "Multi-tenant RBAC configuration in KeyCloak is non-trivial for teams unfamiliar with the platform. KeyCloak's role model (realm roles vs. client roles, role composites) is powerful but easy to misconfigure in ways that produce incorrect access control behaviour — roles that appear to work in dev but fail in production due to client-level vs realm-level scoping differences."
-          severity: "medium"
-          affected_systems: "RBAC enforcement, all downstream epics that depend on role-gated access"
-          mitigation: "Define all three roles (mentee, mentor, admin) and their client-level scopes as code before any UI development begins. Write integration tests that assert role-specific access denial (403s) for all protected routes from day one. Do not rely on manual KeyCloak UI configuration — use KeyCloak's admin REST API or Terraform provider to version-control role definitions."
+          affected_systems: "Admin portal, file storage, mentor profile service"
+          mitigation: >
+            Use cloud-provider managed object storage (AWS S3 or GCS). Implement
+            file-type and size validation on upload. Add a lightweight virus scan
+            hook (ClamAV or cloud-native service). Mock file storage in dev/test.
       blockers: []
-      sequencing_constraints: "E1 is the hard prerequisite for the entire platform. No other epic can begin integration testing until E1 delivers working authentication tokens and role assignments. E7 (Compliance) shares the registration flow — coordinate consent collection injection point before E1's registration form is finalized to avoid rework."
-      architecture_impact: "KeyCloak introduces a dedicated identity service requiring its own database (PostgreSQL), container, health checks, and network policy. Every backend service must validate JWT tokens issued by KeyCloak — this mandates a shared token validation middleware that all epics consume. The RBAC model defined in E1 governs access control across the entire platform — changes to roles after E1 ships require coordinated updates to KeyCloak config and all gated API routes."
+      sequencing_constraints: >
+        E1 is the mandatory foundation — no other epic can begin implementation until
+        E1's auth, profile, and RBAC layers are stable. E2 (mentor data), E3 (session
+        participants), E4 (payment payer/payee identity), E6 (admin portal access),
+        E7 (notification recipients), E8 (identity-tied compliance) all depend on
+        authenticated, role-assigned users from E1. E1 must ship in Sprint 1–2.
+      architecture_impact: >
+        Establishes the IAM foundation: KeyCloak server, JWT token strategy, RBAC
+        role definitions, API gateway auth middleware, and persona routing. All
+        subsequent epics inherit this auth layer. Introduces file storage infrastructure
+        (mentor verification artefacts) that will be reused by E3 (session recordings)
+        and E8 (compliance document management). Data model decisions for user,
+        mentor_profile, and admin_user entities set the schema that all other services
+        reference — a correction post-E1 is expensive.
 
+    # ─── E2: Mentor Marketplace & Discovery ─────────────────────────────────
     - epic_ref: "E2"
-      epic_name: "Mentor Onboarding and Credentialing"
+      epic_name: "Mentor Marketplace & Discovery"
       risk_level: "medium"
       technical_risks:
-        - risk: "Credential file upload (certifications, portfolio documents) requires a storage backend (S3-compatible object store) with secure signed URL access — files must not be publicly accessible but must be viewable by the submitting mentor and the admin reviewer. Implementing this correctly (pre-signed URLs, upload size limits, MIME type validation, virus scanning) under time pressure often leads to overly permissive bucket policies or missing input validation."
-          severity: "medium"
-          affected_systems: "File storage infrastructure, admin review panel, mentor profile"
-          mitigation: "Use a managed object storage service (AWS S3 or equivalent) with bucket policies that deny public access. Generate pre-signed upload URLs server-side with 15-minute expiry. Enforce MIME type and file size server-side, not just client-side. Defer virus scanning for MVP — note it as a post-launch security hardening item."
-        - risk: "Pricing band enforcement requires server-side validation against admin-configured pricing ranges. If the pricing band configuration is stored as application-level config rather than in the database, updating pricing bands requires a deployment. If stored in DB, the admin needs a UI to manage them — which is part of E10 (not yet built when E2 ships). This creates a chicken-and-egg dependency on platform configuration."
+        - risk: >
+            Elasticsearch setup, index design, and sync pipeline are non-trivial
+            in a greenfield environment. The mentor search index must stay in sync
+            with the relational database (profile updates, verification status changes,
+            pricing changes). A broken sync pipeline produces stale search results —
+            a critical UX failure for a trust-based marketplace (see E2 FC-1).
+          severity: "high"
+          affected_systems: "Elasticsearch cluster, mentor profile service, search API"
+          mitigation: >
+            Use a managed Elasticsearch service (AWS OpenSearch or Elastic Cloud)
+            to reduce operational overhead. Implement event-driven sync via database
+            change events or async message queue — not polling. Add a reconciliation
+            job that runs nightly to detect and fix index drift. Dedicated search
+            integration tests on every PR.
+        - risk: >
+            Rule-based recommendation matching (mentee interests → mentor expertise
+            categories) is simple but can silently return poor results if category
+            taxonomy is inconsistent (e.g., "sport" vs "Sport" vs "sports"). Category
+            normalisation must be enforced at the data layer, not at query time.
           severity: "low"
-          affected_systems: "Mentor profile service, admin configuration, pricing validation"
-          mitigation: "Seed initial pricing bands as database fixtures at deployment time. Build the admin pricing band management UI as part of E10. For E2, validate against DB-stored bands. Document the seeded values so they can be updated via DB migration until the admin UI is available."
-        - risk: "The mentor approval state machine (applied → under_review → approved | rejected | request_more_info) must be persisted correctly and transitions must be idempotent. Without careful implementation, concurrent admin actions on the same application (two admins reviewing simultaneously) can produce inconsistent state."
+          affected_systems: "Recommendation service, mentor profile data model"
+          mitigation: >
+            Enforce expertise categories as an enum at the database and API validation
+            layer — no free-text categories. Seed the taxonomy (Sport, Entrepreneurship,
+            Business, Entertainment) as immutable values. Add a test covering the
+            recommendation logic for each category match.
+        - risk: >
+            Empty-state handling for new marketplace with low mentor supply —
+            search returning zero results will feel broken if the platform launches
+            with a thin mentor catalog. This is an operational concern but has technical
+            implications for how pagination and empty states are designed.
           severity: "low"
-          affected_systems: "Mentor application service, admin queue"
-          mitigation: "Apply optimistic locking on application state transitions. Admin review actions should check current state before transitioning — reject transitions from unexpected states with a 409 Conflict. Implement application-level locking with a short TTL if concurrent review is anticipated at launch."
+          affected_systems: "Search API, frontend pagination"
+          mitigation: >
+            Implement explicit empty-state UI with actionable copy. Consider a
+            minimum viable mentor catalog requirement before public launch as an
+            operational gate, documented in the launch checklist.
       blockers: []
-      sequencing_constraints: "Depends on E1 for authentication and role assignment. The mentor approval workflow creates the supply-side data (approved mentor profiles) that E3 (Discovery) indexes. E3's Elasticsearch index cannot be populated or tested meaningfully until E2 delivers at least a small set of approved mentor profiles. Target 5-10 seeded test mentor profiles at end of E2 to unblock E3 integration testing."
-      architecture_impact: "Introduces a file storage subsystem (object store) as new infrastructure. The mentor profile entity is the central data model that E3 (search index), E4 (booking availability), E10 (admin queue) all read from — schema changes to this model after E2 ships will cascade across multiple consumers. Define the mentor profile schema as a formal contract before finalising E2."
+      sequencing_constraints: >
+        Depends on E1 for verified mentor profiles — search index can only be
+        populated after E1's mentor data model and verification workflow are stable.
+        E3 (session booking) depends on E2 — mentees must discover a mentor before
+        requesting a session. Elasticsearch infrastructure established here can
+        also serve E9 (analytics queries for mentor discovery stats) with careful
+        separation of concerns.
+      architecture_impact: >
+        Introduces Elasticsearch as a search infrastructure component — a second
+        data store alongside the relational database. Requires an index sync
+        strategy (event-driven or ETL). The mentor profile entity's searchable
+        fields (name, bio, expertise tags, pricing, verified status) are defined
+        here and must remain consistent with E1's profile model. API response
+        pagination pattern established here will be reused across E9 analytics views.
 
+    # ─── E3: Session Lifecycle & Video Delivery ──────────────────────────────
     - epic_ref: "E3"
-      epic_name: "Mentor Discovery and Search"
-      risk_level: "medium"
+      epic_name: "Session Lifecycle & Video Delivery"
+      risk_level: "high"
       technical_risks:
-        - risk: "Elasticsearch introduces significant operational complexity: cluster setup (even single-node for MVP), index mapping design, index lifecycle management, and keeping the search index in sync with the primary database. Index-database synchronisation is a common failure mode — if an approved mentor's profile update is not propagated to Elasticsearch within the 5-minute SLA, search results become stale and mentors may not appear after approval."
+        - risk: >
+            Zoom and Google Meet API integrations are both complex and different —
+            the epic must commit to one or offer both, but the API surface is
+            distinct. Zoom's server-side SDK requires registering a Marketplace app
+            and handling OAuth, meeting creation, recording callbacks, and webhook
+            delivery. Google Meet's API (Meet REST API) is newer and has less
+            documentation. Either path involves async webhook handling for recording
+            completion events. Third-party video provider outages directly prevent
+            session delivery — the core product is broken.
           severity: "high"
-          affected_systems: "Elasticsearch cluster, mentor profile service, search sync pipeline"
-          mitigation: "Use a change-data-capture (CDC) or event-driven sync pattern: when a mentor profile transitions to approved or is updated, publish a profile_updated event that a sync worker consumes to re-index. Do not use synchronous dual-writes (API writes to DB and Elasticsearch in the same request) — this creates partial failure scenarios. For MVP, a simple async queue-based sync with retry is sufficient."
-        - risk: "Elasticsearch index mapping must be designed upfront for the faceted filter requirements (vertical, sub-domain, rating, price, availability, language, country). Changing field types or adding nested mappings after the index is populated requires a full re-index operation, which is operationally disruptive. Incorrect mapping (e.g., keyword vs text for vertical fields, or missing sort field for price) will produce silent search quality degradation."
+          affected_systems: "Video integration service, session state machine, recording store"
+          mitigation: >
+            Select ONE video provider for MVP — Zoom is the lower-risk choice given
+            its more mature SDK and wider enterprise use. Register the Zoom Marketplace
+            app in Sprint 1 and validate the meeting creation → join → recording →
+            webhook pipeline in Sprint 2 before committing to full session lifecycle
+            integration. Abstract the video provider behind an interface to enable
+            future swap. Add a session fallback state ("video provider unavailable")
+            with a direct meeting link as degraded-mode option.
+        - risk: >
+            Session state machine has 8 states (requested, accepted, scheduled,
+            in-progress, completed, cancelled, no-show) with multiple transition
+            triggers (user actions, time events, video webhook callbacks). State
+            transition bugs are hard to detect and can leave sessions in inconsistent
+            states — e.g., a session marked "in-progress" that never completed
+            because the recording webhook was missed. This directly breaks E4's
+            payment release trigger.
+          severity: "high"
+          affected_systems: "Session service, payment escrow release, recording service"
+          mitigation: >
+            Model the state machine explicitly using a state machine library (e.g.,
+            XState for Node.js or equivalent). Implement idempotent webhook handlers
+            with duplicate event detection. Add a reconciliation job that detects
+            sessions stuck in "in-progress" beyond the maximum session duration and
+            transitions them to an "admin-review" state rather than auto-completing.
+            Integration tests covering all state transitions on every PR.
+        - risk: >
+            Auto-recording with 3-day retention and admin-only access creates a
+            storage, lifecycle, and access control obligation. Recording files from
+            video providers (Zoom/Meet) must be downloaded (or streamed via signed URL),
+            stored securely, time-bounded for deletion, and access-controlled such
+            that only admin API endpoints can retrieve them. Missing a deletion on
+            day 3 is a GDPR violation.
           severity: "medium"
-          affected_systems: "Elasticsearch index, search API, faceted filter UI"
-          mitigation: "Design and document the Elasticsearch index mapping before writing any indexing code. Include all filter fields as keyword type for exact-match facets. Include rating and price as numeric fields with sort capability. Validate the mapping against real test data before production indexing begins."
-        - risk: "Autocomplete (typeahead) requires either a separate Elasticsearch completion suggester index or a prefix query on the main index. The completion suggester requires a separate input field structure in the mapping and must be populated at index time — it cannot be retrofitted onto an existing mapping without re-indexing. If autocomplete is bolted on after the main search is built, it will require mapping changes and a full re-index."
-          severity: "low"
-          affected_systems: "Elasticsearch index mapping, search API, UI"
-          mitigation: "Include the completion suggester field in the initial index mapping design even if autocomplete is implemented after the core search. This avoids a re-index operation later."
-      blockers: []
-      sequencing_constraints: "Depends on E2 for approved mentor profiles to populate the search index. Cannot produce meaningful search results without at least minimal mentor supply. Elasticsearch cluster must be provisioned and validated before E4 (Session Booking) begins, since E4's mentor availability display depends on correct mentor data availability — though E4 reads from the primary DB, not Elasticsearch."
-      architecture_impact: "Adds Elasticsearch as a new infrastructure component requiring provisioning, monitoring, and operational runbooks. Introduces an async sync pipeline between the primary database and the search index — this is new infrastructure (queue + worker) that must be provisioned alongside Elasticsearch. The sync pipeline's health must be observable (lag metrics, dead-letter queue alerting) to catch index drift early."
+          affected_systems: "Recording store, admin portal, compliance / data lifecycle service"
+          mitigation: >
+            Store recordings in cloud object storage with server-side encryption.
+            Use object lifecycle rules (S3 TTL or GCS Object Lifecycle) to auto-delete
+            after 72 hours — do not rely on application-layer deletion jobs. Admin
+            access via signed time-limited URLs only — no public URLs. Add a daily
+            audit job that verifies no recordings exist beyond the 72-hour threshold.
+        - risk: >
+            Recording consent for GDPR (decision point I-05 in product.yaml) is
+            unresolved — mandatory auto-recording without an explicit consent mechanism
+            at session start may violate GDPR Article 7 requirements in Germany and
+            Switzerland. If consent must be captured per-session, the UI/UX and
+            flow for both parties (mentee and mentor) must be designed. If consent
+            is captured at registration (ToS), the legal review must confirm this
+            sufficiency for EU markets.
+          severity: "high"
+          affected_systems: "Session join flow, GDPR compliance (E8), terms of service"
+          mitigation: >
+            This is the critical blocker for E3. Resolve I-05 before architecture
+            begins: confirm with legal counsel whether per-session consent or ToS
+            consent suffices for EU markets. If per-session consent is required,
+            add a consent gate to the "Join Session" flow for both parties. Unresolved,
+            this risks post-launch regulatory action in Germany and Switzerland.
+      blockers:
+        - >
+          I-05 (product.yaml decision_point): Session recording consent mechanism
+          for GDPR compliance is unresolved. Mandatory auto-recording without
+          an explicit consent mechanism at session start may violate GDPR Article 7
+          (Germany, Switzerland). Must be resolved before E3 detailed design begins —
+          the join-session flow and terms-of-service design depend on this decision.
+          Options: (a) per-session consent gate for all parties, (b) blanket ToS
+          consent at registration confirmed legally sufficient for EU markets.
+      sequencing_constraints: >
+        Depends on E1 (authenticated session participants with correct roles) and
+        E2 (verified mentor profiles for session requests). E4 (payment capture)
+        is triggered by session booking confirmation and therefore cannot be
+        fully integrated until E3's booking workflow is stable. E5 (ratings and
+        disputes) depends on E3's session completion state. E6 (admin session
+        management) depends on E3's session data model. E7 (notifications) mocks
+        are used during E3 and replaced after E7 ships — E3 must be designed
+        with a notification interface that E7 can implement without refactoring
+        the session service.
+      architecture_impact: >
+        Introduces the session state machine as the central orchestration component
+        of the platform. Creates a webhook ingestion layer for video provider events.
+        Establishes the recording storage infrastructure (cloud object storage
+        with TTL lifecycle policies) reused by E5 (dispute resolution recording access)
+        and audited by E8 (compliance). The notification interface mocked here is
+        the contract that E7 must implement. The calendar/availability model defined
+        here is tightly coupled to the mentor profile from E1 — schema changes
+        after E3 are expensive.
 
+    # ─── E4: Payment Processing & Financial Operations ───────────────────────
     - epic_ref: "E4"
-      epic_name: "Session Booking and Video Delivery"
+      epic_name: "Payment Processing & Financial Operations"
       risk_level: "high"
       technical_risks:
-        - risk: "The Zoom SDK integration for in-platform video delivery is the highest-risk technical component in the MVP. Zoom's Web SDK requires a valid JWT signature (SDK key + secret) and a valid meeting ID created via the Zoom Meetings API. The in-browser SDK has known constraints: it requires specific browser versions, does not support all browsers equally (Safari has ongoing WebRTC limitations), and requires HTTPS in production. SDK version updates from Zoom can break existing integrations silently."
+        - risk: >
+            Stripe escrow implementation using Payment Intents with capture-on-completion
+            is non-trivial. The escrow model requires creating a PaymentIntent at
+            booking (status: requires_capture), holding the funds, and capturing
+            (releasing) only on session completion — a delayed capture pattern.
+            Stripe limits delayed capture to 7 days. If a session is scheduled more
+            than 7 days out, the delayed capture window will expire, requiring a
+            re-authorisation flow. This edge case is easy to miss and causes payment
+            failures for sessions scheduled far in advance.
           severity: "high"
-          affected_systems: "Video session delivery, session join flow, browser compatibility"
-          mitigation: "Prototype the Zoom Web SDK integration in isolation before building the booking flow around it. Validate browser compatibility matrix (Chrome, Firefox, Safari, Edge) against target user geographies. Pin the Zoom SDK version and establish a controlled upgrade process. Implement a fallback: if the in-browser SDK fails to load, surface a Zoom join link as an escape hatch. Test on mobile browsers explicitly — the SDK's mobile browser experience is materially different from desktop."
-        - risk: "Double-booking prevention requires atomic slot reservation. If two mentees simultaneously attempt to book the same time slot, a naive implementation that checks availability then creates a booking (check-then-act) will fail under concurrent load. This is a classic race condition in booking systems."
+          affected_systems: "Payment service, session booking flow, Stripe integration"
+          mitigation: >
+            Validate Stripe delayed capture (7-day limit) against maximum session
+            scheduling horizon in E3. If mentors can schedule sessions more than
+            7 days ahead, implement a re-authorisation strategy: notify mentee
+            and re-capture at T-7 days. Alternatively, constrain the booking
+            horizon to ≤7 days for MVP. Document this constraint explicitly in
+            the booking UX. Add a payment reconciliation job that detects
+            expired PaymentIntents and surfaces them for admin review.
+        - risk: >
+            Stripe Connect for mentor payouts (platform → mentor fund transfers)
+            requires each mentor to complete Stripe Connect onboarding (identity
+            verification, bank account linking). This adds a required onboarding
+            step to E1's mentor setup that is not explicitly modelled in the current
+            E1 or E4 scope. If mentors skip Connect onboarding, payouts queue
+            indefinitely and mentor satisfaction suffers. The admin needs visibility
+            into Connect onboarding status.
           severity: "high"
-          affected_systems: "Session booking service, availability management, database"
-          mitigation: "Implement slot reservation using a database-level unique constraint on (mentor_id, slot_datetime) or a SELECT FOR UPDATE lock during booking transaction. Do not rely on application-level checks alone. Test concurrent booking scenarios explicitly in the integration test suite."
-        - risk: "Timezone handling across India (IST), Switzerland (CET/CEST), USA (multiple zones), and Germany (CET/CEST) is a persistent source of bugs in booking systems. Storing all times as UTC and displaying in user's local timezone is the correct approach, but it requires consistent timezone-aware handling in the backend, the frontend, and the calendar invite generation. A single point of timezone conversion error (e.g., calendar invite generated in server timezone instead of user timezone) causes missed sessions."
+          affected_systems: "Mentor onboarding (E1), payment service, admin financial operations"
+          mitigation: >
+            Add Stripe Connect onboarding as a required step in E1's mentor profile
+            setup (not E4 alone — this is a cross-epic dependency that must be
+            surfaced in E1's implementation scope). Expose Connect onboarding status
+            in the admin portal (E6). Block session acceptance by mentors who have
+            not completed Connect onboarding — cannot receive payouts if not onboarded.
+        - risk: >
+            Multi-currency handling (INR, USD, CHF, EUR) with Stripe requires
+            understanding whether the platform operates with a "settlement currency"
+            model (mentors receive in a fixed currency) or a "presentment currency"
+            model (mentors receive in their configured currency with Stripe handling
+            conversion). INR transactions require Stripe India (Stripe's separate
+            Indian entity) which has different onboarding, reporting, and banking
+            requirements than Stripe's global platform. This may require two
+            separate Stripe accounts (India and global) with different settlement
+            rails.
+          severity: "high"
+          affected_systems: "Payment service, Stripe account setup, mentor payout rails"
+          mitigation: >
+            Clarify currency architecture with Stripe India and Stripe Global before
+            Sprint 1: confirm whether a single Stripe account can handle INR
+            domestic payments alongside USD, CHF, EUR, or whether a dual-account
+            setup (Stripe India + Stripe Global) is required. This is a critical
+            pre-implementation decision — the payment service architecture differs
+            materially between the two models.
+        - risk: >
+            Webhook reliability for asynchronous Stripe events (payment confirmation,
+            payout completion, dispute notification) is critical. Missing or
+            duplicate webhook processing causes payment inconsistencies, stuck
+            escrow releases, or double-credited payouts. Webhook signature
+            validation, idempotent processing, and dead-letter queuing for
+            failed events are non-trivial to implement correctly.
           severity: "medium"
-          affected_systems: "Session booking service, calendar invite generation, UI date display"
-          mitigation: "Store all session datetimes as UTC in the database. Accept user timezone as a required field during booking. Display times in user timezone in all UI surfaces. Generate calendar invites with explicit TZID fields. Write integration tests that assert correct UTC storage and correct per-timezone display for all four target geographies."
-        - risk: "Session recording with mutual consent requires storing consent flags at booking time, controlling Zoom recording start/stop via API at session boundaries, and handling stored recording access securely. Recording storage on Zoom's cloud adds ongoing cost per session. Privacy concerns from high-profile mentors in Sport and Entertainment (noted in product.yaml market risks) may increase opt-out rates, making recording a contested feature."
-          severity: "low"
-          affected_systems: "Zoom API integration, consent management, E7 compliance"
-          mitigation: "Implement recording consent as a simple boolean flag stored on the booking entity. Default to opt-out. Recording start/stop can be triggered via Zoom Webhook events (meeting.started, meeting.ended). For MVP, defer recording playback and access management — capture the consent flag and Zoom recording ID but leave playback UI to a post-launch iteration."
+          affected_systems: "Payment webhook handler, escrow service, payout service"
+          mitigation: >
+            Implement Stripe webhook signature validation on every event. Store
+            all received webhook events in a log table before processing (idempotency
+            via event ID deduplication). Add a dead-letter queue for failed
+            webhook processing with alerting. Test webhook flows using Stripe's
+            CLI webhook forwarder in dev/CI environments.
       blockers:
-        - "Zoom SDK license and API credentials must be obtained before integration development begins. The Zoom Marketplace approval process for apps using the Meeting SDK can take 3-7 business days. This is a procurement blocker that can delay E4 if not started early."
-      sequencing_constraints: "E4 is a critical path epic — E5 (Payment) depends on the session lifecycle state machine defined in E4. E6 (Quality/Ratings) triggers on session completion events from E4. E8 (Communications) sends session notifications triggered by E4 state transitions. E4's session state machine must be formally defined and documented before E5 and E8 begin implementation, even if they develop in parallel with E4."
-      architecture_impact: "Introduces Zoom as an external real-time dependency — session delivery reliability is now partially outside the platform's control. Session state machine is a shared contract that E5, E6, and E8 all depend on. Requires a webhook endpoint to receive Zoom events (meeting.started, meeting.ended, recording.completed) — this webhook must be authenticated and idempotent. Google Calendar invite generation requires a server-side calendar library or Google Calendar API integration."
+        - >
+          Stripe India vs Stripe Global account structure must be resolved before
+          implementation begins. INR domestic payment routing may require a separate
+          Stripe India account with different onboarding, API endpoints, and
+          settlement rails than the global account handling USD, CHF, EUR.
+          This decision changes the payment service architecture — a wrong initial
+          choice requires significant rework.
+        - >
+          Stripe Connect mentor onboarding scope gap — the current E1 scope does
+          not include Stripe Connect identity verification and bank account linking
+          as a mentor setup step. This must be added to E1's implementation scope
+          before E1 detailed design is locked, or E4 will be blocked by mentors
+          who have not completed Connect onboarding.
+      sequencing_constraints: >
+        Depends on E3 for session booking trigger (payment capture fires on booking
+        confirmation) and session completion trigger (escrow release fires on
+        completion). E5 (refunds for disputes) depends on E4's refund API being
+        implemented. E6 (admin financial operations) depends on E4's transaction
+        and payout data model. E9 (analytics) reads E4's financial records.
+        The Stripe Connect onboarding dependency on E1 must be resolved before
+        E1 development begins — a retro-fit is costly.
+      architecture_impact: >
+        Introduces Stripe as the payment processing backbone with Payment Intents
+        (escrow), Stripe Connect (mentor payouts), and webhook ingestion. Establishes
+        the financial data model (transactions, escrow records, payout queue, commission
+        ledger) that E5 (refunds), E6 (admin financial view), and E9 (analytics)
+        read from. The delayed-capture escrow pattern constrains session scheduling
+        horizon. Multi-currency architecture decisions here (single vs dual Stripe
+        account) affect all payment flows and admin reporting.
 
+    # ─── E5: Ratings, Reviews & Dispute Resolution ──────────────────────────
     - epic_ref: "E5"
-      epic_name: "Payment Processing and Escrow"
-      risk_level: "high"
-      technical_risks:
-        - risk: "PayU's escrow capability varies significantly by geography. PayU India (LazyPay, BharatPe backend) has different API contracts from PayU LATAM or PayU international. The product.yaml assumption that PayU supports escrow-like hold-and-release across India, Switzerland, USA, and Germany in a single integration is the single most consequential technical assumption in the entire roadmap. If PayU does not support hold-and-release across all four countries in a unified API, the escrow model requires either a different payment provider for some geographies or a manual escrow simulation (hold funds in platform account, pay out on completion) which creates regulatory and financial liability."
-          severity: "high"
-          affected_systems: "Payment processing, escrow workflow, multi-currency support, regulatory compliance"
-          mitigation: "Validate PayU's escrow capability per geography BEFORE any E5 development begins. Contact PayU business development for a technical discovery call. If PayU cannot support escrow in all four countries, evaluate Stripe Connect (split payments + payouts across geographies) or Adyen Marketplace as alternatives — both have documented escrow-equivalent flows for marketplace platforms. This validation should happen in parallel with E1-E3 development to avoid a late-stage blocker."
-        - risk: "Webhook handling for payment lifecycle events (payment.captured, payment.failed, refund.processed, payout.completed) must be idempotent. PayU (and most payment gateways) deliver webhooks at-least-once — duplicate events will be received. A non-idempotent webhook handler that processes a payment.captured event twice will release escrow twice, creating double-credit to the mentor."
-          severity: "high"
-          affected_systems: "Payment webhook handler, escrow service, mentor payout service"
-          mitigation: "Implement an idempotency key store for all incoming payment webhooks. Before processing any webhook, check if the event ID has been seen before — if yes, return 200 OK without reprocessing. Use the payment gateway's event ID as the idempotency key. Store processed event IDs in a database table with a TTL of 30 days."
-        - risk: "Multi-currency payment flows (EUR, USD, CHF, INR) require consistent currency handling throughout the payment stack. A common failure mode is mixing integer (minor units: cents, paise) and decimal (major units: EUR, USD) representations across services, leading to commission calculation errors (10% of EUR 75 calculated as 0.075 instead of 7.50 EUR). Under the EUR 50K budget, this type of financial bug can cause real monetary loss."
-          severity: "medium"
-          affected_systems: "Payment service, commission calculation, payout processing, financial reporting"
-          mitigation: "Adopt a single convention across the entire codebase: store and transmit all monetary values in minor currency units (integer cents/paise). Never use floating-point for money calculations — use integer arithmetic or a Decimal library. Establish this as a code standard enforced by linting rules and code review."
-        - risk: "PCI DSS compliance scope, even when using a payment gateway, requires the platform to never log, store, or transmit raw card data. If any logging framework captures request bodies on the payment endpoint, card numbers could end up in application logs. This is a PCI DSS violation that can result in card network fines."
-          severity: "medium"
-          affected_systems: "Payment endpoint, application logging, request middleware"
-          mitigation: "Implement a global request logging middleware that masks or excludes the payment endpoint request body from all logs. Perform a log scanning audit before launch to confirm no PAN (Primary Account Number) patterns appear in log output. Include payment endpoint log exclusion in the QP-7 security testing checklist."
-      blockers:
-        - "PayU escrow capability per geography must be validated before E5 development begins. If PayU cannot provide escrow-equivalent across all four target countries, an alternative gateway must be selected. This validation is on the critical path."
-        - "A platform legal/financial structure for holding funds in escrow must be confirmed. In some jurisdictions, holding customer funds (even briefly) may require a payment institution license. Legal counsel should confirm the regulatory status before launch."
-      sequencing_constraints: "Depends on E4 for the session lifecycle state machine — escrow release is triggered by session.completed events from E4. E9 (Referral rewards as platform credit) depends on E5's payment balance model. E10 (Financial dashboard) depends on E5's transaction records. E5 must define and document its transaction data model before E10 begins dashboard development."
-      architecture_impact: "Payment processing must be implemented as an isolated module with strict input/output boundaries — no other module should access the payment database tables directly. Webhook endpoint must be exposed on a separate, authenticated path distinct from the main API. Escrow state must be tracked in a dedicated payment ledger table, not inferred from session state. Financial data requires field-level encryption at rest for sensitive payment metadata."
-
-    - epic_ref: "E6"
-      epic_name: "Quality Assurance and Ratings"
-      risk_level: "low"
-      technical_risks:
-        - risk: "The review moderation flow (admin approval queue for all reviews) introduces latency between review submission and public visibility. If the admin team is small (as expected for an MVP-stage platform), the review queue could back up, delaying the appearance of reviews on mentor profiles and undermining the real-time quality signal. A review that takes 48+ hours to appear after session completion loses relevance for the next mentee's booking decision."
-          severity: "low"
-          affected_systems: "Review moderation service, mentor profile display, admin operations"
-          mitigation: "Implement a basic automated profanity filter as a first-pass gate — reviews that pass the filter can be auto-approved for display while simultaneously queued for admin review. Only flagged reviews (profanity filter triggered, or dispute-related) require mandatory admin approval before display. This reduces admin queue load while maintaining editorial control."
-        - risk: "Dispute initiation workflow must not be conflated with the refund trigger in E5. If the dispute API is accessible without proper authentication, or if the dispute submission handler does not verify that the submitting mentee has a completed session with the disputed mentor, bad actors can file spurious disputes that clog the admin queue and trigger unnecessary investigation cycles."
-          severity: "medium"
-          affected_systems: "Dispute service, payment service (E5), admin operations (E10)"
-          mitigation: "Validate dispute eligibility server-side: only mentees with a completed session against the specified mentor can submit a dispute. Enforce a time window (e.g., 24 hours post-session for no-show disputes). Rate-limit dispute submissions per user. Disputes must not trigger any payment action — they route to the admin queue only. Financial resolution is an admin-initiated action in E10."
-        - risk: "NPS survey delivery via email (triggered 15 minutes post-session) depends on the E8 notification infrastructure. If E6 is delivered before E8's SendGrid integration is complete, the post-session rating prompt has no delivery channel. E6's trigger mechanism must be designed as an event that E8 can consume, not a direct email send from the rating service."
-          severity: "low"
-          affected_systems: "Rating prompt trigger, E8 notification service"
-          mitigation: "Design E6's rating prompt as a published event (session.completed → rating_prompt.triggered event). E8 subscribes to this event and handles delivery via SendGrid. This decoupling means E6 can be implemented and integration-tested independently of E8's email delivery."
-      blockers: []
-      sequencing_constraints: "Depends on E4 (session completion state) and E5 (payment confirmation — ratings only valid after payment is processed). Should be integrated with E8 (Communications) for email delivery of rating prompts. Dispute data feeds E10's admin dispute management panel — E6's dispute data model must be defined before E10's dispute management UI development begins."
-      architecture_impact: "Rating aggregation (average score, review count) must be maintained as a materialised value on the mentor profile entity, not computed on read. Recomputing average ratings from all reviews on every mentor profile load will degrade at scale and violate NFR-3 (Optimised Performance). Use an increment-aggregate pattern: update the mentor's aggregate rating atomically when a new review is approved."
-
-    - epic_ref: "E7"
-      epic_name: "Compliance and Data Protection"
-      risk_level: "high"
-      technical_risks:
-        - risk: "Data deletion (right to be forgotten) in a distributed system with multiple data stores is significantly more complex than a single-table DELETE. Felly Club's data landscape includes: the primary PostgreSQL database, KeyCloak's user store, the Elasticsearch search index, SendGrid email logs, Zoom session recording metadata (if recordings are enabled), and future backup/archive storage. A data deletion request must reach ALL of these stores. Missing any one store constitutes a GDPR violation. Mapping and implementing a complete deletion chain across all these systems is often underestimated in effort."
-          severity: "high"
-          affected_systems: "PostgreSQL (all user tables), KeyCloak, Elasticsearch index, SendGrid, Zoom API, backup systems"
-          mitigation: "Create a Data Asset Register at the start of E7 — enumerate every system that stores personal data and the deletion API or mechanism for each. Implement data deletion as a choreographed workflow: delete from primary DB → publish deletion event → downstream services (Elasticsearch sync worker, Zoom API client, SendGrid cleanup) consume the event and delete their copies. Verify deletion completeness with a post-deletion audit query. For backups, implement a data masking/purging schedule with documented retention windows."
-        - risk: "Immutable audit log implementation is often confused with a standard database table. A standard table can be updated or deleted — it is not audit-evidence-grade. True immutability requires either a write-only append log (no UPDATE/DELETE permissions on the audit table for the application database user), a cryptographic chain (each log entry hashes the previous entry to detect tampering), or an external audit log service. Without genuine immutability, the audit log fails its compliance purpose."
-          severity: "medium"
-          affected_systems: "Audit log storage, database permissions model, compliance reporting"
-          mitigation: "Create a dedicated audit_log table accessible only via INSERT from the application service user — revoke UPDATE and DELETE permissions on this table from the application role. Grant SELECT access only to the admin/compliance role. For additional tamper-evidence, include a SHA-256 hash of the previous entry in each log record (hash chain). This provides defence-in-depth without requiring an external service."
-        - risk: "India TPDP (Digital Personal Data Protection Act, 2023) has nuances that differ from GDPR: the consent requirement applies to all personal data processing (not just special categories), data fiduciaries must maintain a record of consent, and the right to erasure applies unless retention is required by law. The TPDP is relatively new (implemented 2023-2025 phased rollout) and implementation guidance is still evolving. Building TPDP compliance features based on current incomplete guidance may require rework when regulations are finalised."
-          severity: "medium"
-          affected_systems: "Consent management, data processing records, user data deletion"
-          mitigation: "Align TPDP implementation with GDPR consent architecture — GDPR consent granularity meets or exceeds TPDP requirements in most respects. Implement a jurisdiction-aware consent renderer that shows GDPR consent for EU/Swiss users and TPDP consent for Indian users. Flag TPDP-specific requirements as a tracked item for legal review post-launch. Do not block the MVP on final TPDP interpretation — implement best-effort compliance and plan a post-launch regulatory review."
-      blockers:
-        - "Confirming whether the platform qualifies as a 'payment institution' under local financial regulations (particularly RBI in India and FINMA in Switzerland) given the escrow payment model is a legal question that must be answered before launch. This overlaps with E5's escrow compliance blocker."
-      sequencing_constraints: "E7 shares the registration flow with E1 — consent collection must be integrated into E1's signup form. E7 must be treated as a parallel development track alongside E1, not a sequential dependency. E7's audit logging must be instrumented in E5 (payment events), E2 (admin approval actions), and E10 (admin operations) — E7's audit event schema must be defined before these epics finalise their data models."
-      architecture_impact: "Introduces a compliance data layer: consent records table, audit log table, data deletion workflow orchestrator. The consent service becomes a read dependency for marketing communications (E8 must check consent before sending marketing emails). The audit log writer is a cross-cutting concern that must be instrumented in every module that performs a compliance-relevant action. Data deletion workflow requires a choreography mechanism (event bus or workflow engine) to coordinate deletion across multiple services."
-
-    - epic_ref: "E8"
-      epic_name: "Platform Communications"
-      risk_level: "low"
-      technical_risks:
-        - risk: "SendGrid transactional email delivery requires domain authentication (DKIM/SPF/DMARC records on the sender domain) to achieve high deliverability rates. Without proper DNS configuration, transactional emails (booking confirmations, session reminders) land in spam, directly impacting session completion rates. DNS propagation can take 24-48 hours, making this a setup step that cannot be left to the last minute."
-          severity: "medium"
-          affected_systems: "Email deliverability, SendGrid setup, DNS configuration"
-          mitigation: "Configure DKIM/SPF/DMARC records during infrastructure setup, not during E8 feature development. Verify deliverability with test sends to major email providers (Gmail, Outlook, Apple Mail) before launch. Use SendGrid's email activity dashboard to monitor bounce rates and spam reports from launch day."
-        - risk: "FCM push notification delivery requires device token registration and management. Device tokens expire, change when users reinstall the app, and require graceful handling of stale tokens (FCM returns errors for expired tokens). For a web app using FCM Web Push, the service worker registration and push permission request UI are additional integration surfaces that can fail silently in certain browser configurations."
-          severity: "low"
-          affected_systems: "FCM integration, device token management, service worker"
-          mitigation: "Treat FCM push notifications as a best-effort channel — all critical notifications (booking confirmation, session reminder) must also be delivered via email as the authoritative channel. If FCM delivery fails, do not retry indefinitely — log the failure and rely on the email channel. Prune stale FCM tokens automatically when FCM returns a token_not_registered error."
-        - risk: "In-app messaging threading must enforce that only the matched mentor-mentee pair for a specific booking can exchange messages in that thread. A naive implementation that looks up message threads by user IDs without booking context could allow a mentee who previously booked a mentor to continue messaging after their session relationship has ended, or expose message threads to the wrong parties if IDs are guessable."
-          severity: "medium"
-          affected_systems: "In-app messaging service, message thread access control, E1 RBAC"
-          mitigation: "Anchor each message thread to a specific booking_id, not just to user IDs. Server-side thread access validation must verify that the requesting user (mentor or mentee) is a party to the booking referenced by the thread. Thread IDs should be UUIDs (not sequential integers) to prevent enumeration."
-      blockers: []
-      sequencing_constraints: "Depends on E4 for session lifecycle events that trigger notifications (booking confirmed, session starting). Should be developed concurrently with E4 but the notification triggers are defined by E4's state machine. E8 provides the delivery channel for E6's post-session rating prompt — E6 and E8 must coordinate on event schema for the rating_prompt.triggered event."
-      architecture_impact: "Introduces an asynchronous notification pipeline: session lifecycle events → notification service → SendGrid/FCM delivery. This queue-based architecture is new infrastructure (message queue or event bus) that other epics also benefit from (E6 rating events, E9 referral events). The notification template system must support variable substitution with per-user timezone-localised datetimes — a non-trivial rendering requirement for session reminder emails."
-
-    - epic_ref: "E9"
-      epic_name: "Referral and Acquisition Engine"
-      risk_level: "low"
-      technical_risks:
-        - risk: "Referral attribution across the signup funnel requires maintaining a referral context through multiple stateless HTTP requests: the initial link click, the signup form, the email verification redirect, and the first session completion. If any step in this chain fails to persist the referral code (cookie expiry, cross-origin redirect, ad blocker stripping query parameters), attribution is lost and the referrer receives no credit. This is a subtle but common implementation failure."
-          severity: "medium"
-          affected_systems: "Referral tracking, signup flow, session completion webhook"
-          mitigation: "Persist the referral code in a first-party cookie on link click (not just a URL parameter) with a 30-day TTL. Read the cookie during signup and attach the referral_code to the new user's account record. At first session completion, look up the user's stored referral_code to attribute the reward. This cookie-based persistence survives multi-step redirects and email verification flows."
-        - risk: "Anti-fraud measures (self-referral prevention, duplicate referral detection) require careful definition of what constitutes fraud. Self-referral is detectable by comparing the referrer user ID with the referred user ID — straightforward. Duplicate referral detection (same person creating multiple accounts to claim referral rewards) requires additional signals: same email domain, same device fingerprint, same IP address. Over-aggressive fraud detection blocks legitimate referrals; under-aggressive detection enables reward abuse."
-          severity: "low"
-          affected_systems: "Referral service, fraud detection logic, reward disbursement"
-          mitigation: "For MVP, implement only deterministic fraud checks: same-account self-referral prevention and same-email duplicate detection. Defer device fingerprinting and IP-based fraud detection to a post-launch iteration. Accept that some reward abuse will occur at MVP scale — the cost is bounded and the engineering overhead of sophisticated fraud detection is disproportionate at this stage."
-        - risk: "Referral reward disbursement as platform credit must integrate with E5's payment balance model. Platform credit must be denominated in a specific currency — for a multi-currency platform, this introduces an FX question (is credit EUR always, or in the user's preferred currency?). If credit is in EUR but a user's session is priced in USD, the redemption conversion logic can introduce rounding errors and accounting complexity."
-          severity: "low"
-          affected_systems: "Referral reward service, E5 payment balance, multi-currency handling"
-          mitigation: "Denominate all referral credit in EUR as the platform's base currency for MVP. Apply the current exchange rate at redemption time. Keep referral credit as a separate balance line item distinct from session escrow funds to avoid accounting confusion."
-      blockers: []
-      sequencing_constraints: "Depends on E5 for payment balance infrastructure (referral credit as platform credit). Should be developed after E5 delivers its payment balance model. Reward disbursement events feed E10's financial dashboard — E9's reward transaction data model must be documented before E10 builds the financial overview."
-      architecture_impact: "Referral tracking introduces a new data model (referral_links, referral_events, referral_rewards) that is largely self-contained. The referral code persistence via first-party cookie requires coordination with the registration flow (E1). Attribution analytics dashboard (for admin, in E10) is a read-only reporting view over E9's referral_events table — no new infrastructure required beyond the data model."
-
-    - epic_ref: "E10"
-      epic_name: "Admin Operations and Analytics"
+      epic_name: "Ratings, Reviews & Dispute Resolution"
       risk_level: "medium"
       technical_risks:
-        - risk: "Financial dashboard accuracy requires that all aggregation queries (revenue totals, commission amounts, payout summaries) produce results that exactly match the underlying transaction records. Discrepancies arise when: (a) dashboard queries use eventually-consistent read replicas that lag behind the primary, (b) aggregation logic differs between the dashboard query and the transaction processing logic (different rounding rules, different commission rate lookups), or (c) refunded transactions are not correctly excluded from revenue totals. Financial inaccuracies in the admin dashboard erode operational trust."
+        - risk: >
+            Auto-flagging triggers (ratings below 3 stars, 3+ cancellations) must
+            fire reliably and without duplication. If the flagging job runs more
+            than once or processes the same rating event twice, the admin queue
+            fills with duplicate alerts. If it misses a trigger, quality monitoring
+            fails silently (see FC-2). The flagging logic must be idempotent.
           severity: "medium"
-          affected_systems: "Financial dashboard, reporting queries, E5 transaction data"
-          mitigation: "Compute financial aggregates from the same transaction ledger table that E5 uses for payment processing — do not derive financial figures from session records or secondary tables. If a read replica is used for dashboard queries, implement a staleness indicator showing the replica lag. Reconcile dashboard totals against payment gateway records in a nightly batch job and alert on discrepancies above a threshold."
-        - risk: "The admin panel aggregates real-time operational data from multiple upstream epics: E2 (mentor approval queue), E5 (financial data), E6 (dispute queue), E9 (referral rewards). If E10 directly queries each of these modules' databases across module boundaries, it creates tight coupling and performance risk — a slow query in E5's payment tables can block E10's dashboard load. This is the 'god module reads everything' anti-pattern."
+          affected_systems: "Rating service, quality monitoring queue, admin dashboard"
+          mitigation: >
+            Implement flagging as an idempotent database trigger or event handler
+            that checks whether a flag already exists for the given session/mentor
+            before creating a new one. Add a scheduled reconciliation job that
+            scans for unflagged sessions meeting the criteria and creates flags
+            retroactively if missed. Test flagging logic with explicit boundary
+            cases (exactly 3 cancellations, exactly 3-star rating edge).
+        - risk: >
+            Session recording access for dispute resolution has a hard 3-day TTL.
+            The admin dispute resolution interface must surface recording availability
+            status (available or expired) and gracefully handle the case where the
+            recording has been auto-deleted before the dispute is resolved. If a
+            dispute is filed on day 2 and the recording auto-deletes on day 3
+            before the admin reviews it, the dispute is unresolvable with evidence.
           severity: "medium"
-          affected_systems: "Admin panel, E2 mentor data, E5 payment data, E6 dispute data, E9 referral data"
-          mitigation: "Build E10's dashboard queries on read-optimised reporting tables or materialised views that are updated asynchronously from upstream module events. E10 should not cross module boundaries at the database layer — each upstream module should publish its aggregate metrics to a shared reporting schema that E10 reads. For MVP, a simple reporting schema with scheduled refresh (every 5 minutes) is sufficient."
-        - risk: "Role-gating of the admin panel is critical — if any API route in the admin panel fails to enforce the admin role check, it exposes sensitive financial and user data. With KeyCloak RBAC, the risk is not just missing a role check but implementing it inconsistently (e.g., checking role in middleware for some routes but ad-hoc in handlers for others). Inconsistent enforcement creates gaps."
-          severity: "medium"
-          affected_systems: "Admin panel API routes, E1 RBAC, data privacy"
-          mitigation: "Implement role enforcement as a mandatory middleware applied to all admin panel routes at the router level — not as per-handler logic. Write an integration test that asserts every admin panel endpoint returns 403 when called with a mentee or mentor JWT. This test should be part of the CI pipeline and block deployment if any admin route is ungated."
+          affected_systems: "Admin dispute interface, recording storage (E3), dispute service"
+          mitigation: >
+            Display recording expiry countdown in the admin dispute view. Add
+            an automated alert to admin when a dispute is filed against a session
+            whose recording expires within 24 hours. Consider extending recording
+            retention when a dispute is filed (admin action to "preserve recording"
+            that pauses TTL deletion), subject to GDPR constraints — this requires
+            a legal review decision.
+        - risk: >
+            Abuse reporting scope is broad ("inappropriate behaviour") but the
+            resolution workflow is not explicitly designed. Without a structured
+            triage process, abuse reports may conflict with or duplicate dispute
+            resolution workflows, causing confusion in the admin queue.
+          severity: "low"
+          affected_systems: "Abuse report service, admin portal"
+          mitigation: >
+            Treat abuse reports as a separate admin queue with a simpler workflow
+            (open, acknowledged, resolved) distinct from the dispute workflow.
+            Ensure they share no state machine logic to avoid coupling. Abuse
+            reports do not trigger refunds — disputes do.
       blockers: []
-      sequencing_constraints: "Depends on E2, E4, E5, and E6 for the data that powers its dashboards. Cannot deliver meaningful operational dashboards until these upstream epics are functional. The mentor approval and dispute management panels can be built as shells with empty data early, then connected to live data as upstream epics ship. Financial dashboard should not go live until E5 is in production with real transaction data."
-      architecture_impact: "Introduces a reporting layer — either a reporting schema with materialised views or an async event-driven aggregation pipeline. The admin panel is the highest data-breadth component in the platform, consuming data from the widest range of upstream modules. The reporting architecture chosen here determines whether E10 can scale independently of operational data stores. A well-designed reporting schema also serves as the foundation for future analytics features (ML-based predictions deferred to Phase 2)."
+      sequencing_constraints: >
+        Depends on E3 (completed session state as the prerequisite for rating
+        and dispute filing) and E4 (dispute resolution may trigger refund processing
+        via E4's refund API). E5 must be designed with the recording access interface
+        from E3 as a dependency — recordings are stored and TTL-managed by E3's
+        infrastructure, E5 only consumes them. Sequenced to mid-bucket (after E3
+        and E4 are stable) to ensure the full session and payment data is available
+        for testing dispute resolution end-to-end.
+      architecture_impact: >
+        Introduces the rating and review data model (tied to session and mentor entities),
+        the auto-flagging event processing pipeline, and the dispute management state
+        machine. Reads session recordings from E3's storage infrastructure — no new
+        storage layer added. Triggers refund API from E4 on dispute resolution.
+        The admin portal module built here feeds quality monitoring data to E9
+        (analytics) and the admin KPI dashboard (E6).
+
+    # ─── E6: Platform Administration & Operations ───────────────────────────
+    - epic_ref: "E6"
+      epic_name: "Platform Administration & Operations"
+      risk_level: "medium"
+      technical_risks:
+        - risk: >
+            Strapi CMS integration for communication templates and help centre adds
+            a third persistent data store (alongside relational DB and Elasticsearch)
+            and requires a CMS hosting decision (cloud or self-hosted). Keeping the
+            CMS in sync with the main application's templates (E7 SendGrid templates)
+            creates a dual-management surface where template changes in Strapi may
+            not propagate to SendGrid automatically.
+          severity: "medium"
+          affected_systems: "Strapi CMS, SendGrid template service (E7), admin portal"
+          mitigation: >
+            Use a managed Strapi Cloud instance to reduce operational burden. Define
+            a clear ownership boundary: Strapi manages help centre content and
+            the source of truth for email template copy; E7's SendGrid integration
+            pulls from Strapi on template update events (webhook or periodic sync),
+            not a manual dual-update. Integration test the Strapi → SendGrid sync.
+        - risk: >
+            System configuration changes (commission rates, pricing bands, cancellation
+            policies) affect live production transactions. A commission rate change
+            must be applied only to new transactions without retroactively altering
+            escrowed payments. Without strict version-at-capture semantics, a
+            commission rate change could corrupt in-flight payment records.
+          severity: "high"
+          affected_systems: "System config service, payment service (E4), session service (E3)"
+          mitigation: >
+            Store commission rate at the transaction level at booking time (snapshotted
+            value, not a reference to the current config). Configuration changes must
+            be applied with a "effective from" timestamp — new transactions after the
+            timestamp use the new rate, transactions before retain the original rate.
+            This is a critical data integrity requirement. Add an admin confirmation
+            step before commission rate changes take effect on live traffic.
+        - risk: >
+            Platform-wide search across users, sessions, and transactions is a
+            performance-sensitive feature in the admin portal. Ad-hoc queries against
+            production tables without indexes or query limits will degrade performance
+            for all platform users — a particularly high-severity risk per E9 FC-3.
+          severity: "medium"
+          affected_systems: "Admin search API, production database, platform performance"
+          mitigation: >
+            Implement admin search against indexed columns only (name, email, status,
+            date ranges). Add query timeout limits and result caps. Use read replicas
+            for admin-facing queries that may be slow. Separate admin search from
+            mentee-facing Elasticsearch search to avoid resource contention.
+      blockers: []
+      sequencing_constraints: >
+        Admin portal's session management module depends on E3 (session data model),
+        financial operations module depends on E4 (payment and payout data), and
+        dispute resolution UI depends on E5 (dispute workflow). The admin portal
+        is developed in mid-bucket after these core capabilities are stable.
+        However, the system configuration module (commission rates, cancellation
+        policies) is needed before E4 and E3 reach their final implementation
+        — a chicken-and-egg risk that requires stubbed configuration defaults
+        in E3/E4 that are later replaced by E6's dynamic config.
+      architecture_impact: >
+        Adds Strapi CMS as a third persistence layer. Establishes the system
+        configuration service as a shared dependency across E3, E4, and E10
+        (referral reward configuration). The version-at-capture pattern for commission
+        rates sets a precedent for all price-sensitive configuration. Admin read
+        replicas for performance-sensitive queries affect the database architecture.
+        The admin portal is a separate frontend application (web-only) with its
+        own auth flow through E1's KeyCloak RBAC admin role.
+
+    # ─── E7: Communications & Notification Centre ───────────────────────────
+    - epic_ref: "E7"
+      epic_name: "Communications & Notification Centre"
+      risk_level: "low"
+      technical_risks:
+        - risk: >
+            Replacing mock email notifications from E3 and E4 with SendGrid-delivered
+            emails risks introducing regressions if the mock interface contract
+            (E3's notification interface) is not cleanly abstracted. If E3 hard-coded
+            mock notification calls rather than using an interface, E7's de-mocking
+            effort becomes a refactor rather than a plug-in replacement.
+          severity: "medium"
+          affected_systems: "Notification service, session service (E3), payment service (E4)"
+          mitigation: >
+            Define the notification interface in E3 and E4 as a proper dependency
+            inversion — a NotificationService interface that mock and SendGrid
+            implementations both satisfy. E3 and E4 development must be told this
+            requirement upfront. E7 then only needs to provide the SendGrid implementation.
+            Regression tests for E3 and E4 flows must run post-E7 integration.
+        - risk: >
+            Firebase Cloud Messaging (FCM) for mobile push notifications requires
+            device token registration and management. Tokens are device-specific,
+            expire, and must be refreshed. Managing a token registry adds a
+            persistent data concern. Push delivery is not guaranteed — silent
+            failures require observability tooling.
+          severity: "low"
+          affected_systems: "FCM integration, notification service, device token registry"
+          mitigation: >
+            Implement device token registration at mobile app launch (store token
+            in user profile). Handle FCM token refresh events to update the registry.
+            Use FCM's send-to-token delivery with logging for failed sends. Track
+            delivery success rate in observability tooling. For MVP, email is the
+            primary channel — push is supplementary; a missed push notification
+            that is covered by email is not critical.
+        - risk: >
+            SendGrid transactional email deliverability (landing in inbox vs spam)
+            depends on domain authentication (SPF, DKIM, DMARC), sending reputation,
+            and template quality. A new domain with no sending history is higher
+            risk for initial spam filtering. This is an operational concern with
+            technical prerequisites (DNS records, domain verification) that must
+            be completed before first email delivery.
+          severity: "low"
+          affected_systems: "SendGrid account, DNS configuration, email deliverability"
+          mitigation: >
+            Set up SendGrid domain authentication (SPF, DKIM, DMARC records) in
+            Sprint 1 as part of infrastructure provisioning — do not defer to E7's
+            implementation sprint. Use a dedicated sending subdomain (e.g.,
+            mail.fellyclub.com). Start with low-volume warmup. Monitor SendGrid
+            deliverability dashboard from first send.
+      blockers: []
+      sequencing_constraints: >
+        Depends on E1 for user notification preferences (opt-in/opt-out) and
+        authenticated user profiles. E7 de-mocks E3 and E4 notifications — it
+        should ship before E3 and E4 reach production to avoid running mocked
+        notifications in a live environment. Sequenced to mid-bucket but should
+        be treated as high-priority within that bucket to avoid shipping mocked
+        notifications to real users.
+      architecture_impact: >
+        Introduces Twilio SendGrid and Firebase Cloud Messaging as communication
+        infrastructure. Establishes the notification service as a shared platform
+        component that all epics can dispatch events through. The in-app notification
+        centre adds a new data model (notifications table, read status) and a
+        real-time or polling delivery mechanism. The notification interface contract
+        must be established in E3/E4 and fulfilled here — the interface design is
+        shared architecture across 3 epics.
+
+    # ─── E8: Regulatory Compliance & Data Security ──────────────────────────
+    - epic_ref: "E8"
+      epic_name: "Regulatory Compliance & Data Security"
+      risk_level: "high"
+      technical_risks:
+        - risk: >
+            Right-to-deletion (GDPR Article 17) with cascading data removal across
+            all platform data is technically complex in a multi-service, multi-store
+            architecture. User data exists in: relational DB (profile, sessions,
+            payments), Elasticsearch (mentor search index), Strapi CMS (if user
+            content is referenced), cloud object storage (verification artefacts,
+            session recordings), notification service (email delivery logs), and
+            SendGrid (contact lists). A deletion job that misses any store results
+            in a GDPR violation. The cascading order also matters — deleting the
+            user record before de-indexing from Elasticsearch can leave orphaned
+            search records.
+          severity: "high"
+          affected_systems: "All data stores: relational DB, Elasticsearch, S3, SendGrid, notification service"
+          mitigation: >
+            Implement a deletion orchestrator service that executes deletion in a
+            documented sequence: (1) deactivate user account, (2) cascade soft-delete
+            across relational data, (3) remove from Elasticsearch index, (4) delete
+            cloud storage artefacts, (5) remove from SendGrid contact list, (6)
+            mark hard delete as complete. Use a deletion audit log that records
+            which stores have been cleared per user. Add integration tests that
+            verify data absence across all stores post-deletion. Legal review
+            required on data retention exceptions (e.g., financial records for
+            tax obligations — may need to be retained in anonymised form).
+        - risk: >
+            TPDP (India's Digital Personal Data Protection Act, 2023) is still
+            in a partially notified state — implementing regulations (rules) were
+            not fully published as of early 2026. Building compliance features for
+            TPDP requirements that may change before MVP launch creates rework risk.
+            The compliance posture for India is less defined than for GDPR (EU).
+          severity: "medium"
+          affected_systems: "Compliance service, data handling policies, privacy policy"
+          mitigation: >
+            Engage a qualified data protection counsel in India to review TPDP
+            obligations as they apply to Felly Club's India operations before
+            compliance implementation begins. At minimum, implement GDPR-equivalent
+            controls (consent, deletion, portability) as a baseline — these are
+            unlikely to conflict with TPDP and provide a safe floor. Monitor
+            TPDP rule publications and plan a compliance review sprint post-launch
+            if rules change materially.
+        - risk: >
+            AES-256 encryption at rest for sensitive data fields (PII, financial data)
+            requires field-level encryption or database-level encryption. Field-level
+            encryption (encrypting individual columns) is more granular but requires
+            key management infrastructure (AWS KMS or HashiCorp Vault). Database-level
+            encryption (transparent data encryption) is simpler but provides coarser
+            granularity. The wrong choice creates either operational complexity
+            (field-level without proper key management) or insufficient protection
+            (database-level without field encryption for especially sensitive fields
+            like payment tokens, SSNs, or passport numbers).
+          severity: "medium"
+          affected_systems: "Database, key management service, financial data store"
+          mitigation: >
+            Use database-level encryption (AWS RDS encryption at rest) as the baseline.
+            Apply field-level encryption via AWS KMS only for the most sensitive fields
+            (raw payment metadata if any, verification artefact content). Document the
+            encryption boundaries in an ADR. Avoid encrypting fields used in WHERE
+            clauses without tokenisation (encrypted fields cannot be indexed for search).
+        - risk: >
+            Recording consent ambiguity (I-05) creates a direct compliance risk for E8.
+            If E3 ships auto-recording without a legal consent mechanism and E8 is
+            implemented in mid-bucket, there is a window where production sessions
+            are auto-recorded without a compliant consent mechanism. This violates
+            GDPR Article 7 in EU markets.
+          severity: "high"
+          affected_systems: "Session recording (E3), GDPR compliance, cookie consent flows"
+          mitigation: >
+            I-05 must be resolved before E3 and E8 begin implementation — see E3
+            blocker. E8 must include explicit consent audit coverage for auto-recording
+            as part of its GDPR compliance checklist. If per-session consent is required,
+            E3 and E8 must be co-implemented with the consent gate.
+      blockers:
+        - >
+          I-05 (product.yaml decision_point): Session recording consent for GDPR
+          compliance is shared between E3 and E8 and remains unresolved. E8 cannot
+          complete its GDPR compliance assessment without a determination on whether
+          blanket ToS consent or per-session consent is required for auto-recording.
+          Legal counsel review required before either E3 or E8 implementation begins.
+        - >
+          TPDP rule clarification: India's DPDP Act implementing rules were not
+          fully published as of March 2026. Engage qualified Indian data protection
+          counsel to confirm the compliance obligations applicable to Felly Club's
+          India operations before E8 implementation begins. Without this, E8's
+          TPDP compliance implementation is speculative and may require rework.
+      sequencing_constraints: >
+        Depends on E1 (user identity for right-to-deletion scope) and E4 (PCI DSS
+        audit of payment tokenisation implemented in E4). Sequenced to mid-bucket
+        but must not be the last epic — compliance controls must be validated in
+        staging before production launch. Security hardening (TLS, JWT security,
+        secure headers) should ideally be in place from Sprint 1 as part of
+        infrastructure provisioning — not deferred entirely to E8.
+      architecture_impact: >
+        Adds the deletion orchestrator service as a cross-cutting compliance component.
+        The cookie consent mechanism requires frontend changes across all pages
+        (web app and mobile app). JWT token security audit may require changes
+        to E1's auth implementation. AES-256 encryption at rest affects database
+        configuration and key management infrastructure. The compliance audit trail
+        (admin action logging, data access logging) adds a logging infrastructure
+        requirement shared with E9 (observability).
+
+    # ─── E9: Analytics & Performance Dashboards ─────────────────────────────
+    - epic_ref: "E9"
+      epic_name: "Analytics & Performance Dashboards"
+      risk_level: "low"
+      technical_risks:
+        - risk: >
+            Dashboard queries running against production tables without proper
+            read optimisation can degrade platform performance for concurrent users
+            (see E9 FC-3). Aggregate queries (GMV, session volume, rating distribution)
+            are expensive without pre-computation or materialised views.
+          severity: "medium"
+          affected_systems: "Production database, API performance, all user-facing features"
+          mitigation: >
+            Route all dashboard queries to a read replica — never the primary
+            write database. Pre-compute expensive aggregates (GMV, session counts,
+            rating averages) as scheduled jobs that write to summary tables. Dashboard
+            API reads from summary tables, not ad-hoc aggregate queries. Add query
+            timeout limits on all dashboard endpoints. Performance test dashboard
+            queries under simulated concurrent load before shipping.
+        - risk: >
+            Analytics data consistency depends on the accuracy of E1 (user records),
+            E3 (session records), and E4 (payment records). If those epics have
+            data bugs or race conditions in state transitions, analytics dashboards
+            will surface misleading data. A mentor's earnings dashboard showing an
+            incorrect amount (E9 FC-1) is a trust-breaking bug even if the underlying
+            payment was correct.
+          severity: "low"
+          affected_systems: "Analytics API, mentor earnings dashboard, admin KPI dashboard"
+          mitigation: >
+            Define a data contract for each dashboard data source (which fields from
+            which tables, with which status filter). Integration tests that verify
+            dashboard values against known fixture data. Cross-reference dashboard
+            totals against ledger-level records in automated tests.
+        - risk: >
+            E9 is sequenced to the "long" bucket and depends on E1, E3, and E4.
+            If those upstream epics deliver late, E9 has no data to read. This is
+            primarily a schedule risk rather than a technical risk — the feature
+            itself is low complexity (read-only dashboards from existing data).
+          severity: "low"
+          affected_systems: "E9 delivery schedule"
+          mitigation: >
+            Use test fixtures and synthetic data in development and QA to validate
+            E9 without waiting for real production data from upstream epics.
+            Dashboard development can proceed in parallel using mocked API responses.
+      blockers: []
+      sequencing_constraints: >
+        Depends on E1 (user data), E3 (session data), and E4 (payment data) being
+        stable in data model and state transitions before meaningful analytics can
+        be implemented. Sequenced to long bucket appropriately. Read replicas and
+        summary tables should be considered in database architecture from day one
+        to avoid retrofitting infrastructure when E9 is implemented.
+      architecture_impact: >
+        No new infrastructure if read replicas are provisioned from day one.
+        Introduces summary tables (pre-computed aggregates) as a new database concern.
+        Dashboard API is a new service module (or set of endpoints in the existing
+        backend) that must be isolated from write-path APIs to prevent performance
+        interference. The admin KPI dashboard shares infrastructure with E6's admin
+        portal — no separate deployment needed.
+
+    # ─── E10: Referral Programme & User Acquisition ─────────────────────────
+    - epic_ref: "E10"
+      epic_name: "Referral Programme & User Acquisition"
+      risk_level: "low"
+      technical_risks:
+        - risk: >
+            Referral attribution requires tracking the referral link parameter through
+            the registration flow without losing it if the user closes the browser
+            and returns later, or registers via social login (which redirects to
+            an OAuth provider). Client-side cookie or localStorage storage of the
+            referral parameter can be cleared by the browser or lost in the OAuth
+            redirect flow. Attribution failures mean referrers do not receive rewards
+            (E10 FC-1).
+          severity: "medium"
+          affected_systems: "Registration flow (E1), referral tracking service, OAuth flow"
+          mitigation: >
+            Store the referral parameter server-side at the earliest possible point
+            — on first visit with the referral link, before registration begins.
+            Set a referral cookie with a 30-day TTL. Carry the referral parameter
+            through the OAuth redirect state parameter. Validate attribution logic
+            across all registration paths (email, Google, Apple) in integration tests.
+        - risk: >
+            Reward fulfilment on the referred user's first completed paid session
+            requires a pipeline from session completion (E3) → payment confirmation
+            (E4) → referral attribution check → reward creation. If any step in
+            this pipeline fails silently, the referrer is not rewarded (E10 FC-2).
+            The reward mechanism (account credit, discount voucher, etc.) is
+            admin-configurable via E6 — the implementation must be flexible enough
+            to support multiple reward types without code changes.
+          severity: "low"
+          affected_systems: "Referral service, session completion hook (E3), payment hook (E4)"
+          mitigation: >
+            Implement reward fulfilment as a decoupled event consumer triggered by
+            session completion events. Make the reward type and value read from E6's
+            system configuration at dispatch time (not at referral tracking time).
+            Add observability for reward dispatch events — log success/failure per
+            referral. Test reward fulfilment with explicit end-to-end integration
+            tests covering the referral link → registration → first session →
+            reward pipeline.
+        - risk: >
+            Referral fraud is explicitly deferred in scope, but basic referral abuse
+            (self-referral, disposable email abuse) is still a risk that could
+            undermine reward economics if not minimally addressed in MVP without
+            a full fraud detection system.
+          severity: "low"
+          affected_systems: "Referral tracking service"
+          mitigation: >
+            Apply minimal fraud guards without a full system: block self-referral
+            (referral link owner cannot be the referred user, checked by email match),
+            require email verification before referral attribution is counted, and
+            use admin-configurable reward cap (max rewards per referrer per period).
+            Full fraud detection is deferred per scope.
+      blockers: []
+      sequencing_constraints: >
+        Depends on E1 (user registration to attach referral attribution) and E4
+        (first paid session payment confirmation to trigger reward). The referral
+        registration integration must be built into E1's registration flow as
+        a hook — retrofitting referral tracking into a completed registration
+        flow later adds risk. Referral parameter handling during OAuth (Google,
+        Apple) login must be validated with E1's social login implementation.
+        Sequenced to long bucket correctly.
+      architecture_impact: >
+        Adds a referral tracking service (referral link generation, attribution
+        store, reward ledger) and an event consumer for session completion events.
+        Minimal new infrastructure — referral links are short UUIDs stored in
+        the relational database. The event consumer pattern established here
+        (listening to session completion) will be a reusable pattern for post-
+        session engagement triggers (E7's engagement prompts). E10's reward
+        configuration hook into E6's system configuration sets a precedent for
+        admin-configurable operational parameters across epics.
 
   open_questions:
-    - question: "Does PayU support escrow-equivalent hold-and-release payment flows (capture at booking, release at session completion, refund on cancellation) across all four target geographies — India, Switzerland, USA, and Germany — in a single unified API integration? The entire E5 payment model depends on this assumption. If PayU cannot support this, which alternative gateway (Stripe Connect or Adyen Marketplace) should be used for which geographies?"
-      affected_epics: ["E5", "E4", "E9"]
+    - question: >
+        I-05: What is the legal basis for auto-recording all sessions in GDPR
+        markets (Germany, Switzerland)? Does blanket ToS consent at registration
+        suffice, or is per-session explicit consent required under GDPR Article 7?
+        This is an unresolved decision point in product.yaml that directly affects
+        E3 (session join flow) and E8 (GDPR compliance implementation).
+      affected_epics: ["E3", "E8"]
 
-    - question: "What is the platform's legal/regulatory status for holding funds in escrow? In India, holding customer funds may require RBI registration as a payment aggregator. In Switzerland, FINMA has specific requirements for payment intermediaries. Has legal counsel confirmed that the escrow model is achievable under the current business entity structure without additional licensing?"
-      affected_epics: ["E5", "E7"]
+    - question: >
+        I-01 / I-02 / I-03: Technology stack decisions (React Native vs Swift/Kotlin
+        for mobile; Node.js vs Next.js for backend; API gateway vendor) are deferred
+        to architecture phase per product.yaml. These decisions must be finalised
+        before E1 implementation begins — the mobile stack affects E1's social login
+        (Apple OAuth on iOS), E3's video join flow (Zoom/Meet SDK behaviour on
+        React Native vs native), and E7's push notification infrastructure (FCM
+        on React Native vs native SDKs).
+      affected_epics: ["E1", "E2", "E3", "E7"]
 
-    - question: "Will KeyCloak be self-hosted (adding operational overhead and a dedicated database) or deployed via a managed cloud offering (Keycloak-as-a-Service via Red Hat SSO, Phase2ID, or cloud-hosted)? The choice has direct cost and timeline implications under the EUR 50K budget. A self-hosted KeyCloak requires 2-3 days of infrastructure setup and ongoing ops. A managed offering costs more per month but reduces setup risk."
-      affected_epics: ["E1", "E7"]
-
-    - question: "What is the Zoom SDK licensing tier required for the session volumes expected at MVP? Zoom's Web SDK usage above the free tier threshold requires a paid Zoom account and SDK licensing agreement. Session recording storage on Zoom Cloud is an additional per-recording-minute cost. Has the Zoom SDK cost been factored into the EUR 50K budget?"
+    - question: >
+        Stripe India vs Stripe Global: Can a single Stripe account handle INR
+        domestic transactions alongside USD, CHF, EUR transactions? Or does the
+        India market require a separate Stripe India account with different onboarding
+        and settlement rails? This must be resolved before E4 implementation begins.
       affected_epics: ["E4"]
 
-    - question: "How will the platform handle multi-currency session pricing display vs. actual charge currency? If a mentor sets their rate in EUR, and a mentee in India books the session, will the mentee be charged in INR (with real-time conversion) or in EUR? The currency mismatch between mentor pricing (EUR/USD) and mentee payment currency (INR) affects both E5's payment flow and E3's search/filter display of prices."
-      affected_epics: ["E5", "E3"]
+    - question: >
+        Stripe Connect mentor onboarding scope: The current E1 scope does not include
+        Stripe Connect identity verification and bank account linking as a mentor
+        setup step, but mentors cannot receive payouts (E4) without completing
+        Connect onboarding. Should Stripe Connect onboarding be added to E1's
+        in_scope or E4's? This cross-epic dependency must be assigned an explicit
+        epic owner before E1 implementation begins.
+      affected_epics: ["E1", "E4"]
+
+    - question: >
+        Configuration effective-date semantics: How should system configuration
+        changes (commission rates, cancellation policies) behave for in-flight
+        sessions — sessions that have been booked under the old rate but have
+        not yet completed? The product.yaml and epics do not specify the rule
+        for in-flight session rate treatment. This must be defined before E4 and
+        E6 implementation begins.
+      affected_epics: ["E4", "E6"]
+
+    - question: >
+        TPDP compliance scope: What specific obligations does India's DPDP Act
+        (2023, partially notified as of early 2026) impose on Felly Club's India
+        operations? Are the GDPR-equivalent controls (consent, deletion, portability)
+        sufficient, or are there India-specific requirements (data localisation,
+        data fiduciary registration) that affect the E8 compliance implementation?
+      affected_epics: ["E8"]
+
+    - question: >
+        Session recording dispute extension: If a dispute is filed against a session
+        whose recording will expire within 24 hours, can the admin "preserve" the
+        recording (pausing TTL deletion) for the duration of the dispute resolution?
+        This requires a legal review of whether extended retention for dispute
+        purposes is permissible under GDPR. The answer affects E5's dispute workflow
+        design and E8's compliance model.
+      affected_epics: ["E5", "E8"]
+
+  critical_blockers:
+    - id: "CB-1"
+      description: >
+        I-05 — Session recording consent for GDPR: Unresolved decision point in
+        product.yaml. Mandatory auto-recording without an explicit GDPR-compliant
+        consent mechanism at session start may violate GDPR Article 7 in Germany
+        and Switzerland. Must be resolved (legal counsel review) before E3
+        architecture begins. Options: per-session consent gate or confirmed
+        ToS-consent sufficiency.
+      affected_epics: ["E3", "E8"]
+      resolution_path: >
+        Engage legal counsel in EU markets to confirm consent mechanism. Update
+        E3's success scenarios and E8's compliance scope based on the decision.
+
+    - id: "CB-2"
+      description: >
+        Stripe India account structure: INR domestic payment routing may require
+        a separate Stripe India entity with different API endpoints, onboarding,
+        and settlement rails than the global Stripe account. This is an architecture-
+        defining decision for E4 — a wrong initial choice requires significant
+        rework. Must be resolved before E4 implementation begins.
+      affected_epics: ["E4"]
+      resolution_path: >
+        Direct consultation with Stripe India sales/solutions team before
+        architecture phase. Confirm single-account vs dual-account requirement
+        and document in ADR.
+
+    - id: "CB-3"
+      description: >
+        Stripe Connect scope gap: Mentor payout infrastructure (E4) requires
+        mentors to complete Stripe Connect onboarding (identity verification,
+        bank account linking), but this step is not included in E1's current
+        in_scope. Mentors who have not completed Connect onboarding cannot receive
+        payouts, blocking E4's core function. This dependency must be assigned
+        to E1 before E1 implementation begins.
+      affected_epics: ["E1", "E4"]
+      resolution_path: >
+        Update E1's in_scope to include Stripe Connect mentor onboarding as
+        a required mentor setup step. Validate that this does not scope-creep E1
+        beyond its 'M' effort estimate. If effort impact is significant, evaluate
+        whether Connect onboarding can be deferred to a post-E1 mentor settings
+        step.
 
   summary:
     total_epics: 10
     high_risk_count: 3
     medium_risk_count: 4
-    blocker_count: 4
-    foundation_epics: ["E1", "E7"]
+    low_risk_count: 3
+    blocker_count: 3
+    open_question_count: 7
+    foundation_epics: ["E1"]
+    high_risk_epics: ["E3", "E4", "E8"]
+    medium_risk_epics: ["E2", "E5", "E6", "E7"]
+    low_risk_epics: ["E9", "E10"]
+    key_risk_themes:
+      - "Video provider integration and session recording consent (GDPR I-05) — affects E3 and E8"
+      - "Stripe escrow delayed-capture window and multi-currency India/Global account architecture — affects E4"
+      - "Cross-data-store GDPR right-to-deletion cascade and TPDP uncertainty — affects E8"
+      - "Greenfield codebase: no existing infrastructure — all 10 epics start from zero"
+      - "Fixed-budget (€125k) and 16-week timeline with 7+ external integrations creates scope-quality tension"

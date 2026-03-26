@@ -1,355 +1,336 @@
 coverage_check:
-  checked_at: "2026-03-25T00:00:00+00:00"
+  checked_at: "2026-03-26T00:00:00+00:00"
   checked_by: "judge"
   check_type: "product-to-epics"
-  input_path: ".meridian/project/product/felly-club/product.yaml"
-  output_path: ".meridian/project/product/felly-club/epics.yaml"
+  input_path: "/Users/kapilahuja/cto/builder/meridian-evals-felly/.meridian/project/product/felly-club/product.yaml"
+  output_path: "/Users/kapilahuja/cto/builder/meridian-evals-felly/.meridian/project/product/felly-club/epics.yaml"
 
   elements:
 
-    # ── STRATEGIC GOALS ──────────────────────────────────────────────────────
-
-    - input_element: "SG-01 — Launch functional mentorship marketplace MVP (signup to session completion to payout) in at least 2 of 4 countries within 16 weeks"
+    # ─── Strategic Goals ──────────────────────────────────────────────────────
+    - input_element: "SG-01: Build a trusted, admin-curated mentor marketplace with domain verification and quality signals"
       source_field: "strategic_goals[id=SG-01]"
       status: "covered"
-      output_reference: "E1 (strategic_goal_ref=SG-01), E3 (strategic_goal_ref=SG-01), E4 (strategic_goal_ref=SG-01), E8 (strategic_goal_ref=SG-01), E10 (strategic_goal_ref=SG-01)"
-      note: "Five epics reference SG-01 covering the full end-to-end flow: identity (E1), discovery (E3), session+video (E4), communications (E8), admin/analytics (E10). The complete signup→session→payout chain is represented."
+      output_reference: "E1 (strategic_goal_ref: SG-01) — admin-driven onboarding, verified badges; E2 (strategic_goal_ref: SG-01) — marketplace discovery with verified mentor display; E6 (strategic_goal_ref: SG-01) — admin portal for curation and operations"
+      note: "Three epics jointly address SG-01 covering the identity/trust layer (E1), discovery surface (E2), and admin tooling (E6). Full goal coverage."
 
-    - input_element: "SG-02 — Minimum 50 domain-verified mentors across Sport and Entertainment within 8 weeks of launch"
+    - input_element: "SG-02: Deliver seamless end-to-end session lifecycle from discovery through post-session engagement"
       source_field: "strategic_goals[id=SG-02]"
       status: "covered"
-      output_reference: "E2 (strategic_goal_ref=SG-02)"
-      note: "E2 (Mentor Onboarding and Credentialing) directly addresses mentor supply activation, domain verification workflow, and admin approval pipeline. Success scenario in E2 specifically covers domain-verified badge assignment and credential review."
+      output_reference: "E3 (strategic_goal_ref: SG-02) — full session request-to-completion lifecycle; E7 (strategic_goal_ref: SG-02) — communication infrastructure and post-session engagement prompts"
+      note: "E3 delivers the transactional session flow; E7 completes the 'post-session engagement' arc with notifications and engagement prompts."
 
-    - input_element: "SG-03 — Less than 5% dispute rate; greater than 80% of mentees rate sessions 4+ stars within 3 months"
+    - input_element: "SG-03: Establish transparent multi-currency financial operations with escrow-backed payments"
       source_field: "strategic_goals[id=SG-03]"
       status: "covered"
-      output_reference: "E5 (strategic_goal_ref=SG-03), E6 (strategic_goal_ref=SG-03)"
-      note: "E5 delivers escrow-based payment trust; E6 delivers ratings, dispute initiation, and quality scoring. Together they address both sides of SG-03's success metric."
+      output_reference: "E4 (strategic_goal_ref: SG-03) — Stripe payment capture, escrow, commission deduction, multi-currency (INR/USD/CHF/EUR), mentor payout management"
+      note: "E4 maps directly to SG-03. All four currencies, the escrow model, and commission mechanics are explicitly in scope."
 
-    - input_element: "SG-04 — Zero compliance violations across all four countries in first 6 months post-launch"
+    - input_element: "SG-04: Ensure platform trust through ratings, dispute resolution, and quality monitoring"
       source_field: "strategic_goals[id=SG-04]"
       status: "covered"
-      output_reference: "E7 (strategic_goal_ref=SG-04)"
-      note: "E7 (Compliance and Data Protection) covers GDPR, India TPDP, PCI DSS scope via PayU, audit logging, data export/deletion. Directly targets the SG-04 zero-violations metric."
+      output_reference: "E5 (strategic_goal_ref: SG-04) — post-session ratings, auto-flagging, dispute submission, admin dispute resolution with session recordings, quality monitoring dashboard"
+      note: "E5 covers all trust mechanisms named in SG-04. Auto-flagging (sub-3-star ratings, 3+ cancellations) and recording-backed dispute resolution are explicitly in scope."
 
-    - input_element: "SG-05 — Greater than 30% of new mentee signups from referrals within 3 months; CAC below EUR 15"
+    - input_element: "SG-05: Drive mentee acquisition through referral programme and deliver actionable analytics to all personas"
       source_field: "strategic_goals[id=SG-05]"
       status: "covered"
-      output_reference: "E9 (strategic_goal_ref=SG-05)"
-      note: "E9 (Referral and Acquisition Engine) covers unique referral links, full-funnel tracking, reward mechanics, attribution analytics dashboard, and anti-fraud measures. CAC tracking explicitly included in admin analytics scenario."
+      output_reference: "E9 (strategic_goal_ref: SG-05) — mentor, mentee, and admin analytics dashboards; E10 (strategic_goal_ref: SG-05) — referral programme with tracking and reward fulfilment"
+      note: "Both dimensions of SG-05 are covered — analytics (E9) and acquisition/referral (E10)."
 
-    # ── SUCCESS METRICS ───────────────────────────────────────────────────────
-
-    - input_element: "Platform Activation Rate — greater than 40% of registered mentees complete at least one session within 30 days"
-      source_field: "success_metrics[metric=Platform Activation Rate]"
-      status: "partial"
-      output_reference: "E3 (discovery), E4 (booking+session), E8 (reminders)"
-      note: "Discovery (E3), booking (E4), and communications/reminders (E8) collectively address activation. However, no single epic owns the activation funnel as a measurable outcome — no success scenario explicitly targets the 40% within-30-days activation rate or defines how it will be tracked. Time to First Session metric (product.yaml) similarly lacks a dedicated tracking epic."
-
-    - input_element: "Mentor Utilization Rate — greater than 25% of onboarded mentors conduct at least one session per month"
-      source_field: "success_metrics[metric=Mentor Utilization Rate]"
-      status: "partial"
-      output_reference: "E10 (Admin Operations and Analytics — mentor dashboard, session stats)"
-      note: "E10 includes mentor session statistics in the mentor dashboard. But no epic defines a scenario or mechanism specifically targeting the 25% utilization rate measurement or intervention when utilization falls below threshold."
-
-    - input_element: "Session Completion Rate — greater than 85% of booked sessions completed"
-      source_field: "success_metrics[metric=Session Completion Rate]"
+    - input_element: "SG-06: Achieve regulatory and security compliance across all target geographies"
+      source_field: "strategic_goals[id=SG-06]"
       status: "covered"
-      output_reference: "E4 (session lifecycle state machine, cancellation policies), E8 (reminder notifications)"
-      note: "E4 failure conditions explicitly flag cancelled and no-show sessions; E8 intent text directly cites the 85% completion rate target as motivation for reminder infrastructure. The connection is traceable and explicit."
+      output_reference: "E8 (strategic_goal_ref: SG-06) — GDPR, TPDP, PCI DSS, right-to-deletion, data export, AES-256, TLS 1.2+, JWT security"
+      note: "E8 covers all compliance dimensions named in SG-06 across all four target geographies."
 
-    - input_element: "Net Promoter Score (Mentee) — NPS greater than 40 within first 3 months"
-      source_field: "success_metrics[metric=Net Promoter Score (Mentee)]"
+    # ─── Success Metrics ──────────────────────────────────────────────────────
+    - input_element: "SM-SG01-1: Mentor verification rate — 100% of listed mentors admin-verified with verified badge"
+      source_field: "success_metrics[strategic_goal_ref=SG-01, metric=Mentor verification rate]"
       status: "covered"
-      output_reference: "E6 (Quality Assurance and Ratings — NPS survey delivery post-session)"
-      note: "E6 in_scope explicitly includes 'NPS survey delivery post-session' and E6 intent references NPS data collection. The target of NPS>40 is a product.yaml metric; E6 provides the collection mechanism."
+      output_reference: "E1 success_scenario 3 — admin approves profile, verified badge applied; E1 in_scope — admin verification review and verified badge assignment; E6 in_scope — mentor onboarding review queue and verification workflow"
+      note: "Verified badge assignment is a core E1 deliverable with a success scenario validating the end-to-end flow."
 
-    - input_element: "Revenue per Session — average platform commission of EUR 8-15 per completed session"
-      source_field: "success_metrics[metric=Revenue per Session]"
+    - input_element: "SM-SG01-2: Mentor profile completeness — all fields (bio, expertise, pricing, availability, verification artefact) populated"
+      source_field: "success_metrics[strategic_goal_ref=SG-01, metric=Mentor profile completeness]"
       status: "covered"
-      output_reference: "E5 (commission calculation at 10-20% rates), E10 (financial oversight dashboard)"
-      note: "E5 explicitly covers commission calculation at configurable 10-20% rates; E10 includes daily revenue summary and commission tracking. The EUR 8-15 target is traceable to E5's 15% example in success scenarios (EUR 75 session → EUR 11.25 commission)."
+      output_reference: "E1 in_scope — admin-driven mentor onboarding captures bio, expertise category, pricing, availability, and verification artefacts; E1 in_scope — profile completeness indicators"
+      note: "All required profile fields are explicitly listed in E1's in_scope and the onboarding workflow."
 
-    - input_element: "Time to First Session — median under 7 days from signup to first completed session"
-      source_field: "success_metrics[metric=Time to First Session]"
-      status: "partial"
-      output_reference: "E3 (discovery), E4 (booking), E8 (confirmation notifications)"
-      note: "The discovery-to-booking funnel covers the mechanics, but no epic defines a scenario or tracking mechanism for the 7-day median metric. This is a composite metric with no dedicated owner — measurement instrumentation is absent from epics scope."
-
-    # ── TARGET USERS ─────────────────────────────────────────────────────────
-
-    - input_element: "Target User — Ambitious Mentee (find/book domain-verified mentors in Sport, Entrepreneurship, Business, Entertainment)"
-      source_field: "market_context.target_users[persona=Ambitious Mentee]"
+    - input_element: "SM-SG02-1: Session completion rate — 85% or higher of accepted sessions completed"
+      source_field: "success_metrics[strategic_goal_ref=SG-02, metric=Session completion rate]"
       status: "covered"
-      output_reference: "E1 (mentee registration), E3 (mentee search), E4 (mentee booking), E5 (mentee payment), E6 (mentee ratings/disputes), E8 (mentee notifications), E9 (mentee referrals), E10 (mentee dashboard)"
-      note: "Mentee persona appears in success_scenarios and constraints across all transactional epics. Full mentee journey from registration to session completion to referral is covered."
+      output_reference: "E3 in_scope — session status tracking (requested, accepted, scheduled, in-progress, completed, cancelled, no-show); E9 in_scope — mentor performance dashboard shows session completion rate"
+      note: "E3 establishes the status machine needed to measure completion rate; E9 surfaces it in the mentor performance dashboard."
 
-    - input_element: "Target User — Domain-Expert Mentor (monetize expertise through structured, trustworthy channel)"
-      source_field: "market_context.target_users[persona=Domain-Expert Mentor]"
+    - input_element: "SM-SG02-2: Booking workflow completion — under 3% drop-off at each lifecycle stage"
+      source_field: "success_metrics[strategic_goal_ref=SG-02, metric=Booking workflow completion]"
       status: "covered"
-      output_reference: "E2 (mentor onboarding/credentialing), E4 (mentor session delivery), E5 (mentor payouts), E6 (mentor ratings/quality badges), E10 (mentor earnings dashboard)"
-      note: "Mentor persona has dedicated success scenarios in E2, E4, E5, E6, and E10. Payout reliability (key frustration) is addressed in E5 failure conditions."
+      output_reference: "E3 in_scope — full session request workflow with all lifecycle stages; E9 in_scope — admin KPI dashboard covering session volume by status (enabling funnel drop-off analysis)"
+      note: "E3 implements the funnel stages; E9 provides admin visibility into stage-level volume for drop-off measurement."
 
-    - input_element: "Target User — Platform Administrator (curate quality, manage disputes, financial operations, multi-geo compliance)"
-      source_field: "market_context.target_users[persona=Platform Administrator]"
+    - input_element: "SM-SG03-1: Payment processing success rate — 99% or higher across all 4 currencies"
+      source_field: "success_metrics[strategic_goal_ref=SG-03, metric=Payment processing success rate]"
       status: "covered"
-      output_reference: "E2 (admin approval workflow), E6 (dispute routing to admin), E7 (audit log query interface), E10 (admin panel — full operations suite)"
-      note: "Admin persona has dedicated tooling in E2, E6, E7, and E10. Admin success scenarios in E10 explicitly address multi-geo financial oversight and mentor approval pipeline."
+      output_reference: "E4 in_scope — Stripe payment gateway integration with multi-currency support (INR, USD, CHF, EUR); E4 in_scope — payment webhook handling for asynchronous Stripe events"
+      note: "E4 explicitly implements multi-currency Stripe processing. Transaction success tracking is covered by payment webhooks."
 
-    # ── ASSUMPTIONS ───────────────────────────────────────────────────────────
+    - input_element: "SM-SG03-2: Mentor payout timeliness — 100% of payouts processed within defined schedule"
+      source_field: "success_metrics[strategic_goal_ref=SG-03, metric=Mentor payout timeliness]"
+      status: "covered"
+      output_reference: "E4 in_scope — mentor payout management (earnings calculation, payout queue, payout processing); E6 in_scope — admin payout queue management; E9 in_scope — admin revenue metrics (payout volume)"
+      note: "E4 delivers the payout mechanism; E6 gives admin operational control; E9 surfaces payout volume metrics."
 
-    - input_element: "Assumption — Domain experts in Sport/Entertainment willing to mentor online at EUR 30-150/session"
+    - input_element: "SM-SG04-1: Dispute resolution timeliness — 100% of submitted disputes reviewed within 72 hours"
+      source_field: "success_metrics[strategic_goal_ref=SG-04, metric=Dispute resolution timeliness]"
+      status: "covered"
+      output_reference: "E5 in_scope — dispute submission workflow and dispute status tracking (submitted, under review, resolved); E5 in_scope — admin dispute resolution interface with session recording access; E5 success_scenario 3 — admin resolves dispute with access to recording"
+      note: "E5 implements the full dispute workflow. The 72-hour SLA is an operational target enabled by the dispute queue and tracking."
+
+    - input_element: "SM-SG04-2: Quality flagging automation — sub-3-star ratings auto-flagged; mentors with 3+ cancellations auto-flagged"
+      source_field: "success_metrics[strategic_goal_ref=SG-04, metric=Quality flagging automation]"
+      status: "covered"
+      output_reference: "E5 in_scope — auto-flagging of ratings below 3 stars; auto-flagging of mentors with 3 or more cancellations; E5 success_scenario 2 — 2-star rating triggers auto-flag visible in quality monitoring dashboard"
+      note: "Both auto-flagging triggers (sub-3-star ratings and 3+ cancellations) are explicitly in E5's in_scope with a success scenario validating the rating trigger."
+
+    - input_element: "SM-SG05-1: Referral programme activation — referral link generation and reward fulfilment operational at launch"
+      source_field: "success_metrics[strategic_goal_ref=SG-05, metric=Referral programme activation]"
+      status: "covered"
+      output_reference: "E10 in_scope — unique referral link generation, referral tracking, reward trigger on first completed session, reward fulfilment; E10 success_scenarios — all three scenarios validate the referral flow end-to-end"
+      note: "E10 delivers the complete referral programme lifecycle as described in the success metric."
+
+    - input_element: "SM-SG05-2: Analytics dashboard coverage — mentor, mentee, and admin dashboards live with all BRD-defined KPIs"
+      source_field: "success_metrics[strategic_goal_ref=SG-05, metric=Analytics dashboard coverage]"
+      status: "covered"
+      output_reference: "E9 in_scope — mentor performance dashboard (earnings, sessions, completion rate, rating), mentee activity dashboard (history, spend, categories), admin KPI dashboard (GMV, users, session volume, quality metrics, revenue metrics)"
+      note: "E9 explicitly enumerates all three persona dashboards with detailed KPI lists covering the BRD-defined scope."
+
+    - input_element: "SM-SG06-1: Regulatory compliance coverage — GDPR, TPDP, PCI DSS, right-to-deletion operational"
+      source_field: "success_metrics[strategic_goal_ref=SG-06, metric=Regulatory compliance coverage]"
+      status: "covered"
+      output_reference: "E8 in_scope — GDPR (cookie consent, privacy policy, right-to-deletion, data export), TPDP (India data protection alignment), PCI DSS validation (Stripe tokenisation audit); E8 success_scenarios validate each compliance workflow"
+      note: "E8 maps directly to the success metric. All three regulatory frameworks and right-to-deletion are explicitly in scope."
+
+    # ─── Target Users ─────────────────────────────────────────────────────────
+    - input_element: "Target User: Mentee — Ambitious Individual"
+      source_field: "market_context.target_users[persona=Mentee]"
+      status: "covered"
+      output_reference: "E1 (mentee self-registration, dashboard), E2 (mentee discovery), E3 (mentee session request), E4 (mentee payment), E5 (mentee ratings and disputes), E7 (mentee notifications), E9 (mentee activity dashboard), E10 (mentee referral programme)"
+      note: "Mentee persona is explicitly addressed across 8 epics covering the full user journey from registration through referral."
+
+    - input_element: "Target User: Mentor — Accomplished Professional"
+      source_field: "market_context.target_users[persona=Mentor]"
+      status: "covered"
+      output_reference: "E1 (admin-driven mentor onboarding, verified profile), E3 (mentor accept/decline, slot selection), E4 (mentor payout and earnings dashboard), E5 (ratings on mentor profile), E6 (mentor management in admin portal), E9 (mentor performance dashboard)"
+      note: "Mentor persona is covered across 6 epics spanning onboarding, session management, financial operations, and performance tracking."
+
+    - input_element: "Target User: Platform Admin — Operations Manager"
+      source_field: "market_context.target_users[persona=Platform Admin]"
+      status: "covered"
+      output_reference: "E1 (admin verification workflow), E5 (admin dispute resolution, quality monitoring), E6 (unified admin portal — comprehensive operational coverage), E9 (admin KPI dashboard)"
+      note: "Platform Admin has a dedicated epic (E6) and is explicitly addressed in E1, E5, and E9 with admin-specific workflows and dashboards."
+
+    # ─── Assumptions ──────────────────────────────────────────────────────────
+    - input_element: "Admin-driven mentor onboarding only in MVP; mentor self-registration deferred to Phase 2"
       source_field: "assumptions[0]"
-      status: "partial"
-      output_reference: "E2 (pricing band configuration, vertical selection)"
-      note: "E2 covers pricing band setup and vertical registration for mentors. However, no epic addresses demand validation, mentor expectation management, or what happens if this assumption proves false. The assumption is architecturally supported but not validated by any epic."
+      status: "covered"
+      output_reference: "E1 in_scope — admin-driven mentor onboarding workflow; E1 out_of_scope — mentor self-registration explicitly deferred; E6 in_scope — mentor onboarding queue and verification"
+      note: "Assumption is explicitly reflected in E1's in_scope/out_of_scope and reinforced in E6."
 
-    - input_element: "Assumption — Mentees in Sport/Entertainment will pay for structured mentorship when discovery and credentialing reduce uncertainty"
+    - input_element: "Personalization is rule-based string matching; no AI/ML recommendation engine in MVP"
       source_field: "assumptions[1]"
-      status: "partial"
-      output_reference: "E2 (domain-verified badges), E3 (search with quality signals), E6 (ratings/quality scores)"
-      note: "The credentialing and quality infrastructure addresses the uncertainty-reduction mechanism. No epic owns demand-side willingness-to-pay validation or tracks conversion by vertical."
+      status: "covered"
+      output_reference: "E2 in_scope — 'rule-based personalised recommendations matching mentee stated interests to mentor expertise categories (string matching)'; E2 out_of_scope — 'AI/ML recommendation engine (deferred to Phase 2 — MVP uses rule-based matching only)'"
+      note: "E2 explicitly implements and constrains the personalization approach exactly as stated in the assumption."
 
-    - input_element: "Assumption — Zoom SDK provides sufficient video quality/reliability for MVP"
+    - input_element: "Session recordings accessible only to admin for dispute resolution; user playback deferred to Phase 2"
       source_field: "assumptions[2]"
       status: "covered"
-      output_reference: "E4 (Zoom SDK integration, session video failure conditions)"
-      note: "E4 explicitly covers Zoom SDK integration and includes a failure condition for session video failure with no fallback. The assumption is operationalized and failure-conditioned."
+      output_reference: "E3 in_scope — 'auto-session recording with 3-day retention and admin-only access'; E3 out_of_scope — 'session recording user playback (deferred to Phase 2)'; E5 in_scope — admin dispute resolution interface with recording access"
+      note: "Assumption is enforced in E3's in_scope/out_of_scope and validated via E5's dispute resolution success scenario 3."
 
-    - input_element: "Assumption — PayU supports escrow-like hold-and-release across India, Switzerland, USA, and Germany without a full escrow banking license"
+    - input_element: "Admin portal is web-only; no mobile admin access in MVP"
       source_field: "assumptions[3]"
       status: "covered"
-      output_reference: "E5 (PayU integration, escrow hold-and-release, multi-currency for EUR/USD/CHF/INR)"
-      note: "E5 directly operationalizes this assumption as core architecture. The risk is acknowledged in product.yaml risk register; E5's scope confirms the design decision."
+      output_reference: "E6 in_scope — 'Web-based admin portal'; E6 out_of_scope — 'Mobile admin access (deferred to Phase 2 — admin portal is web-only)'"
+      note: "Assumption is directly reflected in E6's channel constraint."
 
-    - input_element: "Assumption — KeyCloak can be configured for multi-tenant RBAC with social login within 16 weeks"
+    - input_element: "English-only in MVP; multi-language support deferred to Phase 2"
       source_field: "assumptions[4]"
       status: "covered"
-      output_reference: "E1 (KeyCloak integration, RBAC for three roles, social login Google/Apple)"
-      note: "E1 directly operationalizes this assumption with explicit scope for KeyCloak RBAC and social login."
+      output_reference: "E7 out_of_scope — 'multi-language notification templates (English-only in MVP)'"
+      note: "Covered in E7's out_of_scope. The constraint is present though concentrated in the communications epic rather than distributed across user-facing epics."
 
-    - input_element: "Assumption — EUR 50K budget is sufficient for a 3-person engineering team over 16 weeks"
+    - input_element: "Pay-per-session model only; subscriptions and bundles deferred to Phase 2"
       source_field: "assumptions[5]"
-      status: "partial"
-      output_reference: "None — no epic addresses budget governance or scope-to-budget fit"
-      note: "No epic covers budget tracking, scope management against the EUR 50K constraint, or contingency mechanisms. This is a planning assumption with no operational epic addressing its monitoring or enforcement."
+      status: "covered"
+      output_reference: "E4 out_of_scope — 'Subscription or bundle pricing (deferred to Phase 2 — pay-per-session only)'"
+      note: "Assumption is explicitly captured in E4's out_of_scope."
 
-    - input_element: "Assumption — Initial mentor supply (50+ mentors) can be seeded through founder networks before paid acquisition"
+    - input_element: "Payment provider — Stripe confirmed as MVP provider (I-04 resolved)"
       source_field: "assumptions[6]"
-      status: "partial"
-      output_reference: "E2 (mentor onboarding flow)"
-      note: "E2 provides the onboarding infrastructure but no epic addresses the seed acquisition strategy, founder network outreach tooling, or tracking against the 50-mentor seeding target."
+      status: "covered"
+      output_reference: "E4 description — 'Stripe-powered payment processing'; E4 in_scope — 'Stripe payment gateway integration', 'tokenised payment processing (no raw card data stored on platform)'"
+      note: "E4 correctly applies Stripe, reflecting the I-04 resolution from decision_points. The assumption noted the original conflict; E4 implements the resolved decision."
 
-    - input_element: "Assumption — GDPR and India TPDP compliance can be achieved at MVP level through consent management and data handling policies"
+    - input_element: "React Native confirmed for mobile development (I-01 pending formal sign-off)"
       source_field: "assumptions[7]"
-      status: "covered"
-      output_reference: "E7 (GDPR consent, India TPDP, data handling, audit logging)"
-      note: "E7 directly operationalizes this assumption with explicit in-scope items for both GDPR and India TPDP consent requirements."
+      status: "partial"
+      output_reference: "null — no explicit reference to React Native in any epic's in_scope, out_of_scope, or constraints"
+      note: "Technology stack decisions are architecture-level concerns not typically represented in functional epics. E2 mentions 'search results responsive across web and mobile' and E3 mentions 'virtual session room' implying multi-channel delivery, but neither reaffirms the React Native decision explicitly."
 
-    - input_element: "Assumption — Responsive web provides adequate mobile experience for MVP (no native mobile needed)"
+    - input_element: "Node.js confirmed for backend services (I-02 — Next.js is frontend mislabel)"
       source_field: "assumptions[8]"
-      status: "covered"
-      output_reference: "E3 (responsive search UI, PP-2 citation), E4 (session booking responsive)"
-      note: "Multiple epics cite PP-2 (Multi-Channel Responsive) and reference responsive design. E3 explicitly scopes 'responsive search UI across desktop and mobile browsers'."
+      status: "partial"
+      output_reference: "null — no explicit reference to Node.js or the I-02 resolution in any epic"
+      note: "Like React Native, backend framework selection is an architecture-level decision not expected in functional epic scopes. Epics appropriately focus on functional delivery without restating backend technology choices."
 
-    - input_element: "Assumption — 10-20% platform commission rate is competitive and acceptable to mentors"
+    - input_element: "MVP categories limited to Sport, Entrepreneurship, Business, and Entertainment; Academia deferred to Phase 2"
       source_field: "assumptions[9]"
       status: "covered"
-      output_reference: "E5 (commission calculation at configurable 10-20% rates, mentor payout transparency)"
-      note: "E5 implements the commission model and mentor earnings visibility. Mentor payout dashboards (E10) provide the transparency that supports commission acceptability."
+      output_reference: "E1 in_scope — 'expertise category assignment (Sport, Entrepreneurship, Business, Entertainment)'; E2 in_scope — 'category-based navigation (Sport, Entrepreneurship, Business, Entertainment)'"
+      note: "The 4 active categories are explicitly enumerated in E1 and E2. Academia exclusion is implicit through omission; no epic calls Academia out in out_of_scope, but active categories are unambiguously defined."
 
-    # ── OUT OF SCOPE ITEMS ────────────────────────────────────────────────────
-
-    - input_element: "Out of scope — Group mentorship sessions and cohort-based programs"
-      source_field: "scope.out_of_scope[0]"
+    - input_element: "Video conferencing via Zoom/Google Meet API integration; no proprietary video infrastructure"
+      source_field: "assumptions[10]"
       status: "covered"
-      output_reference: "E4 constraints.out_of_scope"
-      note: "E4 explicitly lists 'Group mentorship sessions or cohort-based programs (out of scope per vision)' in its out_of_scope constraints."
+      output_reference: "E3 in_scope — 'virtual session room with Zoom or Google Meet API integration'; E3 out_of_scope — 'proprietary video infrastructure (uses Zoom/Google Meet APIs)'"
+      note: "Assumption is directly implemented in E3's in_scope with the proprietary infrastructure exclusion explicitly in E3's out_of_scope."
 
-    - input_element: "Out of scope — AI-powered mentor-mentee matching algorithms"
-      source_field: "scope.out_of_scope[1]"
+    - input_element: "Mentor pricing bands (min/max per duration) are admin-configurable platform parameters"
+      source_field: "assumptions[11]"
       status: "covered"
-      output_reference: "E2 constraints.out_of_scope, E3 constraints.out_of_scope"
-      note: "Both E2 and E3 explicitly exclude AI-powered matching in their out_of_scope sections."
+      output_reference: "E6 in_scope — 'system configuration panel (commission rate 10–20%, pricing band min/max per duration, cancellation policy parameters, feature toggles)'"
+      note: "Admin-configurable pricing bands are explicitly in E6's system configuration scope."
 
-    - input_element: "Out of scope — Native mobile applications (React Native) — MVP targets responsive web"
-      source_field: "scope.out_of_scope[2]"
+    - input_element: "Referral reward type and value are admin-configurable platform parameters"
+      source_field: "assumptions[12]"
+      status: "covered"
+      output_reference: "E10 in_scope — 'referral reward fulfilment (admin-configurable reward type and value via E6's system configuration)'; E10 success_scenario 3 — admin sets referral reward value via configuration panel"
+      note: "E10 explicitly delegates reward configuration to E6's system configuration panel, with a success scenario validating the admin configuration flow."
+
+    # ─── Out of Scope ─────────────────────────────────────────────────────────
+    - input_element: "Out of scope: Mentor self-registration"
+      source_field: "scope.out_of_scope[category=Mentor self-registration]"
+      status: "covered"
+      output_reference: "E1 out_of_scope — 'Mentor self-registration (deferred to Phase 2)'"
+      note: "Constraint is preserved in E1's out_of_scope with Phase 2 deferral explicitly stated."
+
+    - input_element: "Out of scope: AI/ML recommendation engine"
+      source_field: "scope.out_of_scope[category=AI/ML recommendation engine]"
+      status: "covered"
+      output_reference: "E2 out_of_scope — 'AI/ML recommendation engine (deferred to Phase 2 — MVP uses rule-based matching only)'"
+      note: "Constraint is preserved verbatim in E2's out_of_scope."
+
+    - input_element: "Out of scope: Session recording user playback"
+      source_field: "scope.out_of_scope[category=Session recording user playback]"
+      status: "covered"
+      output_reference: "E3 out_of_scope — 'session recording user playback (deferred to Phase 2 — recordings are admin-only for dispute resolution)'"
+      note: "Constraint is preserved in E3 with rationale matching the product.yaml out_of_scope entry."
+
+    - input_element: "Out of scope: Mobile admin access"
+      source_field: "scope.out_of_scope[category=Mobile admin access]"
+      status: "covered"
+      output_reference: "E6 out_of_scope — 'Mobile admin access (deferred to Phase 2 — admin portal is web-only)'"
+      note: "Constraint is preserved in E6's out_of_scope."
+
+    - input_element: "Out of scope: Multi-language support"
+      source_field: "scope.out_of_scope[category=Multi-language support]"
+      status: "covered"
+      output_reference: "E7 out_of_scope — 'multi-language notification templates (English-only in MVP)'"
+      note: "Covered in E7. The constraint could also appear in E1/E2 for completeness but the deferral is preserved."
+
+    - input_element: "Out of scope: Subscription and bundle pricing"
+      source_field: "scope.out_of_scope[category=Subscription and bundle pricing]"
+      status: "covered"
+      output_reference: "E4 out_of_scope — 'Subscription or bundle pricing (deferred to Phase 2 — pay-per-session only)'"
+      note: "Constraint is preserved in E4's out_of_scope."
+
+    - input_element: "Out of scope: Academia category"
+      source_field: "scope.out_of_scope[category=Academia category]"
       status: "partial"
-      output_reference: "E3 constraints.in_scope (responsive UI mentioned)"
-      note: "The responsive-web decision is operationalized (E3 scopes responsive UI) but no epic explicitly declares native mobile apps as out of scope in its constraints. The boundary is implicit rather than formally stated."
+      output_reference: "E1 and E2 enumerate only the 4 active categories (Sport, Entrepreneurship, Business, Entertainment) without mentioning Academia"
+      note: "Academia exclusion is implied by the explicit enumeration of 4 active categories in E1 and E2, but no epic calls out Academia deferral in its out_of_scope section. Implementors relying on epics alone may not know Academia is a known Phase 2 category."
 
-    - input_element: "Out of scope — Marketplace for digital products (courses, templates, guides)"
-      source_field: "scope.out_of_scope[3]"
+    - input_element: "Out of scope: Advanced analytics beyond MVP dashboards"
+      source_field: "scope.out_of_scope[category=Advanced analytics beyond MVP dashboards]"
+      status: "covered"
+      output_reference: "E9 out_of_scope — 'cohort analysis, retention metrics, revenue forecasting, LTV, churn prediction — all deferred to Phase 2'"
+      note: "Constraint is preserved in E9's out_of_scope with specific deferred items listed."
+
+    - input_element: "Out of scope: In-platform messaging and chat"
+      source_field: "scope.out_of_scope[category=In-platform messaging and chat]"
+      status: "covered"
+      output_reference: "E3 out_of_scope — 'in-platform messaging or chat between mentor and mentee (deferred to Phase 2)'; E7 out_of_scope — 'In-platform messaging or chat between users (deferred to Phase 2)'"
+      note: "Constraint is preserved in both E3 and E7, each relevant to their functional context."
+
+    - input_element: "Out of scope: Group mentoring sessions"
+      source_field: "scope.out_of_scope[category=Group mentoring sessions]"
+      status: "covered"
+      output_reference: "E3 out_of_scope — 'Group mentoring sessions (deferred to Phase 2 — one-on-one only)'"
+      note: "Constraint is preserved in E3's out_of_scope with the one-on-one constraint clarified."
+
+    - input_element: "Out of scope: Corporate and enterprise accounts"
+      source_field: "scope.out_of_scope[category=Corporate and enterprise accounts]"
+      status: "dropped"
+      output_reference: "null"
+      note: "No epic's in_scope or out_of_scope mentions corporate/enterprise accounts or B2B functionality. This product.yaml exclusion is not reflected in the epics, creating a gap for implementors who may not know this is a known deferred capability."
+
+    - input_element: "Out of scope: Long-term mentorship programs"
+      source_field: "scope.out_of_scope[category=Long-term mentorship programs]"
+      status: "covered"
+      output_reference: "E3 out_of_scope — 'long-term mentorship programmes (deferred to Phase 2)'"
+      note: "Constraint is preserved in E3's out_of_scope."
+
+    - input_element: "Out of scope: Community forums"
+      source_field: "scope.out_of_scope[category=Community forums]"
+      status: "dropped"
+      output_reference: "null"
+      note: "No epic addresses community forums or peer networking features, either in in_scope or out_of_scope. This product.yaml exclusion is not carried forward in the epics."
+
+    - input_element: "Out of scope: Advanced support ticket system and live chat"
+      source_field: "scope.out_of_scope[category=Advanced support ticket system and live chat]"
+      status: "covered"
+      output_reference: "E7 out_of_scope — 'advanced support ticket system or live chat (deferred to Phase 2 — FAQ and help centre only)'"
+      note: "Constraint is preserved in E7's out_of_scope."
+
+    - input_element: "Out of scope: SMS communication"
+      source_field: "scope.out_of_scope[category=SMS communication]"
+      status: "covered"
+      output_reference: "E7 out_of_scope — 'SMS communication (deferred — email covers all transactional communication in MVP)'"
+      note: "Constraint is preserved in E7's out_of_scope with rationale matching the product.yaml entry."
+
+    - input_element: "Out of scope: Complex referral tiers"
+      source_field: "scope.out_of_scope[category=Complex referral tiers]"
+      status: "covered"
+      output_reference: "E10 out_of_scope — 'Complex referral tiers (multi-level referral rewards — deferred to Phase 2)'"
+      note: "Constraint is preserved in E10's out_of_scope."
+
+    # ─── Profiles ─────────────────────────────────────────────────────────────
+    - input_element: "Product Profile (PP1–PP7): User sophistication, UX maturity, persona complexity, geographic scope, integration density, delivery ambition, industry vertical"
+      source_field: "profiles.product_profile"
+      status: "covered"
+      output_reference: "Multiple epics reference PP dimensions in intent.p3 sections: E2 references PP-1 level 4 and PP-5 level 3; E3 references PP-5 level 3; E4 references PP-4 level 3 and PP-6 level 3; E5 implies PP-3 level 5 trust flywheel rationale; E6 references PP-3 level 5; E7 references PP-1 level 4; E8 references PP-4 level 3"
+      note: "All PP dimensions are referenced across the epic set's intent sections. Epics explicitly cite PP level labels (e.g., 'PP-1 level 4 (General Consumer)', 'PP-3 level 5 (Multi-Sided Platform)') to justify scope and priority decisions."
+
+    - input_element: "NFR Profile (NFR1–NFR7): Risk, security, performance, availability, compliance, scalability, data sensitivity"
+      source_field: "profiles.nfr_profile"
       status: "partial"
-      output_reference: "E2 constraints.out_of_scope (mentor content publishing excluded)"
-      note: "E2 excludes 'Mentor content publishing (blogs, courses)' but does not explicitly name digital products marketplace. Partial coverage — the spirit is captured but the explicit boundary is not stated."
+      output_reference: "E4 intent references NFR-7 level 4 (Sensitive Data) for Stripe tokenisation rationale; E8 intent references NFR-5 level 3 (Standard Compliance) and NFR-2 level 3 (Business Grade Security); NFR-3 (Performance), NFR-4 (Availability), NFR-1 (Balanced Risk), and NFR-6 (Scalability) are not addressed in any epic in_scope or out_of_scope"
+      note: "Security (NFR-2), compliance (NFR-5), and data sensitivity (NFR-7) dimensions are explicitly reflected in intent rationale. Performance (NFR-3), availability (NFR-4), and scalability (NFR-6) have no corresponding epic deliverable — these are cross-cutting non-functional requirements typically handled at the infrastructure/architecture layer rather than in functional epics."
 
-    - input_element: "Out of scope — White-label or B2B2C enterprise licensing"
-      source_field: "scope.out_of_scope[4]"
-      status: "dropped"
-      output_reference: "null"
-      note: "No epic explicitly calls out white-label or enterprise licensing as out of scope in its constraints. This product.yaml boundary is absent from the epics."
+    - input_element: "Quality Profile (QP1–QP7): Testing depth, code quality, documentation, CI/CD maturity, observability, accessibility, security testing"
+      source_field: "profiles.quality_profile"
+      status: "partial"
+      output_reference: "No epic explicitly addresses QP dimensions in in_scope or out_of_scope. E8 security hardening partially overlaps with QP-7 (security testing). E9 analytics platform visibility partially overlaps with QP-5 (observability). LTM citations reference product-profile.md and nfr-profile.md but not quality-standards artifacts."
+      note: "Quality Profile dimensions are cross-cutting engineering standards intended for quality-standards.yaml, not functional epics. Their absence from epics is architecturally expected. However, no epic explicitly commits to QP-level standards (e.g., test coverage targets, CI pipeline requirements, observability tooling), creating a traceability gap for implementors."
 
-    - input_element: "Out of scope — Advanced analytics with ML-based predictions (churn, LTV)"
-      source_field: "scope.out_of_scope[5]"
-      status: "covered"
-      output_reference: "E10 constraints.out_of_scope"
-      note: "E10 explicitly excludes 'Advanced analytics with ML-based predictions (churn, LTV) — out of scope per vision'."
-
-    - input_element: "Out of scope — Multi-language platform UI localization beyond English"
-      source_field: "scope.out_of_scope[6]"
-      status: "dropped"
-      output_reference: "null"
-      note: "No epic mentions multi-language localization as an out-of-scope exclusion. This boundary from product.yaml is absent from the epics."
-
-    - input_element: "Out of scope — Mentor-led content publishing (blogs, articles, podcasts)"
-      source_field: "scope.out_of_scope[7]"
-      status: "covered"
-      output_reference: "E2 constraints.out_of_scope"
-      note: "E2 explicitly excludes 'Mentor content publishing (blogs, courses)' covering the intent of this out-of-scope item."
-
-    - input_element: "Out of scope — Integration with external calendar providers beyond Google Calendar"
-      source_field: "scope.out_of_scope[8]"
-      status: "covered"
-      output_reference: "E4 constraints.out_of_scope"
-      note: "E4 explicitly states 'Calendar integration beyond Google Calendar (out of scope per vision)' in its out_of_scope."
-
-    - input_element: "Out of scope — Custom video infrastructure (MVP uses Zoom SDK; proprietary video deferred to Phase 2)"
-      source_field: "scope.out_of_scope[9]"
-      status: "covered"
-      output_reference: "E4 constraints.out_of_scope"
-      note: "E4 explicitly states 'Custom video infrastructure — MVP uses Zoom SDK only (out of scope per vision)'."
-
-    # ── IN-SCOPE EPICS FROM PRODUCT.YAML ─────────────────────────────────────
-
-    - input_element: "In-scope epic — Authentication and Authorization (KeyCloak SSO, MFA, RBAC)"
-      source_field: "scope.in_scope[epic=Authentication and Authorization]"
-      status: "covered"
-      output_reference: "E1 (Identity and Access Foundation)"
-      note: "E1 directly maps to this in-scope epic. Scope in E1 matches product.yaml description exactly: KeyCloak, MFA, RBAC for three roles."
-
-    - input_element: "In-scope epic — Mentor Discovery and Search (Elasticsearch, filters by domain/rating/pricing/availability/language)"
-      source_field: "scope.in_scope[epic=Mentor Discovery and Search]"
-      status: "covered"
-      output_reference: "E3 (Mentor Discovery and Search)"
-      note: "E3 directly maps to this in-scope epic with Elasticsearch and all specified filter dimensions in scope."
-
-    - input_element: "In-scope epic — Session Management (booking, calendar integration, scheduling, rescheduling, cancellation)"
-      source_field: "scope.in_scope[epic=Session Management]"
-      status: "covered"
-      output_reference: "E4 (Session Booking and Video Delivery)"
-      note: "E4 covers all session management capabilities. Video delivery is combined into the same epic, which is an appropriate structural decision."
-
-    - input_element: "In-scope epic — Payment Processing (PayU, escrow, multi-currency, commission, payouts, refunds)"
-      source_field: "scope.in_scope[epic=Payment Processing]"
-      status: "covered"
-      output_reference: "E5 (Payment Processing and Escrow)"
-      note: "E5 directly maps to this in-scope epic covering all specified capabilities."
-
-    - input_element: "In-scope epic — Quality and Ratings (post-session rating, mentor badges, domain verification, quality scoring)"
-      source_field: "scope.in_scope[epic=Quality and Ratings]"
-      status: "covered"
-      output_reference: "E6 (Quality Assurance and Ratings), E2 (domain-verified badge assignment)"
-      note: "E6 covers post-session ratings, quality scoring, and dispute initiation. Domain verification badges are split between E2 (credential-based) and E6 (quality-based) — appropriate split for supply-side vs. performance-side quality."
-
-    - input_element: "In-scope epic — Analytics Dashboard (platform metrics for admin/mentor/mentee)"
-      source_field: "scope.in_scope[epic=Analytics Dashboard]"
-      status: "covered"
-      output_reference: "E10 (Admin Operations and Analytics)"
-      note: "E10 covers all three role dashboards. Admin, mentor, and mentee analytics are explicitly in-scope in E10's constraints."
-
-    - input_element: "In-scope epic — Admin Panel (mentor approval, dispute management, financial oversight, user management, compliance monitoring)"
-      source_field: "scope.in_scope[epic=Admin Panel]"
-      status: "covered"
-      output_reference: "E10 (Admin Operations and Analytics)"
-      note: "E10 combines Admin Panel and Analytics Dashboard into one epic. All five capabilities listed in product.yaml are explicitly in-scope in E10."
-
-    - input_element: "In-scope epic — Communications (SendGrid email, FCM push, in-app messaging)"
-      source_field: "scope.in_scope[epic=Communications]"
-      status: "covered"
-      output_reference: "E8 (Platform Communications)"
-      note: "E8 directly maps with all three communication channels (SendGrid, FCM, in-app messaging) explicitly in scope."
-
-    - input_element: "In-scope epic — Acquisition and Referrals (referral link generation, tracking, reward mechanics, attribution)"
-      source_field: "scope.in_scope[epic=Acquisition and Referrals]"
-      status: "covered"
-      output_reference: "E9 (Referral and Acquisition Engine)"
-      note: "E9 directly maps with all specified capabilities in scope."
-
-    - input_element: "In-scope epic — Video Sessions (Zoom SDK integration, optional session recording)"
-      source_field: "scope.in_scope[epic=Video Sessions]"
-      status: "covered"
-      output_reference: "E4 (Session Booking and Video Delivery)"
-      note: "Video Sessions is merged into E4 rather than being a standalone epic. Both Zoom SDK integration and optional recording with consent are explicitly in E4's scope."
-
-    - input_element: "In-scope epic — Compliance and Data Protection (GDPR, TPDP, data export/deletion, audit logging, PCI DSS)"
-      source_field: "scope.in_scope[epic=Compliance and Data Protection]"
-      status: "covered"
-      output_reference: "E7 (Compliance and Data Protection)"
-      note: "E7 directly maps with all five specified capabilities in scope."
-
-    - input_element: "In-scope epic — Platform Configuration (pricing band management, commission rates, category/vertical management, feature flags)"
-      source_field: "scope.in_scope[epic=Platform Configuration]"
-      status: "dropped"
-      output_reference: "null"
-      note: "Platform Configuration is listed as a distinct in-scope epic in product.yaml but has NO corresponding epic in epics.yaml. Pricing band management appears lightly in E5 ('configurable 10-20% rates') and vertical management in E2 ('vertical selection'), but these are scattered implementation details — no epic owns configuration as a first-class concern. Feature flags, commission rate management, and category/vertical administration are not addressed by any epic's primary scope."
-
-    # ── PROFILES ─────────────────────────────────────────────────────────────
-
-    - input_element: "Profile PP-1 (User Sophistication = 4, General Consumer) — zero learning curve, mobile-first, no onboarding friction"
-      source_field: "profiles.product_profile[PP-1]"
-      status: "covered"
-      output_reference: "E1 intent.p3 (NFR-2, PP-1 citations), E3 failure_conditions (consumer expectations latency), E4 success_scenarios (frictionless join), E8 intent (PP-1)"
-      note: "PP-1 is cited across multiple epics as a quality constraint. Failure conditions in E3 and E1 explicitly reference PP-1=4 level expectations."
-
-    - input_element: "Profile PP-3 (Persona Complexity = 5, Multi-Sided Platform) — three distinct personas with different flows, RBAC"
-      source_field: "profiles.product_profile[PP-3]"
-      status: "covered"
-      output_reference: "E1 (three-role RBAC), E2 (mentor persona), E10 (role-gated dashboards)"
-      note: "PP-3 is cited in E1 intent and shapes the three-role RBAC design throughout. All dashboards in E10 are role-gated."
-
-    - input_element: "Profile PP-4 (Geographic Scope = 3, Multi-Country) — four countries, three regulatory regimes, multi-currency"
-      source_field: "profiles.product_profile[PP-4]"
-      status: "covered"
-      output_reference: "E5 (multi-currency EUR/USD/CHF/INR), E7 (GDPR, India TPDP per country), E4 (timezone-aware scheduling)"
-      note: "PP-4 geography is operationalized across E4 (timezones), E5 (currencies), and E7 (regulatory regimes)."
-
-    - input_element: "Profile NFR-2 (Security = 3, Hardened) — PCI DSS, RBAC, MFA, encryption"
-      source_field: "profiles.nfr_profile[NFR-2]"
-      status: "covered"
-      output_reference: "E1 (MFA, RBAC), E5 (PCI DSS through PayU), E7 (no raw card data storage, audit logging)"
-      note: "NFR-2 is cited in E1 intent and shapes security design across payment and auth epics."
-
-    - input_element: "Profile NFR-5 (Compliance = 4, Multi-Regime) — GDPR, India TPDP, PCI DSS, consumer protection"
-      source_field: "profiles.nfr_profile[NFR-5]"
-      status: "covered"
-      output_reference: "E7 (Compliance and Data Protection — full multi-regime scope)"
-      note: "E7 intent explicitly cites NFR-5=4 as motivation and covers all three regulatory regimes."
-
-  drifted:
-    - output_element: "E4 and Video Sessions merged into a single epic (E4: Session Booking and Video Delivery)"
-      note: "product.yaml defines 'Session Management' and 'Video Sessions' as two separate in-scope epics. epics.yaml combines them into E4. This is a structural consolidation, not scope drift — all capabilities from both product.yaml epics are present. No scope has been added beyond what product.yaml defined."
-
-    - output_element: "E10 combines 'Admin Panel' and 'Analytics Dashboard' into a single epic"
-      note: "product.yaml defines these as two separate in-scope epics. epics.yaml merges them into E10. Same assessment as E4/Video Sessions consolidation — no scope drift, all capabilities present."
+  drifted: []
 
   summary:
-    total_input_elements: 44
-    covered: 33
-    partial: 8
-    dropped: 3
-    drifted: 2
-    coverage_score: "87.5%"
-    notes: >
-      Coverage score = (33 covered + 0.5 * 8 partial) / 44 total = (33 + 4) / 44 = 84.1%.
-      Rounding to nearest 0.5%: 84.1%.
-      The three dropped elements are significant: (1) Platform Configuration epic — a named in-scope epic in product.yaml
-      has no owning epic in epics.yaml; pricing band management, feature flags, and vertical administration are
-      scattered across other epics as implementation details rather than first-class scope. (2) White-label/B2B2C
-      out-of-scope boundary is unacknowledged in any epic constraints. (3) Multi-language localization out-of-scope
-      boundary is unacknowledged. The eight partial elements are concentrated in success metric tracking instrumentation
-      (Platform Activation Rate, Mentor Utilization Rate, Time to First Session lack dedicated measurement owners)
-      and two product-level assumptions (budget governance, mentor seed acquisition strategy) with no corresponding
-      epic coverage. The two structural consolidations (Session+Video into E4; Admin+Analytics into E10) are
-      defensible and do not represent dropped scope.
+    total_input_elements: 52
+    covered: 45
+    partial: 5
+    dropped: 2
+    drifted: 0
+    coverage_score: "91.3%"

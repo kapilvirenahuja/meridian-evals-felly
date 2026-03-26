@@ -1,0 +1,729 @@
+{
+  "slug": "felly-club",
+  "name": "Felly Club",
+  "status": "DRAFT",
+  "generated_at": "2026-03-26T00:00:00.000Z",
+  "thesis": "Deliver Felly Club's core mentorship marketplace in 16 weeks and €125,000 by sequencing identity and trust foundations first, then session lifecycle and payments, then compliance and communications, and finally analytics and referral growth — each horizon gated on the stability of its predecessors.",
+  "narrative": "Felly Club's 16-week roadmap is organised around three delivery horizons, each building on verified capabilities from the one before.\n\nThe near horizon (Weeks 1–8) delivers the complete core marketplace loop — verified mentor identity (E1), mentor discovery and search (E2), session booking with video delivery (E3), and escrow-backed payment processing (E4). These four epics constitute the minimum viable marketplace: without all four, no paid session can be completed end-to-end. The near horizon is the highest-risk phase, containing two high-risk epics (E3: Session Lifecycle, E4: Payment Processing), and must resolve three critical blockers before architecture begins: GDPR recording consent (I-05), Stripe India account structure, and Stripe Connect mentor onboarding scope.\n\nThe mid horizon (Weeks 5–12) builds the trust, operational, and compliance layer that transforms a working prototype into a defensible product. Ratings and dispute resolution (E5), the unified admin portal (E6), GDPR/PCI compliance (E8), and the communication infrastructure (E7) all depend on the near horizon being stable but begin as soon as sufficient data and state machines are available. E8 is high-risk and must be validated in staging before production launch — compliance is a market-entry requirement, not a nice-to-have.\n\nThe long horizon (Weeks 9–16) delivers the growth and insight layer. Analytics dashboards (E9) and the referral programme (E10) are sequenced last because they require stable upstream data and are P2 priority — valuable for growth but not on the critical path to marketplace launch. These epics are the lowest technical risk and provide schedule recovery buffer if near or mid horizon epics experience delays.",
+  "assumptions": [
+    "Admin-driven mentor onboarding only in MVP — mentor self-registration deferred to Phase 2",
+    "Pay-per-session model only in MVP — subscriptions and bundle pricing deferred to Phase 2",
+    "Personalisation is rule-based string matching — no AI/ML recommendation engine in MVP",
+    "Session recordings accessible to admin only for dispute resolution — user playback deferred to Phase 2",
+    "Admin portal is web-only — no mobile admin access in MVP",
+    "English-only in MVP — multi-language support deferred to Phase 2",
+    "Video conferencing via Zoom or Google Meet API integration — no proprietary video infrastructure in MVP",
+    "React Native confirmed for mobile app; Next.js for web frontend; Node.js for backend services",
+    "Payment provider is Stripe — Stripe India vs Global account structure to be resolved before E4 begins"
+  ],
+  "exclusions": [
+    "Mentor self-registration — admin-curated onboarding is the quality differentiator in MVP",
+    "AI/ML recommendation engine — rule-based string matching covers MVP discovery needs",
+    "Group mentoring sessions — one-on-one sessions only in MVP",
+    "In-platform messaging and chat — email and in-app notifications cover MVP communication",
+    "Subscription and bundle pricing — pay-per-session model sufficient for MVP",
+    "Academia mentorship category — MVP limited to Sport, Entrepreneurship, Business, and Entertainment",
+    "Mobile admin access — admin portal is web-only in MVP",
+    "Multi-language support — English-only in MVP",
+    "Session recording user playback — admin-only access for dispute resolution in MVP",
+    "Advanced analytics (cohort analysis, LTV, churn prediction) — deferred to Phase 2"
+  ],
+  "decisions": [
+    {
+      "epic": "E1",
+      "horizon": "near",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": "—",
+      "reason": "Mandatory foundation — no other epic can begin without verified user identity and RBAC"
+    },
+    {
+      "epic": "E2",
+      "horizon": "near",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": "E1",
+      "reason": "Core mentor discovery is the primary value unlock for mentees — without it, verified mentors are invisible"
+    },
+    {
+      "epic": "E3",
+      "horizon": "near",
+      "priority": "P1",
+      "effort": "L",
+      "depends_on": "E1, E2",
+      "reason": "Session delivery is Felly Club's core product — without it, the platform is a directory not a marketplace"
+    },
+    {
+      "epic": "E4",
+      "horizon": "near",
+      "priority": "P1",
+      "effort": "L",
+      "depends_on": "E3",
+      "reason": "Escrow-backed payments monetise sessions and compensate mentors — required to complete the core transaction loop"
+    },
+    {
+      "epic": "E5",
+      "horizon": "mid",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": "E3, E4",
+      "reason": "Trust and quality signals require sessions and payments to be stable — sequenced after near horizon"
+    },
+    {
+      "epic": "E6",
+      "horizon": "mid",
+      "priority": "P1",
+      "effort": "L",
+      "depends_on": "E1, E3, E4",
+      "reason": "Admin operational tools depend on all core flows — without E6, admin cannot manage users, sessions, or payouts effectively"
+    },
+    {
+      "epic": "E7",
+      "horizon": "mid",
+      "priority": "P2",
+      "effort": "M",
+      "depends_on": "E1",
+      "reason": "Communication infrastructure replaces mocked notifications from E3/E4 — must ship before live users see mocked emails"
+    },
+    {
+      "epic": "E8",
+      "horizon": "mid",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": "E1, E4",
+      "reason": "GDPR and PCI compliance are market-entry requirements for EU operations — cannot launch without this epic"
+    },
+    {
+      "epic": "E9",
+      "horizon": "long",
+      "priority": "P2",
+      "effort": "M",
+      "depends_on": "E1, E3, E4",
+      "reason": "Analytics dashboards require stable upstream session and payment data — low risk, sequenced last"
+    },
+    {
+      "epic": "E10",
+      "horizon": "long",
+      "priority": "P2",
+      "effort": "S",
+      "depends_on": "E1, E4",
+      "reason": "Referral programme addresses cold-start growth risk — lowest effort epic, sequenced in long horizon"
+    }
+  ],
+  "timeline": [
+    {
+      "horizon": "near",
+      "label": "Core Marketplace (Weeks 1–8)",
+      "feature_refs": ["E1", "E2", "E3", "E4"]
+    },
+    {
+      "horizon": "mid",
+      "label": "Trust, Operations & Compliance (Weeks 5–12)",
+      "feature_refs": ["E5", "E6", "E7", "E8"]
+    },
+    {
+      "horizon": "long",
+      "label": "Growth & Insights (Weeks 9–16)",
+      "feature_refs": ["E9", "E10"]
+    }
+  ],
+  "epics": [
+    {
+      "id": "E1",
+      "name": "User Identity & Profile Foundation",
+      "strategic_goal_ref": "SG-01",
+      "description": "Establishes the core identity layer for all three personas — mentees, mentors, and platform admin — through KeyCloak-backed registration, authentication, and profile management. Provides admin-driven mentor onboarding with domain verification and verified badges, forming the trust and identity foundation every subsequent epic depends on.",
+      "bucket": "near",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": [],
+      "intent": {
+        "p1": "Today, aspiring individuals across Sport, Entrepreneurship, Business, and Entertainment have no standardised way to discover or connect with credible mentors. Accomplished professionals lack a structured channel to offer their expertise. There is no shared identity layer that verifies mentor credentials, manages mentee profiles, or gives platform administrators the tools to curate supply quality. Without this foundation, every downstream capability — discovery, booking, payment — has no verified user to operate on.",
+        "p2": "After this epic ships, mentees can self-register via email or social login, create profiles with their interests and goals, and browse the platform as authenticated users. Platform administrators can onboard mentors through a guided workflow that captures bio, expertise category, pricing, availability, and verification artefacts (LinkedIn, portfolio, proof-of-expertise). Mentors receive verified badges upon admin approval, and their profiles display trust signals visible to mentees. All three personas have distinct authenticated experiences with role-based access control.",
+        "p3": "This epic directly enables SG-01: 'Build a trusted, admin-curated mentor marketplace with domain verification and quality signals.' The admin-curated onboarding model is Felly Club's primary differentiator against free platforms (ADPList) and transactional platforms without verification (Clarity.fm). By establishing verified identity first, every subsequent epic inherits a trust layer."
+      },
+      "constraints": {
+        "in_scope": "Mentee self-registration with email and social login (Google, Apple) via KeyCloak; admin-driven mentor onboarding workflow; admin verification review and verified badge assignment; mentor and mentee profile view and edit; role-based access control for three personas; JWT session management; password reset and recovery flows.",
+        "out_of_scope": "Mentor self-registration (deferred to Phase 2); MFA beyond KeyCloak defaults; SSO/SAML enterprise integration; bulk user import; social login providers beyond Google and Apple.",
+        "must_not_break": "None at this stage — foundational epic."
+      },
+      "success_scenarios": [
+        "Given a new visitor on the web app, when they complete registration with valid email and password, then they receive a verification email, confirm their account, and land on their mentee dashboard.",
+        "Given a platform admin, when they initiate mentor onboarding with bio, expertise category, pricing, availability, and LinkedIn verification link, then the mentor profile is created in 'pending verification' status.",
+        "Given an admin reviewing a pending mentor profile, when they approve after verifying credentials, then the mentor's status changes to 'verified,' a verified badge appears on their public profile, and the mentor can log in."
+      ],
+      "failure_conditions": [
+        "A mentee completes registration but cannot log in or access their dashboard — the identity flow is broken end-to-end.",
+        "A mentor profile appears as 'verified' to mentees without admin approval — the trust layer is bypassed.",
+        "Role-based access control does not enforce persona boundaries — a mentee can access admin functions."
+      ]
+    },
+    {
+      "id": "E2",
+      "name": "Mentor Marketplace & Discovery",
+      "strategic_goal_ref": "SG-01",
+      "description": "Delivers the mentor discovery experience — listing, search, filtering, detailed profile views, and rule-based personalised recommendations — enabling mentees to find and evaluate mentors across Sport, Entrepreneurship, Business, and Entertainment categories.",
+      "bucket": "near",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": ["E1"],
+      "intent": {
+        "p1": "Mentees currently have no standardised way to discover mentors across niche domains like Sport or Entertainment. Existing platforms serve only tech and business verticals, while transactional platforms offer no structured search, filtering, or quality signals. A mentee looking for a sports mentor has no single destination with searchable, filterable, and comparable mentor profiles.",
+        "p2": "After this epic ships, mentees can browse a paginated mentor listing with category tabs, use advanced search with filters (expertise area, price range, availability, rating), view detailed mentor profiles with bio, credentials, verified badge, pricing, availability calendar, and session history. Rule-based recommendations surface relevant mentors by matching mentee interests to mentor expertise categories.",
+        "p3": "This epic is central to SG-01's vision of a 'trusted, admin-curated mentor marketplace.' Discovery is the primary value unlock for mentees — without it, verified mentors exist in the system but are invisible. The cross-domain coverage (Sport, Entrepreneurship, Business, Entertainment) is Felly Club's key differentiator."
+      },
+      "constraints": {
+        "in_scope": "Paginated mentor listing with category-based navigation; full-text search via Elasticsearch; advanced filtering by expertise, price, availability, rating, and verified status; detailed mentor profile page; rule-based personalised recommendations matching mentee interests to mentor expertise categories.",
+        "out_of_scope": "AI/ML recommendation engine (deferred to Phase 2); mentor comparison tool; saved/favourite mentors list; booking from discovery page (booking is in E3); search analytics dashboard.",
+        "must_not_break": "E1 user authentication and profile data — mentor profiles displayed in search must reflect verified status from E1 without data inconsistency."
+      },
+      "success_scenarios": [
+        "Given a logged-in mentee with stated interest in 'Entrepreneurship,' when they navigate to the marketplace, then they see a paginated list of verified Entrepreneurship mentors with name, photo, verified badge, price per session, and average rating.",
+        "Given a mentee on the marketplace, when they search 'sports coaching' and apply a $50–$100 price filter, then results show only verified Sport-category mentors in that price range.",
+        "Given a mentee viewing a mentor's detailed profile, when they review the page, then they see full bio, expertise categories, verification artefacts, verified badge, pricing for 30-min and 60-min sessions, and availability calendar preview."
+      ],
+      "failure_conditions": [
+        "A mentee searches for mentors in a populated category but receives zero results — the search index is out of sync with mentor data.",
+        "Unverified or admin-rejected mentor profiles appear in search results — the trust filter is broken.",
+        "Rule-based recommendations show mentors from unrelated categories — the matching logic does not function correctly."
+      ]
+    },
+    {
+      "id": "E3",
+      "name": "Session Lifecycle & Video Delivery",
+      "strategic_goal_ref": "SG-02",
+      "description": "Implements the complete session lifecycle — from session request and mentor acceptance through slot selection, video session delivery via Zoom or Google Meet integration, auto-recording with 3-day retention, and post-session status tracking. Delivers the core transactional experience that connects mentees with mentors in real-time.",
+      "bucket": "near",
+      "priority": "P1",
+      "effort": "L",
+      "depends_on": ["E1", "E2"],
+      "intent": {
+        "p1": "Even with verified mentors discoverable on the platform, there is no way to conduct a mentorship session. The gap between discovering a mentor and receiving guidance is entirely unstructured — mentees and mentors would need to coordinate scheduling, video calls, and session logistics outside the platform. This fragmentation creates friction, drops conversions, and makes it impossible to ensure session quality or capture session data needed for trust and payment flows.",
+        "p2": "After this epic ships, a mentee can request a session, selecting their preferred duration. The mentor receives the request and can accept or decline. On acceptance, both parties enter a slot selection flow. Once confirmed, both receive reminders. At session time, both join a virtual session room powered by Zoom or Google Meet, with auto-recording enabled for dispute resolution (admin-only access, 3-day retention). Cancellation and rescheduling follow platform-defined policies.",
+        "p3": "This epic is the primary delivery against SG-02: 'Deliver seamless end-to-end session lifecycle from discovery through post-session engagement.' The session is Felly Club's core product. The full lifecycle management (request → acceptance → scheduling → video → completion) is a key differentiator against Cameo (short video messages) and Clarity.fm (per-minute billing, no structured scheduling)."
+      },
+      "constraints": {
+        "in_scope": "Session request workflow; mentor accept/decline flow; slot selection from mentor's available calendar; session reminders (email-based); cancellation and rescheduling with platform-defined policy enforcement; session status tracking (8 states); virtual session room with Zoom or Google Meet API integration; auto-session recording with 3-day retention and admin-only access; session history view for mentees and mentors.",
+        "out_of_scope": "Group mentoring sessions; in-platform messaging (deferred to Phase 2); session recording user playback; long-term mentorship programmes; proprietary video infrastructure; payment processing (handled by E4); post-session ratings (handled by E5).",
+        "must_not_break": "E1 user authentication — session participants must be authenticated with valid roles. E2 mentor profile data — session request must reference a verified mentor."
+      },
+      "success_scenarios": [
+        "Given a mentee viewing a verified mentor's profile, when they click 'Request Session' and select 60-minute duration, then the mentor receives a session request notification and the session appears as 'requested' in both dashboards.",
+        "Given a mentor who has accepted a session request, when the mentee selects an available 60-minute slot, then both see the session as 'scheduled' with date, time, and duration confirmed, and both receive a calendar reminder email 24 hours before.",
+        "Given a scheduled session at its start time, when both the mentee and mentor click 'Join Session,' then they enter a virtual session room powered by Zoom or Google Meet, auto-recording starts, and the session status changes to 'in-progress.'"
+      ],
+      "failure_conditions": [
+        "A mentee completes a session request but the mentor never receives the notification — the request workflow is broken.",
+        "A scheduled session's virtual room fails to launch or connect to the video provider — the core deliverable is non-functional.",
+        "Session recordings are accessible to mentees or mentors rather than admin-only — the privacy constraint is violated."
+      ]
+    },
+    {
+      "id": "E4",
+      "name": "Payment Processing & Financial Operations",
+      "strategic_goal_ref": "SG-03",
+      "description": "Implements Stripe-powered payment processing with escrow-backed session payments, platform commission deduction (10–20%), multi-currency support (INR, USD, CHF, EUR), refund processing, and automated mentor payout management — establishing the financial backbone of the marketplace.",
+      "bucket": "near",
+      "priority": "P1",
+      "effort": "L",
+      "depends_on": ["E3"],
+      "intent": {
+        "p1": "Without a payment layer, Felly Club cannot monetise sessions or compensate mentors. Mentees have no way to pay for sessions within the platform, forcing off-platform payment arrangements that eliminate trust, make disputes unresolvable, and remove the platform's revenue stream. The two-sided marketplace cannot sustain itself without transparent, escrow-backed financial operations.",
+        "p2": "After this epic ships, when a mentee books a session, payment is captured via Stripe and held in escrow until session completion. Upon completion, the platform deducts its commission (10–20%, admin-configurable) and the remaining amount is queued for mentor payout. Multi-currency support (INR, USD, CHF, EUR) enables payments from all target geographies. Mentors see their earnings, pending payouts, and payout history in their dashboard.",
+        "p3": "This epic delivers SG-03: 'Establish transparent multi-currency financial operations with escrow-backed payments.' The escrow model is a key trust differentiator — Felly Club holds funds until session completion, protecting mentees from no-shows and mentors from non-payment. Multi-currency support across 4 currencies from day one is essential for target geographies."
+      },
+      "constraints": {
+        "in_scope": "Stripe payment gateway integration; escrow flow (payment captured on booking, held until session completion, released after commission deduction); platform commission calculation (10–20%, admin-configurable); multi-currency support for INR, USD, CHF, EUR; refund processing for cancelled sessions; mentor payout management; mentor earnings dashboard; payment webhook handling; tokenised payment processing.",
+        "out_of_scope": "Subscription or bundle pricing; multiple payment gateway support; saved payment methods; fraud detection beyond Stripe Radar; invoice generation; tax calculation; cryptocurrency payments.",
+        "must_not_break": "E3 session lifecycle — payment capture must integrate with session status transitions without breaking the state machine. E1 user authentication — payment operations must be tied to authenticated users with correct role enforcement."
+      },
+      "success_scenarios": [
+        "Given a mentee booking a confirmed session at $100/60min, when they confirm payment, then Stripe captures $100, the session status includes 'payment captured,' and funds are held in escrow.",
+        "Given a completed session at $100 with 15% commission, when marked as completed, then $85 is queued for mentor payout and $15 is recorded as platform revenue in the mentor's earnings dashboard and admin financial view.",
+        "Given a session cancelled within the refund-eligible window, when the system processes the cancellation, then the escrowed payment is refunded to the mentee's original payment method."
+      ],
+      "failure_conditions": [
+        "A mentee completes a session but the escrowed payment is not released to the mentor payout queue — mentors are not compensated for delivered sessions.",
+        "A session is cancelled and the mentee is charged without receiving a refund — the escrow protection fails.",
+        "Raw card data is stored on the platform instead of using Stripe tokenisation — PCI DSS scope is expanded."
+      ]
+    },
+    {
+      "id": "E5",
+      "name": "Ratings, Reviews & Dispute Resolution",
+      "strategic_goal_ref": "SG-04",
+      "description": "Delivers the platform trust framework — post-session ratings and reviews, quality monitoring with auto-flagging, dispute resolution supported by admin-accessible session recordings, mentor verification status enforcement, and abuse reporting — ensuring marketplace integrity and continuous quality improvement.",
+      "bucket": "mid",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": ["E3", "E4"],
+      "intent": {
+        "p1": "After sessions are delivered and payments processed, the platform has no mechanism for quality feedback, accountability, or dispute resolution. Mentees cannot rate their experience, making it impossible for future mentees to make informed booking decisions. When disputes arise — no-shows, quality disagreements, or misconduct — there is no structured resolution process. The absence of quality signals erodes the trust that the admin-curated model was designed to create.",
+        "p2": "After this epic ships, mentees can rate completed sessions (1–5 stars) and leave written reviews visible on the mentor's profile. Ratings below 3 stars are auto-flagged for admin review. Mentors with 3 or more cancellations are auto-flagged. Mentees or mentors can submit disputes for completed sessions, which admin resolves using the session recording (3-day retention, admin-only access from E3). The quality monitoring dashboard gives admin visibility into flagged mentors and pending disputes.",
+        "p3": "This epic delivers SG-04: 'Ensure platform trust through ratings, dispute resolution, and quality monitoring.' Trust is the differentiator that separates a curated marketplace from a directory. Felly Club's combination of ratings, auto-flagging, and recording-backed dispute resolution creates a trust flywheel — quality mentors earn visibility through ratings, poor-quality mentors are flagged and reviewed."
+      },
+      "constraints": {
+        "in_scope": "Post-session rating system (1–5 stars) with optional written review; ratings displayed on mentor profile; auto-flagging of ratings below 3 stars; auto-flagging of mentors with 3+ cancellations; dispute submission workflow; admin dispute resolution interface with access to session recording; dispute status tracking; abuse reporting; quality monitoring dashboard for admin.",
+        "out_of_scope": "AI-powered sentiment analysis; automated dispute resolution without admin; review responses by mentors; photo or video reviews; multi-dimensional ratings; reputation scoring algorithms.",
+        "must_not_break": "E3 session lifecycle — ratings and disputes reference completed sessions and must not alter session status or recording access controls. E4 payment status — dispute resolution may trigger refunds via E4's refund API."
+      },
+      "success_scenarios": [
+        "Given a mentee whose session is marked completed, when they navigate to the session detail page, then they see a rating prompt (1–5 stars) and optional text review field, and upon submission, the rating appears on the mentor's public profile.",
+        "Given a mentee who rates a session 2 stars, when the rating is submitted, then the system auto-flags the session for admin review and the admin sees the flagged session in their quality monitoring dashboard.",
+        "Given a mentee who files a dispute for a completed session, when the admin opens the dispute, then they can view the dispute details, access the session recording (if within 3-day retention), and mark the dispute as resolved."
+      ],
+      "failure_conditions": [
+        "A completed session has no rating prompt — mentees cannot provide feedback and the quality loop is broken.",
+        "A rating below 3 stars is submitted but not auto-flagged — the quality monitoring system fails to surface problematic sessions.",
+        "An admin resolving a dispute cannot access the session recording within the 3-day retention window — evidence-based resolution is non-functional."
+      ]
+    },
+    {
+      "id": "E6",
+      "name": "Platform Administration & Operations",
+      "strategic_goal_ref": "SG-01",
+      "description": "Delivers the unified admin portal for platform operations — user lifecycle management, session oversight, financial operations monitoring, system configuration (commission rates, pricing bands, cancellation policies), content management (communication templates, help centre), and platform-wide operational controls.",
+      "bucket": "mid",
+      "priority": "P1",
+      "effort": "L",
+      "depends_on": ["E1", "E3", "E4"],
+      "intent": {
+        "p1": "Without a unified admin portal, platform operations require direct database access or ad-hoc tools for every operational task. The admin persona currently has no dedicated interface to perform their curated marketplace role. Manual processes for mentor verification, dispute handling, payout management, and system configuration create operational bottlenecks that undermine the admin-curated quality model Felly Club is built on.",
+        "p2": "After this epic ships, platform administrators access a comprehensive web-based admin portal with modules for: user management (view, edit, suspend, deactivate), mentor management (onboarding queue, verification status), session management (session list with status filters), financial operations (transaction list, payout queue, refund processing, revenue summary), system configuration (commission rate, pricing bands, cancellation policy, feature toggles), and content management via Strapi CMS integration.",
+        "p3": "This epic is critical to SG-01 because the 'admin-curated' model depends entirely on admin having effective operational tools. It also supports SG-04 by providing the admin interface for dispute resolution and quality monitoring. Without E6, mentor onboarding approvals (E1), dispute resolution (E5), payout management (E4), and quality monitoring (E5) all require workarounds."
+      },
+      "constraints": {
+        "in_scope": "Web-based admin portal with role-restricted access; user lifecycle management; mentor onboarding review queue and verification workflow; session management dashboard; financial operations view; system configuration panel (commission 10–20%, pricing bands, cancellation policy, feature toggles); content management via Strapi CMS; platform-wide search across users, sessions, and transactions.",
+        "out_of_scope": "Mobile admin access (deferred to Phase 2); advanced analytics beyond operational views (covered in E9); automated suspension workflows; API management or developer portal; white-label or multi-tenant admin configuration.",
+        "must_not_break": "E1 user profiles — admin edits must be reflected consistently. E3 session data — admin session management must not corrupt session state machine transitions. E4 financial data — admin financial operations must not create inconsistencies in payment records."
+      },
+      "success_scenarios": [
+        "Given a platform admin logged into the admin portal, when they navigate to the mentor management section, then they see all mentors with status filters (pending, verified, suspended) and can view and edit any mentor's full profile including verification status.",
+        "Given a platform admin in the system configuration panel, when they change the commission rate from 15% to 18%, then all new session payments after the change apply the 18% rate while existing escrowed payments retain their original rate.",
+        "Given a platform admin in the financial operations view, when they view the payout queue, then they see all pending mentor payouts with amount, mentor name, session reference, and can trigger payout processing."
+      ],
+      "failure_conditions": [
+        "A platform admin cannot access the admin portal or is shown a mentee/mentor dashboard instead — role-based routing to the admin experience is broken.",
+        "Changes made in the system configuration panel do not take effect for new transactions — the configuration system is disconnected from the operational system.",
+        "The admin portal displays stale or inconsistent data — data synchronisation between the admin view and the operational system is broken."
+      ]
+    },
+    {
+      "id": "E7",
+      "name": "Communications & Notification Centre",
+      "strategic_goal_ref": "SG-02",
+      "description": "Implements the platform communication layer — transactional email delivery via Twilio SendGrid, in-app notification centre, and post-session engagement prompts — replacing mock email notifications from E3 and E4 with a full communication infrastructure.",
+      "bucket": "mid",
+      "priority": "P2",
+      "effort": "M",
+      "depends_on": ["E1"],
+      "intent": {
+        "p1": "E3 and E4 deliver their core flows with basic mock email notifications, but the platform lacks a structured communication infrastructure. There is no centralised notification centre, no templated email system for consistent branding, and no post-session engagement mechanism to drive repeat bookings. Users must rely on checking their dashboards manually or watching for inconsistently formatted emails.",
+        "p2": "After this epic ships, all transactional emails (session requests, confirmations, reminders, payment receipts, payout notifications) are delivered through Twilio SendGrid with branded, templated formatting. Users have an in-app notification centre accessible from any page. Post-session engagement prompts encourage mentees to book follow-up sessions. Email delivery replaces all mock notifications from E3 and E4.",
+        "p3": "This epic completes SG-02's vision of 'seamless end-to-end session lifecycle from discovery through post-session engagement.' The 'post-session engagement' dimension specifically requires communication infrastructure that nudges mentees back into the booking flow. This epic also de-mocks the basic email notifications from E3 and E4, fulfilling the Rule of Mocks as Phased Delivery."
+      },
+      "constraints": {
+        "in_scope": "Twilio SendGrid integration for transactional email; branded email templates for session lifecycle events, payment events, and account events; in-app notification centre with unread count badge; push notification infrastructure via Firebase Cloud Messaging (FCM) for mobile; post-session engagement prompts; notification preferences per user.",
+        "out_of_scope": "In-platform messaging or chat; SMS communication; complex drip campaigns or marketing automation; multi-language notification templates; advanced support ticket system.",
+        "must_not_break": "E1 user authentication and preferences — notification delivery must respect user opt-out preferences. E3 session lifecycle — replacing mock notifications must not disrupt session status transitions."
+      },
+      "success_scenarios": [
+        "Given a mentee who has just booked a session, when the booking is confirmed, then the mentee receives a branded confirmation email via SendGrid with session details and sees a notification in their in-app notification centre.",
+        "Given a mentee on any page, when they click the notification bell icon, then they see a notification centre panel showing unread notifications (newest first), each with a summary and timestamp, and can mark notifications as read.",
+        "Given a mentee whose session completed 24 hours ago, when the engagement prompt triggers, then the mentee receives an email suggesting they book a follow-up session or explore new mentors."
+      ],
+      "failure_conditions": [
+        "Transactional emails for critical events (session confirmations, payment receipts) are not delivered or land in spam consistently — the primary communication channel is unreliable.",
+        "The in-app notification centre shows no notifications despite active session and payment events — the notification pipeline is disconnected from platform events.",
+        "Replacing mock notifications from E3 and E4 with SendGrid-delivered emails introduces regressions in the session booking or payment workflow."
+      ]
+    },
+    {
+      "id": "E8",
+      "name": "Regulatory Compliance & Data Security",
+      "strategic_goal_ref": "SG-06",
+      "description": "Implements cross-geography regulatory compliance (GDPR for EU markets, TPDP for India, PCI DSS for payment data) and platform security hardening (AES-256 encryption at rest, TLS 1.2+ in transit, JWT token security) — ensuring the platform meets legal obligations across all four target geographies before market launch.",
+      "bucket": "mid",
+      "priority": "P1",
+      "effort": "M",
+      "depends_on": ["E1", "E4"],
+      "intent": {
+        "p1": "Felly Club targets four jurisdictions — India, Switzerland, USA, and Germany — each with distinct data protection regulations. The platform processes PII (names, emails, credentials), financial data (payment transactions, escrow balances), and session recordings (video content). Without explicit compliance mechanisms, the platform risks regulatory penalties, user trust violations, and potential market exclusion in EU markets.",
+        "p2": "After this epic ships, the platform implements cookie consent management with granular opt-in/opt-out for EU users. Users can exercise right-to-deletion (account deletion with cascading data removal across all stores), data export, and data access requests. PCI DSS compliance is validated through Stripe tokenisation. Platform security is hardened with AES-256 encryption at rest, TLS 1.2+ for all traffic, and JWT token security audit.",
+        "p3": "This epic delivers SG-06: 'Achieve regulatory and security compliance across all target geographies.' Without compliance, Felly Club cannot legally operate in the EU (Germany, Switzerland) or process payments securely. NFR-5 level 3 (Standard Compliance) and NFR-7 level 4 (Sensitive Data) confirm that compliance is a market-entry requirement, not optional."
+      },
+      "constraints": {
+        "in_scope": "GDPR compliance: cookie consent banner with granular opt-in/opt-out, privacy policy page, right-to-deletion workflow with cascading data removal across all platform stores, data export workflow; TPDP (India) compliance alignment; PCI DSS compliance validation (audit of Stripe tokenisation); platform security hardening: AES-256 encryption at rest, TLS 1.2+ enforcement, JWT token security audit, secure headers; audit logging of admin actions.",
+        "out_of_scope": "HIPAA compliance; SOX compliance; advanced penetration testing; DPIA documentation; cross-border data transfer mechanisms (SCCs, BCRs); ISO 27001 certification; WAF configuration beyond cloud provider defaults.",
+        "must_not_break": "E1 user authentication — security hardening must not break login flows. E4 payment processing — PCI DSS audit must not interfere with active payment processing."
+      },
+      "success_scenarios": [
+        "Given a user in Germany visiting for the first time, when the landing page loads, then a cookie consent banner appears with granular opt-in/opt-out options per category, and the user's choice is persisted and respected across subsequent page loads.",
+        "Given a registered mentee who requests account deletion, when they confirm through the right-to-deletion workflow, then their account is deactivated and all personal data is scheduled for deletion within the GDPR-mandated timeframe.",
+        "Given the platform's payment data handling, when a PCI DSS compliance audit is performed, then no raw card data (PAN, CVV, expiry) is found stored, logged, or transmitted by the platform."
+      ],
+      "failure_conditions": [
+        "The cookie consent banner does not appear for EU users, or consent choices are not respected — GDPR cookie consent requirement is violated.",
+        "A user exercises right-to-deletion but their personal data remains in the platform's database or logs — data deletion is incomplete.",
+        "Platform API traffic is served over HTTP instead of TLS 1.2+, or sensitive data is stored unencrypted — the security baseline is not met."
+      ]
+    },
+    {
+      "id": "E9",
+      "name": "Analytics & Performance Dashboards",
+      "strategic_goal_ref": "SG-05",
+      "description": "Delivers persona-specific analytics dashboards — mentor performance dashboard (earnings, session stats, ratings), mentee activity dashboard (session history, spending, favourite categories), and platform-level admin KPI dashboard (GMV, session volume, user growth, quality metrics) — providing actionable insights for all three personas.",
+      "bucket": "long",
+      "priority": "P2",
+      "effort": "M",
+      "depends_on": ["E1", "E3", "E4"],
+      "intent": {
+        "p1": "With sessions being delivered and payments flowing, all three personas lack visibility into their own performance and the platform's health. Mentors cannot see their earnings trends or session completion rates. Mentees cannot review their session history or spending patterns. Platform admin has no aggregated view of key business metrics — GMV, session volume, user growth, or quality distribution. Without analytics, decision-making for all personas is blind.",
+        "p2": "After this epic ships, mentors see a performance dashboard showing total earnings, session count, completion rate, average rating trend, and upcoming sessions. Mentees see an activity dashboard with session history, total spend, and sessions by category. Platform admin accesses a KPI dashboard with GMV, active user counts, session volume by status and category, quality metrics, and revenue metrics.",
+        "p3": "This epic delivers the analytics dimension of SG-05: 'Drive mentee acquisition through referral programme and deliver actionable analytics to all personas.' Analytics serve each persona's decision loop — mentors optimise pricing and availability based on performance data, mentees make informed booking decisions from their history, and admin monitors platform health."
+      },
+      "constraints": {
+        "in_scope": "Mentor performance dashboard: total earnings, session count, completion rate, average rating over time, cancellation count, upcoming session list; mentee activity dashboard: session history, total spend by period, sessions by category; platform admin KPI dashboard: GMV, active user counts, session volume by status and category, quality metrics, revenue metrics; data sourced from existing session, payment, and user tables.",
+        "out_of_scope": "Advanced analytics (cohort analysis, retention metrics, revenue forecasting, LTV, churn prediction — deferred to Phase 2); real-time streaming analytics; data warehouse or ETL pipeline; exportable reports; customisable dashboard widgets.",
+        "must_not_break": "E1 user profiles, E3 session data, and E4 payment records — all dashboards read from these data sources and must not modify them. Dashboard queries must not degrade platform performance for concurrent users."
+      },
+      "success_scenarios": [
+        "Given a mentor logged into their dashboard, when they navigate to the performance section, then they see their total earnings, total sessions completed, session completion rate, average rating, and a list of upcoming sessions.",
+        "Given a platform admin logged into the admin portal, when they navigate to the KPI dashboard, then they see current-period GMV, total active mentors and mentees, session volume breakdown by status, and quality metrics (average rating, open disputes, flagged mentors).",
+        "Given a mentee logged into their dashboard, when they navigate to the activity section, then they see their session history sorted by date, showing mentor name, session duration, category, rating given, and cumulative spend."
+      ],
+      "failure_conditions": [
+        "A mentor's earnings dashboard shows amounts that do not match their actual completed session payouts — the data is inconsistent with the payment system.",
+        "The admin KPI dashboard shows zero or stale data despite active sessions and transactions — the dashboard is disconnected from live data.",
+        "Dashboard page loads cause noticeable performance degradation for other users — analytics queries are not optimised and impact the production database."
+      ]
+    },
+    {
+      "id": "E10",
+      "name": "Referral Programme & User Acquisition",
+      "strategic_goal_ref": "SG-05",
+      "description": "Implements the mentee referral programme — unique referral link generation, referral tracking, and reward fulfilment on the referred user's first completed session — providing an organic acquisition channel to drive platform growth across target geographies.",
+      "bucket": "long",
+      "priority": "P2",
+      "effort": "S",
+      "depends_on": ["E1", "E4"],
+      "intent": {
+        "p1": "The two-sided marketplace faces a classic cold-start problem — without mentees, mentors have no incentive to stay; without mentors, mentees cannot find value. Paid acquisition is constrained by the €125,000 fixed budget. There is no structured mechanism for existing satisfied mentees to bring in new users, and no way to attribute new sign-ups to referral sources.",
+        "p2": "After this epic ships, every registered mentee has a unique referral link accessible from their dashboard. When a new user signs up through a referral link, the referral is tracked and attributed to the referring mentee. When the referred user completes their first paid session, the referrer receives a reward (admin-configurable type and value). The referral dashboard shows each mentee their referral link, total referrals, sign-ups, and rewards earned.",
+        "p3": "This epic delivers the acquisition dimension of SG-05: 'Drive mentee acquisition through referral programme.' The referral programme directly addresses the marketplace cold-start risk — it creates a self-reinforcing growth loop where satisfied mentees recruit new mentees at no marginal cost. PP-6 level 3 (Market-Ready v1) targeting real paying customers across 4 geographies confirms that organic acquisition channels need to be operational at launch."
+      },
+      "constraints": {
+        "in_scope": "Unique referral link generation per registered mentee; referral link sharing (copy to clipboard, share via social/email); referral tracking — attribution of new sign-ups via referral link parameter; reward trigger on referred user's first completed paid session; referral reward fulfilment (admin-configurable reward type and value); mentee referral dashboard; admin referral analytics (total referrals, conversion rate, rewards issued).",
+        "out_of_scope": "Complex referral tiers (multi-level rewards — deferred to Phase 2); mentor referral programme; referral fraud detection; time-limited referral campaigns; referral leaderboards or gamification.",
+        "must_not_break": "E1 user registration — referral tracking must integrate with the registration flow without adding friction. E4 payment processing — reward fulfilment must not interfere with session payment or payout flows."
+      },
+      "success_scenarios": [
+        "Given a registered mentee on their dashboard, when they navigate to the referral section, then they see their unique referral link with a copy-to-clipboard button and a summary of their referral activity (total referrals, sign-ups, rewards earned).",
+        "Given a new visitor who clicks a referral link, when they complete registration and subsequently complete their first paid session, then the referring mentee is credited with a successful referral and receives the configured reward.",
+        "Given a platform admin in the system configuration panel, when they set the referral reward to '$10 account credit,' then all future successful referrals issue the $10 reward to the referring mentee upon the referred user's first completed session."
+      ],
+      "failure_conditions": [
+        "A new user signs up through a referral link but the referral is not attributed to the referring mentee — the tracking mechanism is broken.",
+        "A referred user completes their first paid session but the referrer does not receive the configured reward — the reward fulfilment pipeline fails."
+      ]
+    }
+  ],
+  "risk_summary": {
+    "total_features": 10,
+    "high_risk_count": 3,
+    "medium_risk_count": 4,
+    "blocker_count": 3
+  },
+  "feasibility": [
+    {
+      "feature_ref": "E1 — User Identity & Profile Foundation",
+      "risk_level": "medium",
+      "technical_risks": [
+        {
+          "risk": "KeyCloak integration complexity — KeyCloak is a full IAM system requiring dedicated infrastructure setup, realm configuration, client registration, and RBAC role mapping for 3 distinct personas. Misconfiguration risks silent auth bypasses and broken session management.",
+          "severity": "medium",
+          "mitigation": "Use KeyCloak's official SDKs and Docker Compose for local dev, provision a managed cloud KeyCloak instance for prod. Define realm, roles, and client scopes in IaC from day one. E2E auth tests covering all 3 persona login paths on every PR."
+        },
+        {
+          "risk": "Social login OAuth flow (Google and Apple) adds 2 external OAuth provider integrations on top of KeyCloak's identity brokering. Apple's Sign In requires a paid Apple Developer account and is more restrictive than Google. Token bridging between OAuth providers and KeyCloak's internal token system adds implementation surface area.",
+          "severity": "medium",
+          "mitigation": "Implement Google first and validate the KeyCloak identity broker pattern. Apple's OAuth requirements must be validated in Sprint 1 — defer if Apple Developer account is not provisioned by kick-off."
+        },
+        {
+          "risk": "Admin-driven mentor onboarding is a multi-step workflow with file uploads (LinkedIn, portfolio, proof-of-expertise artefacts). Verification artefact storage, upload validation, and admin review queue all need to be built from scratch. File upload handling, virus scanning, and storage cost are often underestimated.",
+          "severity": "low",
+          "mitigation": "Use cloud-provider managed object storage (AWS S3 or GCS). Implement file-type and size validation on upload. Add a lightweight virus scan hook. Mock file storage in dev/test."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "E1 is the mandatory foundation — no other epic can begin implementation until E1's auth, profile, and RBAC layers are stable. E1 must ship in Sprint 1–2.",
+      "architecture_impact": "Establishes the IAM foundation: KeyCloak server, JWT token strategy, RBAC role definitions, API gateway auth middleware, and persona routing. All subsequent epics inherit this auth layer. Introduces file storage infrastructure that will be reused by E3 (session recordings) and E8 (compliance). Data model decisions for user, mentor_profile, and admin_user entities set the schema that all other services reference — a correction post-E1 is expensive."
+    },
+    {
+      "feature_ref": "E2 — Mentor Marketplace & Discovery",
+      "risk_level": "medium",
+      "technical_risks": [
+        {
+          "risk": "Elasticsearch setup, index design, and sync pipeline are non-trivial in a greenfield environment. The mentor search index must stay in sync with the relational database (profile updates, verification status changes, pricing changes). A broken sync pipeline produces stale search results — a critical UX failure for a trust-based marketplace.",
+          "severity": "high",
+          "mitigation": "Use a managed Elasticsearch service (AWS OpenSearch or Elastic Cloud). Implement event-driven sync via database change events or async message queue — not polling. Add a reconciliation job that runs nightly. Dedicated search integration tests on every PR."
+        },
+        {
+          "risk": "Rule-based recommendation matching (mentee interests → mentor expertise categories) can silently return poor results if category taxonomy is inconsistent. Category normalisation must be enforced at the data layer, not at query time.",
+          "severity": "low",
+          "mitigation": "Enforce expertise categories as an enum at the database and API validation layer — no free-text categories. Seed the taxonomy (Sport, Entrepreneurship, Business, Entertainment) as immutable values."
+        },
+        {
+          "risk": "Empty-state handling for new marketplace with low mentor supply — search returning zero results will feel broken if the platform launches with a thin mentor catalog.",
+          "severity": "low",
+          "mitigation": "Implement explicit empty-state UI with actionable copy. Consider a minimum viable mentor catalog requirement before public launch as an operational gate, documented in the launch checklist."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "Depends on E1 for verified mentor profiles — search index can only be populated after E1's mentor data model and verification workflow are stable. E3 (session booking) depends on E2 — mentees must discover a mentor before requesting a session.",
+      "architecture_impact": "Introduces Elasticsearch as a search infrastructure component — a second data store alongside the relational database. Requires an index sync strategy (event-driven or ETL). API response pagination pattern established here will be reused across E9 analytics views."
+    },
+    {
+      "feature_ref": "E3 — Session Lifecycle & Video Delivery",
+      "risk_level": "high",
+      "technical_risks": [
+        {
+          "risk": "Zoom and Google Meet API integrations are both complex and different — the epic must commit to one. Zoom's server-side SDK requires registering a Marketplace app and handling OAuth, meeting creation, recording callbacks, and webhook delivery. Third-party video provider outages directly prevent session delivery — the core product is broken.",
+          "severity": "high",
+          "mitigation": "Select ONE video provider for MVP — Zoom is the lower-risk choice given its more mature SDK. Register the Zoom Marketplace app in Sprint 1 and validate the meeting creation → join → recording → webhook pipeline in Sprint 2 before committing to full session lifecycle integration."
+        },
+        {
+          "risk": "Session state machine has 8 states (requested, accepted, scheduled, in-progress, completed, cancelled, no-show) with multiple transition triggers. State transition bugs can leave sessions in inconsistent states — e.g., a session marked 'in-progress' that never completed because the recording webhook was missed. This directly breaks E4's payment release trigger.",
+          "severity": "high",
+          "mitigation": "Model the state machine explicitly using a state machine library. Implement idempotent webhook handlers with duplicate event detection. Add a reconciliation job that detects sessions stuck in 'in-progress' beyond the maximum session duration. Integration tests covering all state transitions on every PR."
+        },
+        {
+          "risk": "Auto-recording with 3-day retention and admin-only access creates storage, lifecycle, and access control obligations. Missing a deletion on day 3 is a GDPR violation.",
+          "severity": "medium",
+          "mitigation": "Store recordings in cloud object storage with server-side encryption. Use object lifecycle rules (S3 TTL or GCS Object Lifecycle) to auto-delete after 72 hours — do not rely on application-layer deletion jobs. Admin access via signed time-limited URLs only."
+        },
+        {
+          "risk": "Recording consent for GDPR (decision point I-05) is unresolved — mandatory auto-recording without an explicit consent mechanism at session start may violate GDPR Article 7 requirements in Germany and Switzerland.",
+          "severity": "high",
+          "mitigation": "This is the critical blocker for E3. Resolve I-05 before architecture begins: confirm with legal counsel whether per-session consent or ToS consent suffices for EU markets. If per-session consent is required, add a consent gate to the 'Join Session' flow for both parties."
+        }
+      ],
+      "blockers": ["I-05 (product.yaml decision_point): Session recording consent mechanism for GDPR compliance is unresolved. Mandatory auto-recording without an explicit consent mechanism at session start may violate GDPR Article 7 (Germany, Switzerland). Must be resolved before E3 detailed design begins."],
+      "sequencing_constraints": "Depends on E1 (authenticated session participants) and E2 (verified mentor profiles for session requests). E4 (payment capture) is triggered by session booking confirmation and cannot be fully integrated until E3's booking workflow is stable.",
+      "architecture_impact": "Introduces the session state machine as the central orchestration component of the platform. Creates a webhook ingestion layer for video provider events. Establishes the recording storage infrastructure reused by E5 (dispute resolution) and audited by E8 (compliance)."
+    },
+    {
+      "feature_ref": "E4 — Payment Processing & Financial Operations",
+      "risk_level": "high",
+      "technical_risks": [
+        {
+          "risk": "Stripe escrow implementation using Payment Intents with capture-on-completion is non-trivial. The escrow model requires creating a PaymentIntent at booking (status: requires_capture), holding the funds, and capturing only on session completion — a delayed capture pattern. Stripe limits delayed capture to 7 days, creating edge cases for sessions scheduled far in advance.",
+          "severity": "high",
+          "mitigation": "Validate Stripe delayed capture (7-day limit) against maximum session scheduling horizon in E3. If mentors can schedule sessions more than 7 days ahead, implement a re-authorisation strategy. Alternatively, constrain the booking horizon to ≤7 days for MVP."
+        },
+        {
+          "risk": "Stripe Connect for mentor payouts requires each mentor to complete Stripe Connect onboarding (identity verification, bank account linking). This adds a required onboarding step to E1's mentor setup that is not explicitly modelled in the current E1 or E4 scope.",
+          "severity": "high",
+          "mitigation": "Add Stripe Connect onboarding as a required step in E1's mentor profile setup. Expose Connect onboarding status in the admin portal (E6). Block session acceptance by mentors who have not completed Connect onboarding."
+        },
+        {
+          "risk": "Multi-currency handling (INR, USD, CHF, EUR) with Stripe: INR transactions may require Stripe India (a separate Indian entity) with different onboarding, reporting, and banking requirements than Stripe's global platform. This may require two separate Stripe accounts (India and global) with different settlement rails.",
+          "severity": "high",
+          "mitigation": "Clarify currency architecture with Stripe India and Stripe Global before Sprint 1: confirm whether a single Stripe account can handle INR domestic payments alongside USD, CHF, EUR, or whether a dual-account setup is required."
+        },
+        {
+          "risk": "Webhook reliability for asynchronous Stripe events (payment confirmation, payout completion, dispute notification) is critical. Missing or duplicate webhook processing causes payment inconsistencies, stuck escrow releases, or double-credited payouts.",
+          "severity": "medium",
+          "mitigation": "Implement Stripe webhook signature validation on every event. Store all received webhook events in a log table before processing (idempotency via event ID deduplication). Add a dead-letter queue for failed webhook processing with alerting."
+        }
+      ],
+      "blockers": [
+        "Stripe India vs Stripe Global account structure must be resolved before implementation begins. INR domestic payment routing may require a separate Stripe India account with different API endpoints and settlement rails.",
+        "Stripe Connect mentor onboarding scope gap — the current E1 scope does not include Stripe Connect identity verification and bank account linking as a mentor setup step. This must be added to E1's implementation scope before E1 detailed design is locked."
+      ],
+      "sequencing_constraints": "Depends on E3 for session booking trigger (payment capture fires on booking confirmation) and session completion trigger (escrow release fires on completion). E5 (refunds for disputes) depends on E4's refund API. E6 (admin financial operations) depends on E4's transaction and payout data model.",
+      "architecture_impact": "Introduces Stripe as the payment processing backbone with Payment Intents (escrow), Stripe Connect (mentor payouts), and webhook ingestion. Establishes the financial data model (transactions, escrow records, payout queue, commission ledger) that E5, E6, and E9 read from."
+    },
+    {
+      "feature_ref": "E5 — Ratings, Reviews & Dispute Resolution",
+      "risk_level": "medium",
+      "technical_risks": [
+        {
+          "risk": "Auto-flagging triggers (ratings below 3 stars, 3+ cancellations) must fire reliably and without duplication. If the flagging job processes the same rating event twice, the admin queue fills with duplicate alerts. The flagging logic must be idempotent.",
+          "severity": "medium",
+          "mitigation": "Implement flagging as an idempotent database trigger or event handler that checks whether a flag already exists before creating a new one. Add a scheduled reconciliation job. Test flagging logic with explicit boundary cases."
+        },
+        {
+          "risk": "Session recording access for dispute resolution has a hard 3-day TTL. If a dispute is filed on day 2 and the recording auto-deletes on day 3 before the admin reviews it, the dispute is unresolvable with evidence.",
+          "severity": "medium",
+          "mitigation": "Display recording expiry countdown in the admin dispute view. Add an automated alert to admin when a dispute is filed against a session whose recording expires within 24 hours. Consider extending recording retention when a dispute is filed, subject to GDPR constraints."
+        },
+        {
+          "risk": "Abuse reporting scope is broad ('inappropriate behaviour') but the resolution workflow is not explicitly designed. Without a structured triage process, abuse reports may conflict with or duplicate dispute resolution workflows.",
+          "severity": "low",
+          "mitigation": "Treat abuse reports as a separate admin queue with a simpler workflow (open, acknowledged, resolved) distinct from the dispute workflow. Ensure they share no state machine logic. Abuse reports do not trigger refunds — disputes do."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "Depends on E3 (completed session state as the prerequisite for rating and dispute filing) and E4 (dispute resolution may trigger refund processing via E4's refund API). Sequenced to mid-bucket to ensure the full session and payment data is available for testing dispute resolution end-to-end.",
+      "architecture_impact": "Introduces the rating and review data model (tied to session and mentor entities), the auto-flagging event processing pipeline, and the dispute management state machine. Reads session recordings from E3's storage infrastructure — no new storage layer added. Triggers refund API from E4 on dispute resolution."
+    },
+    {
+      "feature_ref": "E6 — Platform Administration & Operations",
+      "risk_level": "medium",
+      "technical_risks": [
+        {
+          "risk": "Strapi CMS integration for communication templates and help centre adds a third persistent data store and requires a CMS hosting decision. Keeping the CMS in sync with SendGrid templates creates a dual-management surface where template changes in Strapi may not propagate to SendGrid automatically.",
+          "severity": "medium",
+          "mitigation": "Use a managed Strapi Cloud instance. Define a clear ownership boundary: Strapi manages help centre content; E7's SendGrid integration pulls from Strapi on template update events (webhook or periodic sync). Integration test the Strapi → SendGrid sync."
+        },
+        {
+          "risk": "System configuration changes (commission rates, pricing bands, cancellation policies) affect live production transactions. A commission rate change must be applied only to new transactions without retroactively altering escrowed payments. Without strict version-at-capture semantics, a commission rate change could corrupt in-flight payment records.",
+          "severity": "high",
+          "mitigation": "Store commission rate at the transaction level at booking time (snapshotted value, not a reference to the current config). Configuration changes must be applied with an 'effective from' timestamp. Add an admin confirmation step before commission rate changes take effect."
+        },
+        {
+          "risk": "Platform-wide search across users, sessions, and transactions is performance-sensitive in the admin portal. Ad-hoc queries against production tables without indexes or query limits will degrade performance for all platform users.",
+          "severity": "medium",
+          "mitigation": "Implement admin search against indexed columns only. Add query timeout limits and result caps. Use read replicas for admin-facing queries. Separate admin search from mentee-facing Elasticsearch search to avoid resource contention."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "Admin portal's session management module depends on E3, financial operations module depends on E4, and dispute resolution UI depends on E5. The system configuration module is needed before E4 and E3 reach their final implementation — a chicken-and-egg risk that requires stubbed configuration defaults in E3/E4.",
+      "architecture_impact": "Adds Strapi CMS as a third persistence layer. Establishes the system configuration service as a shared dependency across E3, E4, and E10. The version-at-capture pattern for commission rates sets a precedent for all price-sensitive configuration. Admin read replicas for performance-sensitive queries affect the database architecture."
+    },
+    {
+      "feature_ref": "E7 — Communications & Notification Centre",
+      "risk_level": "low",
+      "technical_risks": [
+        {
+          "risk": "Replacing mock email notifications from E3 and E4 with SendGrid-delivered emails risks introducing regressions if the mock interface contract is not cleanly abstracted. If E3 hard-coded mock notification calls rather than using an interface, E7's de-mocking effort becomes a refactor rather than a plug-in replacement.",
+          "severity": "medium",
+          "mitigation": "Define the notification interface in E3 and E4 as a proper dependency inversion — a NotificationService interface that mock and SendGrid implementations both satisfy. E3 and E4 development must be told this requirement upfront. Regression tests for E3 and E4 flows must run post-E7 integration."
+        },
+        {
+          "risk": "Firebase Cloud Messaging (FCM) for mobile push notifications requires device token registration and management. Tokens are device-specific, expire, and must be refreshed. Managing a token registry adds a persistent data concern. Push delivery is not guaranteed — silent failures require observability tooling.",
+          "severity": "low",
+          "mitigation": "Implement device token registration at mobile app launch. Handle FCM token refresh events to update the registry. For MVP, email is the primary channel — push is supplementary."
+        },
+        {
+          "risk": "SendGrid transactional email deliverability depends on domain authentication (SPF, DKIM, DMARC), sending reputation, and template quality. A new domain with no sending history is higher risk for initial spam filtering.",
+          "severity": "low",
+          "mitigation": "Set up SendGrid domain authentication (SPF, DKIM, DMARC records) in Sprint 1 as part of infrastructure provisioning — do not defer to E7's implementation sprint. Use a dedicated sending subdomain. Start with low-volume warmup."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "Depends on E1 for user notification preferences. E7 de-mocks E3 and E4 notifications — it should ship before E3 and E4 reach production to avoid running mocked notifications in a live environment.",
+      "architecture_impact": "Introduces Twilio SendGrid and Firebase Cloud Messaging as communication infrastructure. Establishes the notification service as a shared platform component. The in-app notification centre adds a new data model (notifications table, read status). The notification interface contract must be established in E3/E4 and fulfilled here."
+    },
+    {
+      "feature_ref": "E8 — Regulatory Compliance & Data Security",
+      "risk_level": "high",
+      "technical_risks": [
+        {
+          "risk": "Right-to-deletion (GDPR Article 17) with cascading data removal across all platform stores is technically complex. User data exists in: relational DB, Elasticsearch, Strapi CMS, cloud object storage (verification artefacts, session recordings), notification service, and SendGrid. A deletion job that misses any store results in a GDPR violation.",
+          "severity": "high",
+          "mitigation": "Implement a deletion orchestrator service that executes deletion in a documented sequence: (1) deactivate account, (2) cascade soft-delete across relational data, (3) remove from Elasticsearch index, (4) delete cloud storage artefacts, (5) remove from SendGrid contact list, (6) mark hard delete as complete. Add integration tests that verify data absence across all stores post-deletion."
+        },
+        {
+          "risk": "TPDP (India's Digital Personal Data Protection Act, 2023) is still in a partially notified state as of early 2026. Building compliance features for TPDP requirements that may change before MVP launch creates rework risk.",
+          "severity": "medium",
+          "mitigation": "Engage a qualified data protection counsel in India to review TPDP obligations before compliance implementation begins. At minimum, implement GDPR-equivalent controls (consent, deletion, portability) as a baseline — these are unlikely to conflict with TPDP."
+        },
+        {
+          "risk": "AES-256 encryption at rest for sensitive data fields requires field-level encryption or database-level encryption. Field-level encryption (encrypting individual columns) is more granular but requires key management infrastructure. Database-level encryption is simpler but provides coarser granularity.",
+          "severity": "medium",
+          "mitigation": "Use database-level encryption (AWS RDS encryption at rest) as the baseline. Apply field-level encryption via AWS KMS only for the most sensitive fields. Avoid encrypting fields used in WHERE clauses without tokenisation."
+        },
+        {
+          "risk": "Recording consent ambiguity (I-05) creates a direct compliance risk for E8. If E3 ships auto-recording without a legal consent mechanism and E8 is implemented in mid-bucket, there is a window where production sessions are auto-recorded without a compliant consent mechanism. This violates GDPR Article 7 in EU markets.",
+          "severity": "high",
+          "mitigation": "I-05 must be resolved before E3 and E8 begin implementation. E8 must include explicit consent audit coverage for auto-recording as part of its GDPR compliance checklist. If per-session consent is required, E3 and E8 must be co-implemented with the consent gate."
+        }
+      ],
+      "blockers": [
+        "I-05 (product.yaml decision_point): Session recording consent for GDPR compliance is shared between E3 and E8 and remains unresolved. E8 cannot complete its GDPR compliance assessment without a determination on whether blanket ToS consent or per-session consent is required for auto-recording. Legal counsel review required.",
+        "TPDP rule clarification: India's DPDP Act implementing rules were not fully published as of March 2026. Engage qualified Indian data protection counsel to confirm compliance obligations applicable to Felly Club's India operations before E8 implementation begins."
+      ],
+      "sequencing_constraints": "Depends on E1 (user identity for right-to-deletion scope) and E4 (PCI DSS audit of payment tokenisation). Sequenced to mid-bucket but must not be the last epic — compliance controls must be validated in staging before production launch.",
+      "architecture_impact": "Adds the deletion orchestrator service as a cross-cutting compliance component. The cookie consent mechanism requires frontend changes across all pages. JWT token security audit may require changes to E1's auth implementation. The compliance audit trail adds a logging infrastructure requirement shared with E9 (observability)."
+    },
+    {
+      "feature_ref": "E9 — Analytics & Performance Dashboards",
+      "risk_level": "low",
+      "technical_risks": [
+        {
+          "risk": "Dashboard queries running against production tables without proper read optimisation can degrade platform performance for concurrent users. Aggregate queries (GMV, session volume, rating distribution) are expensive without pre-computation or materialised views.",
+          "severity": "medium",
+          "mitigation": "Route all dashboard queries to a read replica — never the primary write database. Pre-compute expensive aggregates as scheduled jobs that write to summary tables. Dashboard API reads from summary tables, not ad-hoc aggregate queries. Performance test dashboard queries under simulated concurrent load."
+        },
+        {
+          "risk": "Analytics data consistency depends on the accuracy of E1 (user records), E3 (session records), and E4 (payment records). If those epics have data bugs or race conditions in state transitions, analytics dashboards will surface misleading data.",
+          "severity": "low",
+          "mitigation": "Define a data contract for each dashboard data source. Integration tests that verify dashboard values against known fixture data. Cross-reference dashboard totals against ledger-level records in automated tests."
+        },
+        {
+          "risk": "E9 is sequenced to the 'long' bucket and depends on E1, E3, and E4. If upstream epics deliver late, E9 has no data to read. This is primarily a schedule risk — the feature itself is low complexity (read-only dashboards from existing data).",
+          "severity": "low",
+          "mitigation": "Use test fixtures and synthetic data in development and QA to validate E9 without waiting for real production data from upstream epics. Dashboard development can proceed in parallel using mocked API responses."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "Depends on E1 (user data), E3 (session data), and E4 (payment data) being stable in data model and state transitions before meaningful analytics can be implemented. Read replicas and summary tables should be considered in database architecture from day one to avoid retrofitting when E9 is implemented.",
+      "architecture_impact": "No new infrastructure if read replicas are provisioned from day one. Introduces summary tables (pre-computed aggregates) as a new database concern. Dashboard API is a new service module that must be isolated from write-path APIs to prevent performance interference."
+    },
+    {
+      "feature_ref": "E10 — Referral Programme & User Acquisition",
+      "risk_level": "low",
+      "technical_risks": [
+        {
+          "risk": "Referral attribution requires tracking the referral link parameter through the registration flow without losing it if the user closes the browser or registers via social login (which redirects to an OAuth provider). Client-side cookie or localStorage storage can be cleared or lost in the OAuth redirect flow.",
+          "severity": "medium",
+          "mitigation": "Store the referral parameter server-side at the earliest possible point — on first visit with the referral link, before registration begins. Set a referral cookie with a 30-day TTL. Carry the referral parameter through the OAuth redirect state parameter."
+        },
+        {
+          "risk": "Reward fulfilment on the referred user's first completed paid session requires a pipeline from session completion → payment confirmation → referral attribution check → reward creation. If any step fails silently, the referrer is not rewarded.",
+          "severity": "low",
+          "mitigation": "Implement reward fulfilment as a decoupled event consumer triggered by session completion events. Make the reward type and value read from E6's system configuration at dispatch time. Add observability for reward dispatch events."
+        },
+        {
+          "risk": "Basic referral abuse (self-referral, disposable email abuse) is a risk that could undermine reward economics even without a full fraud detection system.",
+          "severity": "low",
+          "mitigation": "Apply minimal fraud guards: block self-referral (referral link owner cannot be the referred user), require email verification before referral attribution is counted, and use admin-configurable reward cap. Full fraud detection is deferred per scope."
+        }
+      ],
+      "blockers": [],
+      "sequencing_constraints": "Depends on E1 (user registration to attach referral attribution) and E4 (first paid session payment confirmation to trigger reward). The referral registration integration must be built into E1's registration flow as a hook — retrofitting referral tracking into a completed registration flow later adds risk.",
+      "architecture_impact": "Adds a referral tracking service (referral link generation, attribution store, reward ledger) and an event consumer for session completion events. Minimal new infrastructure — referral links are short UUIDs stored in the relational database."
+    }
+  ],
+  "critical_blockers": [
+    {
+      "blocker": "CB-1: Session Recording Consent (GDPR I-05)",
+      "severity": "critical",
+      "affected_features": ["E3", "E8"],
+      "resolution": "Engage legal counsel in EU markets to confirm whether per-session consent gate or blanket ToS consent suffices for auto-recording under GDPR Article 7 (Germany, Switzerland). Update E3's session join flow and E8's compliance scope based on the decision. Must be resolved before E3 architecture begins."
+    },
+    {
+      "blocker": "CB-2: Stripe India vs Stripe Global Account Structure",
+      "severity": "critical",
+      "affected_features": ["E4"],
+      "resolution": "Direct consultation with Stripe India sales/solutions team before architecture phase. Confirm single-account vs dual-account requirement and document in an Architecture Decision Record (ADR). This decision changes the payment service architecture — a wrong initial choice requires significant rework."
+    },
+    {
+      "blocker": "CB-3: Stripe Connect Mentor Onboarding Scope Gap",
+      "severity": "critical",
+      "affected_features": ["E1", "E4"],
+      "resolution": "Update E1's in_scope to include Stripe Connect mentor onboarding as a required mentor setup step. Validate that this does not scope-creep E1 beyond its 'M' effort estimate. If effort impact is significant, evaluate whether Connect onboarding can be deferred to a post-E1 mentor settings step."
+    }
+  ],
+  "open_questions": [
+    "I-05: What is the legal basis for auto-recording all sessions in GDPR markets (Germany, Switzerland)? Does blanket ToS consent at registration suffice, or is per-session explicit consent required under GDPR Article 7? This directly affects E3 (session join flow) and E8 (GDPR compliance implementation). (Affects: E3, E8)",
+    "I-01/I-02/I-03: Technology stack decisions (React Native vs Swift/Kotlin for mobile; Node.js vs Next.js for backend; API gateway vendor) must be finalised before E1 implementation begins. The mobile stack affects E1's social login (Apple OAuth on iOS), E3's video join flow, and E7's push notification infrastructure. (Affects: E1, E2, E3, E7)",
+    "Stripe India vs Stripe Global: Can a single Stripe account handle INR domestic transactions alongside USD, CHF, EUR? Or does the India market require a separate Stripe India account with different onboarding and settlement rails? Must be resolved before E4 implementation begins. (Affects: E4)",
+    "Stripe Connect mentor onboarding scope: The current E1 scope does not include Stripe Connect identity verification and bank account linking as a mentor setup step, but mentors cannot receive payouts (E4) without completing Connect onboarding. Should Stripe Connect onboarding be added to E1's in_scope or E4's? (Affects: E1, E4)",
+    "Configuration effective-date semantics: How should system configuration changes (commission rates, cancellation policies) behave for in-flight sessions — sessions booked under the old rate but not yet completed? This must be defined before E4 and E6 implementation begins. (Affects: E4, E6)",
+    "TPDP compliance scope: What specific obligations does India's DPDP Act (2023, partially notified as of early 2026) impose on Felly Club's India operations? Are GDPR-equivalent controls sufficient, or are there India-specific requirements (data localisation, data fiduciary registration) that affect E8? (Affects: E8)",
+    "Session recording dispute extension: If a dispute is filed against a session whose recording will expire within 24 hours, can the admin 'preserve' the recording (pausing TTL deletion) for the duration of dispute resolution? This requires a legal review of whether extended retention for dispute purposes is permissible under GDPR. (Affects: E5, E8)"
+  ]
+}

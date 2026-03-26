@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hub &mdash; felly-club</title>
+  <title>Hub — felly-club</title>
   <style>
     :root {
       --bg-primary: #1A2332;
@@ -22,280 +22,92 @@
       --border-default: #2E3D4F;
       --border-accent: #00D4FF;
       --shadow: 0 4px 24px rgba(0,0,0,0.3);
-      --font-display: 'Space Grotesk', -apple-system, sans-serif;
-      --font-body: 'DM Sans', 'Space Grotesk', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--text-primary);
-      background: var(--bg-primary);
-      min-height: 100vh;
+      font-family: 'DM Sans', 'Space Grotesk', -apple-system, sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--text-primary); background: var(--bg-primary); margin: 0;
     }
-
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 40px 24px 80px;
-    }
-
-    /* ─── Header ─────────────────────────────────────────────── */
-    .hub-header {
-      border-bottom: 1px solid var(--border-default);
-      padding-bottom: 20px;
-      margin-bottom: 8px;
-    }
-
-    .hub-title {
-      font-family: var(--font-display);
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--color-water);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .hub-subtitle {
-      font-family: var(--font-body);
-      font-size: 15px;
-      color: var(--text-secondary);
-      margin-top: 6px;
-    }
-
-    /* ─── Badges ─────────────────────────────────────────────── */
-    .badge {
-      display: inline-block;
-      padding: 3px 11px;
-      border-radius: 12px;
-      font-family: var(--font-display);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .badge-draft     { background: rgba(251,191,36,0.15); color: var(--status-draft); border: 1px solid rgba(251,191,36,0.25); }
-    .badge-validated { background: rgba(0,210,106,0.15); color: var(--status-validated); border: 1px solid rgba(0,210,106,0.25); }
-    .badge-locked    { background: rgba(0,212,255,0.12); color: var(--status-locked); border: 1px solid rgba(0,212,255,0.2); }
-
-    /* ─── Meta ───────────────────────────────────────────────── */
-    .hub-meta {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-dimmed);
-      margin-top: 10px;
-      margin-bottom: 28px;
-    }
-
-    /* ─── Section Label ──────────────────────────────────────── */
-    .section-label {
-      font-family: var(--font-display);
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--text-dimmed);
-      margin-bottom: 16px;
-    }
-
-    /* ─── Artifact Grid ──────────────────────────────────────── */
-    .artifact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    @media (max-width: 640px) {
-      .artifact-grid { grid-template-columns: 1fr; }
-      .hub-title { font-size: 24px; }
-    }
-
-    /* ─── Artifact Cards ─────────────────────────────────────── */
+    .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+    h1 { font-size: 28px; color: var(--color-water); border-bottom: 1px solid var(--border-default); padding-bottom: 8px; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-draft { background: rgba(251,191,36,0.15); color: var(--status-draft); }
+    .badge-validated { background: rgba(0,210,106,0.15); color: var(--status-validated); }
+    .badge-locked { background: rgba(0,212,255,0.15); color: var(--status-locked); }
+    .artifact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
     .artifact-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-default);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-      padding: 20px 22px;
-      text-decoration: none;
-      color: inherit;
+      background: var(--bg-secondary); border: 1px solid var(--border-default);
+      border-radius: 8px; box-shadow: var(--shadow); padding: 20px;
+      text-decoration: none; color: inherit; transition: border-color 0.15s;
       display: block;
-      transition: border-color 0.15s, box-shadow 0.15s;
     }
-
-    a.artifact-card:hover {
-      border-color: var(--border-accent);
-      box-shadow: 0 0 18px rgba(0,212,255,0.18);
-    }
-
-    .artifact-card.disabled {
-      opacity: 0.4;
-      pointer-events: none;
-      cursor: default;
-    }
-
-    .artifact-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .artifact-name {
-      font-family: var(--font-display);
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .artifact-stat {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-
-    .artifact-link-hint {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--color-water);
-      margin-top: 12px;
-      opacity: 0.7;
-    }
-
-    .artifact-pending {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-dimmed);
-      margin-top: 12px;
-    }
-
-    /* ─── Dependency Flow ────────────────────────────────────── */
-    .dep-flow {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-dimmed);
-      text-align: center;
-      margin-top: 32px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-default);
-      letter-spacing: 0.3px;
-    }
-
-    .dep-flow span.active-step {
-      color: var(--color-water);
-      font-weight: 700;
-    }
+    a.artifact-card:hover { border-color: var(--border-accent); }
+    .artifact-card.disabled { opacity: 0.4; pointer-events: none; }
+    .artifact-name { font-size: 16px; font-weight: bold; color: var(--text-primary); margin-bottom: 8px; }
+    .artifact-stat { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+    .artifact-source { font-size: 11px; color: var(--text-dimmed); margin-top: 4px; font-family: monospace; }
+    .dep-flow { font-size: 12px; color: var(--text-dimmed); margin-top: 24px; text-align: center; }
+    .generated { font-size: 12px; color: var(--text-dimmed); margin-top: 4px; }
+    @media (max-width: 600px) { .artifact-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <div class="container">
-
-    <div class="hub-header">
-      <div class="hub-title">
-        Felly Club
-        <span class="badge badge-draft">DRAFT</span>
-      </div>
-      <div class="hub-subtitle">Share | Connect | Grow &mdash; Admin-curated cross-domain mentorship marketplace</div>
-    </div>
-
-    <div class="hub-meta">
-      felly-club &nbsp;&bull;&nbsp; Generated: 2026-03-26T00:00:00.000Z &nbsp;&bull;&nbsp; discover-product phase
-    </div>
-
-    <div class="section-label">Artifacts</div>
-
+    <h1>Felly Club <span class="badge badge-locked">LOCKED</span></h1>
+    <p class="generated">felly-club &mdash; Generated: 2026-03-26T00:00:00.000Z</p>
     <div class="artifact-grid">
 
-      <!-- product.yaml: DRAFT, 6 strategic goals, brief exists -->
+      <!-- product.yaml — LOCKED, 6 strategic goals -->
       <a class="artifact-card" href="product-brief.html">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Product</div>
-          <span class="badge badge-draft">DRAFT</span>
-        </div>
-        <div class="artifact-stat">6 strategic goals &nbsp;&bull;&nbsp; 3 personas &nbsp;&bull;&nbsp; 4 geographies</div>
-        <div class="artifact-link-hint">&#8594; product-brief.html</div>
+        <div class="artifact-name">Product <span class="badge badge-locked">LOCKED</span></div>
+        <div class="artifact-stat">6 strategic goals</div>
+        <div class="artifact-source">product.yaml</div>
       </a>
 
-      <!-- roadmap.yaml: missing -->
+      <!-- roadmap — brief generated from epics.yaml + feasibility.yaml; roadmap.yaml deleted -->
+      <a class="artifact-card" href="roadmap-brief.html">
+        <div class="artifact-name">Roadmap <span class="badge badge-draft">DRAFT</span></div>
+        <div class="artifact-stat">10 epics across 3 horizons</div>
+        <div class="artifact-source">epics.yaml + feasibility.yaml</div>
+      </a>
+
+      <!-- features.yaml — missing -->
       <div class="artifact-card disabled">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Roadmap</div>
-          <span class="badge" style="background:rgba(100,116,139,0.15);color:#64748B;border:1px solid rgba(100,116,139,0.2);">PENDING</span>
-        </div>
-        <div class="artifact-stat">No artifact yet</div>
-        <div class="artifact-pending">roadmap.yaml not found</div>
+        <div class="artifact-name">Features</div>
+        <div class="artifact-stat">Not yet generated</div>
+        <div class="artifact-source">features.yaml</div>
       </div>
 
-      <!-- features.yaml: missing -->
+      <!-- architecture.yaml — missing -->
       <div class="artifact-card disabled">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Features</div>
-          <span class="badge" style="background:rgba(100,116,139,0.15);color:#64748B;border:1px solid rgba(100,116,139,0.2);">PENDING</span>
-        </div>
-        <div class="artifact-stat">No artifact yet</div>
-        <div class="artifact-pending">features.yaml not found</div>
+        <div class="artifact-name">Architecture</div>
+        <div class="artifact-stat">Not yet generated</div>
+        <div class="artifact-source">architecture.yaml</div>
       </div>
 
-      <!-- architecture.yaml: missing -->
+      <!-- tech.yaml — missing -->
       <div class="artifact-card disabled">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Architecture</div>
-          <span class="badge" style="background:rgba(100,116,139,0.15);color:#64748B;border:1px solid rgba(100,116,139,0.2);">PENDING</span>
-        </div>
-        <div class="artifact-stat">No artifact yet</div>
-        <div class="artifact-pending">architecture.yaml not found</div>
+        <div class="artifact-name">Tech</div>
+        <div class="artifact-stat">Not yet generated</div>
+        <div class="artifact-source">tech.yaml</div>
       </div>
 
-      <!-- tech.yaml: missing -->
+      <!-- scenarios.yaml — missing -->
       <div class="artifact-card disabled">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Tech</div>
-          <span class="badge" style="background:rgba(100,116,139,0.15);color:#64748B;border:1px solid rgba(100,116,139,0.2);">PENDING</span>
-        </div>
-        <div class="artifact-stat">No artifact yet</div>
-        <div class="artifact-pending">tech.yaml not found</div>
+        <div class="artifact-name">Scenarios</div>
+        <div class="artifact-stat">Not yet generated</div>
+        <div class="artifact-source">scenarios.yaml</div>
       </div>
 
-      <!-- scenarios.yaml: missing -->
+      <!-- plan.yaml — missing -->
       <div class="artifact-card disabled">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Scenarios</div>
-          <span class="badge" style="background:rgba(100,116,139,0.15);color:#64748B;border:1px solid rgba(100,116,139,0.2);">PENDING</span>
-        </div>
-        <div class="artifact-stat">No artifact yet</div>
-        <div class="artifact-pending">scenarios.yaml not found</div>
+        <div class="artifact-name">Plan</div>
+        <div class="artifact-stat">Not yet generated</div>
+        <div class="artifact-source">plan.yaml</div>
       </div>
 
-      <!-- plan.yaml: missing -->
-      <div class="artifact-card disabled">
-        <div class="artifact-card-top">
-          <div class="artifact-name">Plan</div>
-          <span class="badge" style="background:rgba(100,116,139,0.15);color:#64748B;border:1px solid rgba(100,116,139,0.2);">PENDING</span>
-        </div>
-        <div class="artifact-stat">No artifact yet</div>
-        <div class="artifact-pending">plan.yaml not found</div>
-      </div>
-
-    </div><!-- /artifact-grid -->
-
-    <div class="dep-flow">
-      <span class="active-step">product</span>
-      &nbsp;&rarr;&nbsp; roadmap
-      &nbsp;&rarr;&nbsp; features
-      &nbsp;&rarr;&nbsp; architecture
-      &nbsp;&rarr;&nbsp; tech
-      &nbsp;&rarr;&nbsp; scenarios
-      &nbsp;&rarr;&nbsp; plan
     </div>
-
-  </div><!-- /container -->
+    <p class="dep-flow">product &rarr; roadmap &rarr; features &rarr; architecture &rarr; tech &rarr; scenarios &rarr; plan</p>
+  </div>
 </body>
 </html>

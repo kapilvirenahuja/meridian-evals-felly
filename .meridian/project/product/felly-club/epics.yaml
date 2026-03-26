@@ -1,13 +1,23 @@
+# Felly Club — Scoped Epics
+# Derived from product.yaml (LOCKED)
+# Status: DRAFT — pending feasibility assessment and brief review
+
 slug: "felly-club"
 product_yaml_path: ".meridian/project/product/felly-club/product.yaml"
-time_horizon: "12 months"
-generated_at: "2026-03-25"
+time_horizon: "16 weeks"
+generated_at: "2026-03-26"
 
 epics:
+  # ─── E1: Foundation ─────────────────────────────────────────────────────────
   - id: "E1"
-    name: "Identity and Access Foundation"
+    name: "User Identity & Profile Foundation"
     strategic_goal_ref: "SG-01"
-    description: "Establish the authentication, authorization, and identity management foundation for all three personas (mentee, mentor, admin) using KeyCloak. Delivers SSO, MFA, RBAC, and social login as shared infrastructure that every downstream epic depends on."
+    description: >
+      Establishes the core identity layer for all three personas — mentees,
+      mentors, and platform admin — through KeyCloak-backed registration,
+      authentication, and profile management. Provides admin-driven mentor
+      onboarding with domain verification and verified badges, forming the
+      trust and identity foundation every subsequent epic depends on.
     bucket: "near"
     priority: "P1"
     effort: "M"
@@ -15,30 +25,98 @@ epics:
     foundation_investment: true
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/templates/epic-schema.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "Today there is no identity layer for Felly Club. Mentees, mentors, and administrators have no way to create accounts, authenticate securely, or receive role-appropriate access to platform features. Without this foundation, no other platform capability can function — search requires knowing who is searching, payments require knowing who is paying, and admin operations require elevated privileges. The three-persona model (PP-3 = 5, Multi-Sided Platform) demands role-based access control from day one, not as a retrofit."
-      p2: "After this epic ships, all three personas can register accounts (email/password or social login via Google/Apple), authenticate with MFA where required, and receive role-appropriate access to the platform. Mentees see mentee flows, mentors see mentor dashboards, and administrators access the admin panel — all governed by KeyCloak-managed RBAC policies. Session management handles secure token refresh, device-aware sessions, and forced logout capabilities. Every downstream epic can delegate identity verification to this shared infrastructure rather than building its own."
-      p3: "This epic is the prerequisite for the entire MVP launch (SG-01). Without authenticated identity and role separation, the platform cannot distinguish between a mentee browsing mentors, a mentor managing availability, and an admin approving applications. The multi-sided marketplace model collapses without trust in identity — and that trust begins with hardened authentication (NFR-2 = 3) and multi-factor verification (PP-7 = 4, Regulated Commerce). Every other epic in the roadmap declares a dependency on E1, making this the single most critical foundation investment."
+      p1: >
+        Today, aspiring individuals across Sport, Entrepreneurship, Business,
+        and Entertainment have no standardised way to discover or connect with
+        credible mentors. Accomplished professionals lack a structured channel
+        to offer their expertise. There is no shared identity layer that
+        verifies mentor credentials, manages mentee profiles, or gives
+        platform administrators the tools to curate supply quality. Without
+        this foundation, every downstream capability — discovery, booking,
+        payment — has no verified user to operate on.
+      p2: >
+        After this epic ships, mentees can self-register via email or social
+        login, create profiles with their interests and goals, and browse the
+        platform as authenticated users. Platform administrators can onboard
+        mentors through a guided workflow that captures bio, expertise
+        category, pricing, availability, and verification artefacts
+        (LinkedIn, portfolio, proof-of-expertise). Mentors receive verified
+        badges upon admin approval, and their profiles display trust signals
+        visible to mentees. All three personas — mentee, mentor, admin — have
+        distinct authenticated experiences with role-based access control.
+      p3: >
+        This epic directly enables SG-01: "Build a trusted, admin-curated
+        mentor marketplace with domain verification and quality signals."
+        The admin-curated onboarding model is Felly Club's primary
+        differentiator against free platforms with inconsistent quality
+        (ADPList) and transactional platforms without verification
+        (Clarity.fm). By establishing verified identity as the first
+        deliverable, every subsequent epic inherits a trust layer — mentor
+        discovery shows verified badges, session booking involves verified
+        parties, and payment flows operate between known entities.
     constraints:
-      in_scope: "KeyCloak integration for SSO with email/password and social login (Google, Apple). Multi-factor authentication via TOTP with optional SMS fallback. Role-based access control for three roles: mentee, mentor, admin. Secure session management with token refresh and expiry. Password reset and account recovery flows. Registration flows for mentee and mentor personas with email verification."
-      out_of_scope: "Mentor domain verification and credentialing (handled in E2). Admin user creation workflow beyond initial seed admin. Enterprise SSO/SAML integration. Biometric authentication. Hardware security keys (WebAuthn/FIDO2). Directory sync with external IdPs. Profile management beyond basic identity fields (name, email, avatar)."
-      must_not_break: "None at this stage — foundational epic."
+      in_scope: >
+        Mentee self-registration with email and social login (Google, Apple)
+        via KeyCloak; admin-driven mentor onboarding workflow with profile
+        creation, expertise category assignment (Sport, Entrepreneurship,
+        Business, Entertainment), pricing and availability setup, and
+        verification artefact upload (LinkedIn, portfolio, proof-of-expertise);
+        admin verification review and verified badge assignment; mentor and
+        mentee profile view and edit; role-based access control for three
+        personas (mentee, mentor, admin); session management with JWT tokens;
+        password reset and recovery flows; profile completeness indicators.
+      out_of_scope: >
+        Mentor self-registration (deferred to Phase 2); MFA beyond KeyCloak
+        defaults; SSO/SAML enterprise integration; bulk user import; user
+        analytics and audit trail beyond login events; social login providers
+        beyond Google and Apple; profile photo advanced editing (cropping,
+        filters); directory sync with external identity providers.
+      must_not_break: >
+        None at this stage — foundational epic.
     success_scenarios:
-      - "Given a new user visiting the platform, when they complete the registration form with valid email and password, then they receive a verification email within 60 seconds and can log in after clicking the verification link."
-      - "Given a registered mentee, when they attempt to access the admin panel URL, then they receive a 403 Forbidden response and are redirected to their mentee dashboard."
-      - "Given a user with MFA enabled, when they enter correct credentials without a TOTP code, then they are prompted for the second factor and cannot access the platform until it is provided."
+      - >
+        Given a new visitor on the Felly Club web app, when they complete
+        the registration form with valid email and password, then they
+        receive a verification email, confirm their account, and land on
+        their mentee dashboard with profile completion prompts.
+      - >
+        Given a platform administrator logged into the admin portal, when
+        they initiate mentor onboarding and fill in the mentor's bio,
+        expertise category (e.g., Sport), pricing (e.g., $50/30min),
+        availability slots, and upload a LinkedIn profile link as
+        verification, then the mentor profile is created in "pending
+        verification" status and appears in the admin review queue.
+      - >
+        Given an admin reviewing a pending mentor profile, when they approve
+        the profile after verifying credentials, then the mentor's profile
+        status changes to "verified," a verified badge appears on their
+        public profile, and the mentor can log in and see their dashboard.
     failure_conditions:
-      - "A user can access role-restricted resources (mentor dashboard, admin panel) without holding the corresponding role in KeyCloak."
-      - "Session tokens do not expire or refresh correctly, allowing stale sessions to persist beyond the configured timeout."
-      - "Registration or login flows take more than 5 seconds end-to-end under normal load, creating unacceptable friction for general consumer users (PP-1 = 4)."
+      - >
+        A mentee completes registration but cannot log in or access their
+        dashboard — the identity flow is broken end-to-end.
+      - >
+        A mentor profile is created without admin verification and appears
+        as "verified" to mentees — the trust layer is bypassed.
+      - >
+        Role-based access control does not enforce persona boundaries — a
+        mentee can access admin functions or a mentor can access another
+        mentor's private data.
 
+  # ─── E2: Marketplace Discovery ──────────────────────────────────────────────
   - id: "E2"
-    name: "Mentor Onboarding and Credentialing"
-    strategic_goal_ref: "SG-02"
-    description: "Enable domain experts in Sport, Entertainment, Business, and Entrepreneurship to register as mentors, submit credentials for domain verification, build public profiles, and receive approval through a structured admin workflow. This is the supply-side activation engine for the marketplace."
+    name: "Mentor Marketplace & Discovery"
+    strategic_goal_ref: "SG-01"
+    description: >
+      Delivers the mentor discovery experience — listing, search, filtering,
+      detailed profile views, and rule-based personalised recommendations —
+      enabling mentees to find and evaluate mentors across Sport,
+      Entrepreneurship, Business, and Entertainment categories.
     bucket: "near"
     priority: "P1"
     effort: "M"
@@ -46,277 +124,1007 @@ epics:
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/search.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/personalization.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "The mentorship marketplace faces a critical cold-start problem: without credible, domain-verified mentors in Sport and Entertainment — verticals no existing platform serves — mentees have no reason to join. Today, accomplished professionals in these domains have no structured channel to offer mentorship. Existing platforms like MentorCruise and ADPList focus on tech and design, leaving sport coaches, entertainment industry veterans, and entrepreneurship advisors without a curated onboarding path. The vision targets 50 domain-verified mentors within 8 weeks of launch, which requires a frictionless yet rigorous onboarding pipeline."
-      p2: "After this epic ships, domain experts can register as mentors, select their verticals (Sport, Entertainment, Business, Entrepreneurship), submit credentials for verification (certifications, experience documentation, portfolio links), set their session rates within platform-defined pricing bands, configure their availability, and build a public profile with a domain-verified badge. Administrators can review applications, verify credentials, approve or reject mentors with feedback, and manage the mentor pipeline through a structured workflow. The end-to-end flow from application to approved public profile is operational."
-      p3: "This epic directly serves SG-02 — establishing mentor supply in underserved verticals. The 50-mentor target within 8 weeks is only achievable if the onboarding experience is smooth enough for non-technical domain experts (PP-1 = 4, General Consumer) and rigorous enough to establish the credibility that differentiates Felly Club from platforms with self-reported profiles. Domain verification badges are a core differentiator listed in the vision — without them, Felly Club is just another mentorship listing site. This epic also feeds SG-01 by populating the supply side that the discovery and booking epics depend on."
+      p1: >
+        Mentees currently have no standardised way to discover mentors across
+        niche domains like Sport or Entertainment. Existing platforms
+        (MentorCruise, GrowthMentor) serve only tech and business verticals,
+        while transactional platforms (Clarity.fm, Cameo) offer no structured
+        search, filtering, or quality signals. A mentee looking for a sports
+        mentor or an entertainment industry guide has no single destination
+        with searchable, filterable, and comparable mentor profiles — they
+        rely on fragmented word-of-mouth or generic social media searches.
+      p2: >
+        After this epic ships, mentees can browse a paginated mentor listing
+        with category tabs (Sport, Entrepreneurship, Business, Entertainment),
+        use advanced search with filters (expertise area, price range,
+        availability, rating, language), view detailed mentor profiles with
+        bio, credentials, verified badge, pricing, availability calendar,
+        and session history. Rule-based recommendations surface relevant
+        mentors by matching mentee interests to mentor expertise categories.
+        Mentees can evaluate and compare mentors before deciding whom to
+        book — the discovery-to-decision journey is complete within the
+        platform.
+      p3: >
+        This epic is central to SG-01's vision of a "trusted, admin-curated
+        mentor marketplace." Discovery is the primary value unlock for
+        mentees — without it, verified mentors exist in the system but are
+        invisible. The cross-domain coverage (Sport, Entrepreneurship,
+        Business, Entertainment) is Felly Club's key differentiator, and
+        this epic makes that coverage navigable. PP-1 level 4 (General
+        Consumer) demands an intuitive, mobile-first search experience
+        with progressive disclosure, while PP-5 level 3 (Bidirectional)
+        indicates Elasticsearch as the search infrastructure for scalable
+        discovery across a growing mentor catalog.
     constraints:
-      in_scope: "Mentor registration flow with vertical selection (Sport, Entertainment, Business, Entrepreneurship). Credential submission for domain verification (certifications, experience, portfolio). Admin review and approval workflow with approve/reject/request-more-info states. Public mentor profile with bio, verticals, credentials, pricing, availability, and domain-verified badge. Pricing band configuration per mentor within platform-defined ranges. Availability management (weekly schedule, blocked dates)."
-      out_of_scope: "Automated credential verification via third-party APIs (manual admin review for MVP). AI-powered mentor matching or recommendation. Mentor content publishing (blogs, courses). Mentor performance analytics beyond basic profile views (handled in E10). Mentor-to-mentor networking or community features. Bulk mentor import tools."
-      must_not_break: "E1 authentication and RBAC — mentor onboarding must use existing KeyCloak roles, not create parallel auth flows."
+      in_scope: >
+        Paginated mentor listing with category-based navigation (Sport,
+        Entrepreneurship, Business, Entertainment); full-text search across
+        mentor names, bios, and expertise tags via Elasticsearch; advanced
+        filtering by expertise category, price range, availability, rating,
+        and verified status; detailed mentor profile page with bio,
+        credentials, verification artefacts, pricing per duration (30min,
+        60min), availability calendar preview, and session count; rule-based
+        personalised recommendations matching mentee stated interests to
+        mentor expertise categories (string matching); search results
+        responsive across web and mobile; empty state handling for categories
+        with no mentors.
+      out_of_scope: >
+        AI/ML recommendation engine (deferred to Phase 2 — MVP uses
+        rule-based matching only); mentor comparison tool; saved/favourite
+        mentors list; mentor availability booking from the discovery page
+        (booking is in E3); search analytics dashboard; autocomplete/
+        typeahead (may be added if effort permits but not committed);
+        mentor ranking by revenue or platform promotion.
+      must_not_break: >
+        E1 user authentication and profile data — mentor profiles displayed
+        in search must reflect the verified status and profile data from E1
+        without data inconsistency.
     success_scenarios:
-      - "Given a domain expert visiting the platform, when they complete the mentor registration form with credentials and submit for review, then their application appears in the admin approval queue within 30 seconds and they receive a confirmation email."
-      - "Given an admin reviewing a mentor application, when they approve the application with domain verification, then the mentor's public profile becomes visible in search results with a domain-verified badge within 5 minutes."
-      - "Given an approved mentor, when they set their session rate to a value outside the platform-defined pricing band, then the system rejects the rate and displays the valid range."
+      - >
+        Given a logged-in mentee with stated interest in "Entrepreneurship,"
+        when they navigate to the mentor marketplace page, then they see a
+        paginated list of verified mentors in the Entrepreneurship category,
+        each showing name, photo, expertise summary, verified badge, price
+        per session, and average rating.
+      - >
+        Given a mentee on the marketplace page, when they enter "sports
+        coaching" in the search bar and apply a price filter of "$50–$100
+        per session," then the results show only verified Sport-category
+        mentors whose pricing falls within the selected range, with matching
+        terms highlighted.
+      - >
+        Given a mentee viewing a mentor's detailed profile, when they review
+        the profile page, then they see the mentor's full bio, expertise
+        categories, verification artefacts (LinkedIn link, portfolio),
+        verified badge, pricing for 30-minute and 60-minute sessions,
+        availability calendar preview, and total completed session count.
     failure_conditions:
-      - "A mentor profile becomes publicly visible and searchable before admin approval is granted."
-      - "Domain-verified badges are displayed on mentor profiles that have not completed the credential verification workflow."
-      - "The mentor onboarding flow requires more than 10 minutes to complete for a prepared applicant, creating friction that deters supply-side acquisition."
+      - >
+        A mentee searches for mentors in a populated category but receives
+        zero results — the search index is out of sync with mentor data.
+      - >
+        Unverified or admin-rejected mentor profiles appear in search
+        results or the marketplace listing — the trust filter is broken.
+      - >
+        Rule-based recommendations show mentors from categories unrelated
+        to the mentee's stated interests — the matching logic does not
+        function correctly.
 
+  # ─── E3: Session Lifecycle ──────────────────────────────────────────────────
   - id: "E3"
-    name: "Mentor Discovery and Search"
-    strategic_goal_ref: "SG-01"
-    description: "Deliver Elasticsearch-powered mentor discovery with faceted filtering by domain vertical, rating, pricing, availability, and language. Enables mentees to find and evaluate mentors across Sport, Entertainment, Business, and Entrepreneurship verticals."
+    name: "Session Lifecycle & Video Delivery"
+    strategic_goal_ref: "SG-02"
+    description: >
+      Implements the complete session lifecycle — from session request and
+      mentor acceptance through slot selection, video session delivery via
+      Zoom or Google Meet integration, auto-recording with 3-day retention,
+      and post-session status tracking. Delivers the core transactional
+      experience that connects mentees with mentors in real-time.
     bucket: "near"
     priority: "P1"
-    effort: "M"
+    effort: "L"
     depends_on: ["E1", "E2"]
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/search.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "Mentees currently have no way to discover mentors on the platform. Without a structured discovery mechanism, even a well-stocked mentor supply is invisible to the demand side. The vision identifies 'no standardized discovery mechanism for domain-specific mentors' as a core pain point. Existing competitors either offer basic text search (MentorCruise) or rely on manually curated lists (ADPList). Mentees in niche verticals like Sport and Entertainment need domain-aware filtering that understands their specific needs — filtering by sport discipline, entertainment sub-domain, pricing range, language, and availability."
-      p2: "After this epic ships, mentees can search for mentors using full-text queries and refine results through faceted filters: domain vertical, sub-domain specialization, rating, price range, availability windows, language, and geographic proximity. Search results display mentor cards with key information (name, verified badge, rating, price, next available slot) enabling quick evaluation. Autocomplete guides mentees toward valid searches. The search experience is responsive and performs well across devices (PP-2 = 3, Multi-Channel Responsive), with sub-500ms query response times (NFR-3 = 3)."
-      p3: "Discovery is the bridge between mentor supply (SG-02) and marketplace transactions (SG-01). Without effective search, the marketplace cannot function regardless of how many mentors are onboarded. The Elasticsearch-powered approach supports the scale trajectory from initial 50 mentors to thousands, with relevance tuning capability that improves as usage data accumulates. This is a critical path item for the MVP — session booking (E4) and payment (E5) are meaningless without mentees first finding mentors."
+      p1: >
+        Even with verified mentors discoverable on the platform, there is no
+        way to actually conduct a mentorship session. The gap between
+        discovering a mentor and receiving guidance is entirely unstructured —
+        mentees and mentors would need to coordinate scheduling, video calls,
+        and session logistics outside the platform through email, calendar
+        invites, and third-party video tools. This fragmentation creates
+        friction, drops conversions, and makes it impossible for the platform
+        to ensure session quality, enforce cancellation policies, or capture
+        the session data needed for trust and payment flows downstream.
+      p2: >
+        After this epic ships, a mentee can request a session with a
+        discovered mentor, selecting their preferred duration (30 or 60
+        minutes). The mentor receives the request and can accept or decline.
+        On acceptance, both parties enter a slot selection flow where the
+        mentee picks from the mentor's available calendar slots. Once a slot
+        is confirmed, both receive reminders. At session time, both join a
+        virtual session room powered by Zoom or Google Meet integration,
+        with auto-recording enabled for dispute resolution purposes (admin-
+        only access, 3-day retention). Cancellation and rescheduling follow
+        platform-defined policies. After the session completes, both parties
+        see the session marked as completed in their dashboards.
+      p3: >
+        This epic is the primary delivery against SG-02: "Deliver seamless
+        end-to-end session lifecycle from discovery through post-session
+        engagement." The session is Felly Club's core product — without it,
+        the platform is a directory, not a marketplace. The full lifecycle
+        management (request → acceptance → scheduling → video → completion)
+        is a key differentiator against Cameo (short video messages, not
+        sessions) and Clarity.fm (per-minute billing, no structured
+        scheduling). PP-5 level 3 (Bidirectional) confirms the need for
+        deep integration with video providers (Zoom/Google Meet) including
+        recording callbacks and calendar events.
     constraints:
-      in_scope: "Elasticsearch index for approved mentor profiles. Full-text search across mentor name, bio, and credentials. Faceted filtering by domain vertical, sub-domain, rating, price range, availability, language, and country. Mentor card display in search results with key attributes. Autocomplete and typeahead for search queries. Sort options (relevance, rating, price, availability). Responsive search UI across desktop and mobile browsers."
-      out_of_scope: "AI-powered mentor-mentee matching algorithms (out of scope per vision). Semantic or vector-based search. Personalized search ranking based on mentee behavior. Saved searches or search alerts. Geographic map-based discovery. Search analytics dashboard (handled in E10)."
-      must_not_break: "E2 mentor profiles — search indexes must reflect current approved mentor data without lag beyond 5 minutes."
+      in_scope: >
+        Session request workflow (mentee selects duration and sends request
+        to mentor); mentor accept/decline flow with reason capture on
+        decline; slot selection from mentor's available calendar after
+        acceptance; session reminders (email-based — notifications mocked
+        until E7 delivers in-app notification centre); cancellation and
+        rescheduling with platform-defined policy enforcement (admin-
+        configurable via E6); session status tracking (requested, accepted,
+        scheduled, in-progress, completed, cancelled, no-show); virtual
+        session room with Zoom or Google Meet API integration; auto-session
+        recording with 3-day retention and admin-only access; session
+        history view for mentees and mentors in their dashboards.
+      out_of_scope: >
+        Group mentoring sessions (deferred to Phase 2 — one-on-one only);
+        in-platform messaging or chat between mentor and mentee (deferred to
+        Phase 2 — communication via session request and platform
+        notifications only); session recording user playback (deferred to
+        Phase 2 — recordings are admin-only for dispute resolution);
+        long-term mentorship programmes (deferred to Phase 2); proprietary
+        video infrastructure (uses Zoom/Google Meet APIs); payment
+        processing for sessions (handled by E4); post-session ratings
+        (handled by E5); in-app notification centre (handled by E7 —
+        email-based notifications used as interim).
+      must_not_break: >
+        E1 user authentication — session participants must be authenticated
+        users with valid roles (mentee requesting, mentor accepting). E2
+        mentor profile data — session request must reference a verified
+        mentor whose profile and availability data are consistent with
+        what was displayed during discovery.
     success_scenarios:
-      - "Given a mentee searching for 'sport coaching', when they apply the Sport vertical filter and set a price range of EUR 30-80, then only approved mentors matching both criteria appear in results within 500ms."
-      - "Given a mentee typing 'entre' in the search bar, when autocomplete activates, then suggestions including 'Entrepreneurship' and matching mentor names appear within 200ms."
-      - "Given 50 approved mentors across four verticals, when a mentee searches without filters, then results are ranked by relevance with domain-verified mentors receiving a visible boost."
+      - >
+        Given a mentee viewing a verified mentor's profile, when they click
+        "Request Session" and select a 60-minute duration, then the mentor
+        receives a session request notification (email), and the session
+        appears as "requested" in both the mentee's and mentor's dashboards.
+      - >
+        Given a mentor who has accepted a session request, when the mentee
+        selects an available 60-minute slot from the mentor's calendar, then
+        both parties see the session as "scheduled" with date, time, and
+        duration confirmed, and both receive a calendar reminder email 24
+        hours before the session.
+      - >
+        Given a scheduled session at its start time, when both the mentee
+        and mentor click "Join Session," then they enter a virtual session
+        room powered by Zoom or Google Meet, auto-recording starts, and the
+        session status changes to "in-progress."
+      - >
+        Given a mentee who needs to cancel a scheduled session, when they
+        cancel within the platform's cancellation policy window, then the
+        session status changes to "cancelled," the mentor is notified, and
+        the calendar slot is freed for future booking.
     failure_conditions:
-      - "Search returns mentors who are not approved or whose profiles are incomplete, exposing unverified content to mentees."
-      - "Faceted filter counts are inaccurate — showing 12 mentors for a filter combination that actually yields 8 results."
-      - "Search latency exceeds 1 second for standard queries, degrading the discovery experience below consumer expectations (PP-1 = 4)."
+      - >
+        A mentee completes a session request but the mentor never receives
+        the notification — the request workflow is broken and sessions
+        cannot proceed.
+      - >
+        A scheduled session's virtual room fails to launch or connect to
+        the video provider — the core deliverable (video mentorship) is
+        non-functional.
+      - >
+        Session recordings are accessible to mentees or mentors rather than
+        admin-only — the privacy constraint is violated, creating regulatory
+        and trust risk.
+      - >
+        Cancellation or rescheduling bypasses platform policy — a mentee
+        cancels outside the policy window without consequences, or a mentor
+        declines without the decline being tracked.
 
+  # ─── E4: Payments ───────────────────────────────────────────────────────────
   - id: "E4"
-    name: "Session Booking and Video Delivery"
-    strategic_goal_ref: "SG-01"
-    description: "Enable mentees to book 30-minute or 60-minute sessions with mentors, manage scheduling with calendar integration, and conduct sessions via Zoom SDK-powered in-platform video delivery. Covers the full session lifecycle from booking through completion."
+    name: "Payment Processing & Financial Operations"
+    strategic_goal_ref: "SG-03"
+    description: >
+      Implements Stripe-powered payment processing with escrow-backed session
+      payments, platform commission deduction (10–20%), multi-currency support
+      (INR, USD, CHF, EUR), refund processing, and automated mentor payout
+      management — establishing the financial backbone of the marketplace.
     bucket: "near"
     priority: "P1"
     effort: "L"
-    depends_on: ["E1", "E2", "E3"]
+    depends_on: ["E3"]
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/payments.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "Today there is no mechanism for mentees to book sessions with mentors or for those sessions to be delivered. The marketplace has supply (E2) and discovery (E3) but no transaction mechanism — the equivalent of a store with products on shelves but no checkout counter. Scheduling across time zones (India, Switzerland, USA, Germany — PP-4 = 3) adds complexity that manual coordination cannot handle. Existing competitors either lack built-in video (MentorCruise, GrowthMentor redirect to external tools) or offer phone-only delivery (Clarity.fm). The vision positions built-in video delivery as a core differentiator."
-      p2: "After this epic ships, mentees can view a mentor's available time slots (synced from mentor availability settings), select a 30-minute or 60-minute session format, book a session with automatic timezone conversion, and receive confirmation with calendar invites. Mentors receive booking notifications and can manage their upcoming sessions. Both parties join sessions through Zoom SDK embedded in the platform — no external tool switching required. Sessions can be rescheduled or cancelled according to configurable policies (e.g., 24-hour cancellation window). Optional session recording is available with mutual consent. The session lifecycle flows from booked to in-progress to completed, triggering downstream events (payment release in E5, rating prompt in E6)."
-      p3: "Session booking and delivery is the core transaction of the marketplace and the centerpiece of SG-01. Without it, Felly Club is a directory, not a marketplace. The Zoom SDK integration eliminates the friction of switching to external video tools — a differentiator over MentorCruise and GrowthMentor. The session lifecycle also creates the trigger events that downstream epics depend on: payment release (E5) fires on session completion, and the rating prompt (E6) fires post-session. This epic transforms Felly Club from a listing platform into a functional marketplace."
+      p1: >
+        Without a payment layer, Felly Club cannot monetise sessions or
+        compensate mentors. Mentees have no way to pay for sessions within
+        the platform, forcing off-platform payment arrangements that
+        eliminate trust, make disputes unresolvable, and remove the
+        platform's revenue stream. Mentors have no structured payout
+        mechanism, reducing their incentive to participate. The two-sided
+        marketplace cannot sustain itself without transparent, escrow-backed
+        financial operations that protect both parties and capture platform
+        commission.
+      p2: >
+        After this epic ships, when a mentee books a session, payment is
+        captured via Stripe and held in escrow until session completion.
+        Upon completion, the platform deducts its commission (10–20%,
+        admin-configurable) and the remaining amount is queued for mentor
+        payout. Mentees can pay in their local currency (INR, USD, CHF,
+        or EUR) with Stripe handling conversion. Refund processing is
+        available for cancelled sessions per platform policy. Mentors see
+        their earnings, pending payouts, and payout history in their
+        dashboard. The admin can monitor all financial transactions,
+        configure commission rates, and manage payout schedules.
+      p3: >
+        This epic delivers SG-03: "Establish transparent multi-currency
+        financial operations with escrow-backed payments." The escrow model
+        is a key trust differentiator — unlike Clarity.fm's per-minute
+        billing or ADPList's free model, Felly Club holds funds until
+        session completion, protecting mentees from no-shows and mentors
+        from non-payment. Multi-currency support across 4 currencies from
+        day one (PP-4 level 3, Multi-Country) is essential for the
+        target geographies (India, Switzerland, USA, Germany). NFR-7
+        level 4 (Sensitive data) mandates tokenised payment processing
+        via Stripe to avoid PCI DSS scope expansion.
     constraints:
-      in_scope: "Session booking flow for 30-minute and 60-minute formats. Mentor availability display with timezone-aware slot selection. Google Calendar integration for calendar invites. Booking confirmation, reminder, and cancellation notifications. Zoom SDK integration for in-platform video sessions. Session rescheduling and cancellation with configurable policies. Optional session recording with mutual consent toggle. Session lifecycle state machine: booked, confirmed, in-progress, completed, cancelled, no-show."
-      out_of_scope: "Group mentorship sessions or cohort-based programs (out of scope per vision). Calendar integration beyond Google Calendar (out of scope per vision). Custom video infrastructure — MVP uses Zoom SDK only (out of scope per vision). AI-generated session notes or transcription. Session replay or on-demand recording access. Recurring session scheduling (weekly standing sessions)."
-      must_not_break: "E1 authentication — session access must enforce that only the booked mentor and mentee can join. E2 mentor profiles — availability displayed in booking must reflect current mentor settings. E3 search — session booking actions initiated from search results must preserve search context for back navigation."
+      in_scope: >
+        Stripe payment gateway integration for session payment capture;
+        escrow flow — payment captured on booking, held until session
+        completion, released to mentor payout queue after commission
+        deduction; platform commission calculation and deduction (10–20%,
+        admin-configurable rate); multi-currency support for INR, USD, CHF,
+        and EUR via Stripe; refund processing for cancelled sessions per
+        platform cancellation policy; mentor payout management — earnings
+        calculation, payout queue, payout processing via Stripe Connect or
+        equivalent; mentor earnings dashboard (earnings, pending payouts,
+        payout history); payment webhook handling for asynchronous Stripe
+        events; tokenised payment processing (no raw card data stored on
+        platform).
+      out_of_scope: >
+        Subscription or bundle pricing (deferred to Phase 2 — pay-per-
+        session only); multiple payment gateway support or gateway failover;
+        saved payment methods for repeat purchases; fraud detection beyond
+        Stripe's built-in Radar; invoice generation; payment analytics
+        dashboard (covered in E9); tax calculation and filing per
+        jurisdiction; cryptocurrency payments; installment payments.
+      must_not_break: >
+        E3 session lifecycle — payment capture must integrate with session
+        status transitions (booking triggers payment, completion triggers
+        payout queue, cancellation triggers refund evaluation) without
+        breaking the session state machine. E1 user authentication —
+        payment operations must be tied to authenticated users with correct
+        role enforcement (mentees pay, mentors receive payouts, admin
+        configures rates).
     success_scenarios:
-      - "Given a mentee viewing a mentor's profile, when they select an available 60-minute slot on a future date, then a booking is created with a calendar invite sent to both parties and the slot is marked unavailable for other mentees within 30 seconds."
-      - "Given a booked session starting in 5 minutes, when the mentee clicks 'Join Session', then the Zoom SDK loads within the platform and connects both parties without requiring an external Zoom application or account."
-      - "Given a mentee requesting cancellation 48 hours before a session, when the cancellation policy allows 24-hour notice, then the session is cancelled, the slot is released back to the mentor's availability, and both parties receive cancellation confirmation."
+      - >
+        Given a mentee booking a confirmed session with a mentor priced at
+        $100/60min, when the mentee enters their payment details and
+        confirms, then Stripe captures the $100 payment, the session status
+        includes "payment captured," and the funds are held in escrow (not
+        released to the mentor).
+      - >
+        Given a completed session where the mentee paid $100 and the
+        platform commission is 15%, when the session is marked as completed,
+        then $85 is queued for mentor payout and $15 is recorded as
+        platform revenue, visible in the mentor's earnings dashboard and
+        the admin financial view.
+      - >
+        Given a mentee in Germany paying in EUR for a session priced by a
+        mentor in INR, when the payment is processed, then Stripe handles
+        the currency conversion, the mentee is charged in EUR, and the
+        mentor's payout is calculated in their configured currency.
+      - >
+        Given a session cancelled within the platform's refund-eligible
+        window, when the admin or system processes the cancellation, then
+        the escrowed payment is refunded to the mentee's original payment
+        method and the session's financial status shows "refunded."
     failure_conditions:
-      - "Two mentees successfully book the same time slot with the same mentor — a double-booking occurs."
-      - "Session video fails to connect for either party and no fallback or error guidance is provided, leaving users stranded."
-      - "Timezone conversion errors cause sessions to display at wrong times for users in different countries, leading to missed sessions."
-      - "Session lifecycle state transitions allow invalid paths (e.g., a cancelled session transitioning to completed)."
+      - >
+        A mentee completes a session but the escrowed payment is not
+        released to the mentor payout queue — mentors are not compensated
+        for delivered sessions.
+      - >
+        A session is cancelled and the mentee is charged without receiving
+        a refund — the escrow protection fails and mentee trust is broken.
+      - >
+        Raw card data is stored on the platform instead of using Stripe
+        tokenisation — PCI DSS scope is expanded and data security is
+        compromised.
 
+  # ─── E5: Trust & Quality ────────────────────────────────────────────────────
   - id: "E5"
-    name: "Payment Processing and Escrow"
-    strategic_goal_ref: "SG-03"
-    description: "Implement PayU-powered payment processing with escrow hold-and-release, multi-currency support across four countries, platform commission calculation, mentor payouts, and refund workflows. Delivers the financial trust infrastructure that differentiates Felly Club."
-    bucket: "near"
+    name: "Ratings, Reviews & Dispute Resolution"
+    strategic_goal_ref: "SG-04"
+    description: >
+      Delivers the platform trust framework — post-session ratings and
+      reviews, quality monitoring with auto-flagging, dispute resolution
+      supported by admin-accessible session recordings, mentor verification
+      status enforcement, and abuse reporting — ensuring marketplace
+      integrity and continuous quality improvement.
+    bucket: "mid"
     priority: "P1"
-    effort: "L"
-    depends_on: ["E1", "E4"]
+    effort: "M"
+    depends_on: ["E3", "E4"]
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/payments.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "Today there is no mechanism to process payments, hold funds in escrow during sessions, calculate platform commissions, or pay mentors. The marketplace has sessions (E4) but no financial layer — mentees cannot pay and mentors cannot earn. This is not merely a feature gap but a trust gap: without escrow-based payment protection, mentees risk paying for no-show mentors and mentors risk delivering sessions without receiving payment. Existing competitors lack escrow (MentorCruise, ADPList) or use per-minute billing without session guarantees (Clarity.fm). The multi-country operation (India, Switzerland, USA, Germany) adds multi-currency complexity that most competitors avoid entirely."
-      p2: "After this epic ships, mentees can pay for sessions at booking time with funds held in escrow until session completion. Upon session completion, the platform automatically calculates the 10-20% commission, releases the mentor's share, and records the transaction. Multi-currency support handles EUR, USD, CHF, and INR with transparent conversion. Refund workflows process full and partial refunds for cancelled or disputed sessions. Mentor payouts are processed on a configurable schedule (weekly or bi-weekly) with payout history and earnings dashboards. The entire payment flow is PCI DSS compliant through PayU's gateway — the platform never handles raw card data."
-      p3: "This epic is central to SG-03 — delivering trust and transparency as core differentiators. Escrow protection is the financial mechanism that backs the platform's quality guarantee: mentees pay only for completed sessions, and mentors are guaranteed payment for delivered sessions. The 10-20% commission model generates platform revenue (target: EUR 8-15 per session). Multi-currency support enables the four-country launch (SG-01) without forcing currency conversion onto users. PCI DSS compliance through PayU aligns with SG-04's regulatory compliance goals. Without this epic, Felly Club has no revenue model and no financial trust mechanism."
+      p1: >
+        After sessions are delivered and payments processed, the platform
+        has no mechanism for quality feedback, accountability, or dispute
+        resolution. Mentees cannot rate or review their experience, making
+        it impossible for future mentees to make informed booking decisions.
+        Poor-quality mentors face no consequences, and excellent mentors
+        receive no recognition. When disputes arise — no-shows, session
+        quality disagreements, or misconduct — there is no structured
+        resolution process. The absence of quality signals erodes the
+        trust that the admin-curated model was designed to create.
+      p2: >
+        After this epic ships, mentees can rate completed sessions (1–5
+        stars) and leave written reviews visible on the mentor's profile.
+        Ratings below 3 stars are auto-flagged for admin review. Mentors
+        with 3 or more cancellations are auto-flagged for quality
+        monitoring. Mentees or mentors can submit disputes for completed
+        sessions, which admin resolves using the session recording (3-day
+        retention, admin-only access from E3). Abuse reports can be filed
+        by either party. The quality monitoring dashboard gives admin
+        visibility into flagged mentors, pending disputes, and platform-
+        wide quality trends.
+      p3: >
+        This epic delivers SG-04: "Ensure platform trust through ratings,
+        dispute resolution, and quality monitoring." Trust is the
+        differentiator that separates a curated marketplace from a
+        directory. ADPList's free model has inconsistent quality because
+        there's no accountability loop. Clarity.fm has no dispute
+        resolution or session recordings. Felly Club's combination of
+        ratings, auto-flagging, and recording-backed dispute resolution
+        creates a trust flywheel — quality mentors earn visibility through
+        ratings, poor-quality mentors are flagged and reviewed, and
+        disputes are resolved with evidence rather than he-said-she-said.
     constraints:
-      in_scope: "PayU integration for card payments and local payment methods. Escrow hold-and-release tied to session lifecycle (hold at booking, release at completion). Multi-currency support for EUR, USD, CHF, and INR. Platform commission calculation at configurable 10-20% rates. Mentor payout processing on weekly/bi-weekly schedules. Full and partial refund workflows for cancellations and disputes. Transaction history and earnings dashboards for mentors. Payment confirmation and receipt emails. Idempotent payment requests to prevent duplicate charges."
-      out_of_scope: "Subscription or recurring billing models. Multiple payment gateway failover (PayU only for MVP). Installment payment plans. Direct bank transfer (ACH/SEPA) — only gateway-supported methods. Cryptocurrency or alternative payment methods. Advanced fraud detection beyond PayU's built-in tools. Automated tax calculation and filing per jurisdiction."
-      must_not_break: "E1 authentication — payment flows must enforce authenticated sessions only. E4 session lifecycle — payment state transitions must align with session state transitions (escrow release on completion, refund on cancellation)."
+      in_scope: >
+        Post-session rating system (1–5 stars) with optional written review;
+        ratings displayed on mentor profile page (average rating, review
+        count, individual reviews); auto-flagging of ratings below 3 stars
+        for admin review; auto-flagging of mentors with 3 or more
+        cancellations; dispute submission workflow (mentee or mentor can
+        file a dispute for a completed session with reason and description);
+        admin dispute resolution interface with access to session recording
+        from E3; dispute status tracking (submitted, under review, resolved);
+        abuse reporting for inappropriate behaviour; quality monitoring
+        dashboard for admin showing flagged mentors, pending disputes, and
+        quality metrics.
+      out_of_scope: >
+        AI-powered sentiment analysis of reviews; automated dispute
+        resolution without admin involvement; review responses by mentors;
+        review incentives (request review after delivery); photo or video
+        reviews; multi-dimensional ratings (separate scores for quality,
+        punctuality, etc.); review moderation beyond admin approval;
+        reputation scoring or ranking algorithms based on ratings.
+      must_not_break: >
+        E3 session lifecycle — ratings and disputes reference completed
+        sessions and must not alter session status or recording access
+        controls. E4 payment status — dispute resolution may trigger
+        refunds but must not bypass the payment refund workflow established
+        in E4. E1 user profiles — ratings and reviews must display alongside
+        mentor profile data from E1 without data conflicts.
     success_scenarios:
-      - "Given a mentee booking a session priced at EUR 75, when they complete the payment form, then EUR 75 is charged and held in escrow, the mentor sees the booking as 'paid and held', and the mentee receives a payment confirmation email with escrow details."
-      - "Given a completed session with a EUR 75 charge and 15% commission, when the session status transitions to 'completed', then EUR 63.75 is released to the mentor's payout balance and EUR 11.25 is recorded as platform revenue within 24 hours."
-      - "Given a session cancelled by the mentee within the cancellation policy window, when the cancellation is processed, then the full escrowed amount is refunded to the mentee's original payment method within 5 business days."
+      - >
+        Given a mentee whose session has been marked as completed, when they
+        navigate to the session detail page, then they see a rating prompt
+        (1–5 stars) and an optional text review field, and upon submission,
+        the rating appears on the mentor's public profile.
+      - >
+        Given a mentee who rates a session 2 stars, when the rating is
+        submitted, then the system auto-flags the session for admin review,
+        and the admin sees the flagged session in their quality monitoring
+        dashboard with the mentee's rating and review text.
+      - >
+        Given a mentee who files a dispute for a completed session, when
+        the admin opens the dispute in the admin portal, then they can view
+        the dispute details, access the session recording (if within 3-day
+        retention), and mark the dispute as resolved with an outcome
+        (refund, warning, no action).
     failure_conditions:
-      - "Funds are released from escrow before session completion, removing the trust guarantee for mentees."
-      - "Commission calculation produces incorrect amounts, either overcharging mentors or undercharging the platform."
-      - "A payment failure during booking leaves the session in a booked state without payment — a mentee holds a slot without paying."
-      - "Mentor payouts fail silently with no notification or retry mechanism, eroding mentor trust."
+      - >
+        A completed session has no rating prompt — mentees cannot provide
+        feedback and the quality loop is broken.
+      - >
+        A rating below 3 stars is submitted but not auto-flagged — the
+        quality monitoring system fails to surface problematic sessions.
+      - >
+        An admin resolving a dispute cannot access the session recording
+        within the 3-day retention window — the evidence-based resolution
+        process is non-functional.
 
+  # ─── E6: Platform Administration ────────────────────────────────────────────
   - id: "E6"
-    name: "Quality Assurance and Ratings"
-    strategic_goal_ref: "SG-03"
-    description: "Implement post-session rating and review system, mentor quality scoring, domain-verified badge management, and dispute initiation workflow. Builds the trust and quality layer that sustains marketplace health and differentiates Felly Club from platforms with no quality accountability."
+    name: "Platform Administration & Operations"
+    strategic_goal_ref: "SG-01"
+    description: >
+      Delivers the unified admin portal for platform operations — user
+      lifecycle management, session oversight, financial operations
+      monitoring, system configuration (commission rates, pricing bands,
+      cancellation policies), content management (communication templates,
+      help centre), and platform-wide operational controls. This is an
+      explicitly cross-cutting capability per product.yaml scope, spanning
+      user management, session, financial, and content domains, with the
+      admin persona as the single owner. The cross-cutting scope is
+      justified because product.yaml names "Administrative Controls &
+      Platform Operations" and "System Configuration & Content Management"
+      as unified admin-facing capabilities.
+    bucket: "mid"
+    priority: "P1"
+    effort: "L"
+    depends_on: ["E1", "E3", "E4"]
+    foundation_investment: false
+    github_issue_ref: "TBD"
+    ltm_citations:
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/payments.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+    intent:
+      p1: >
+        Without a unified admin portal, platform operations require direct
+        database access or ad-hoc tools for every operational task — managing
+        users, monitoring sessions, reviewing financial transactions,
+        configuring platform parameters, and managing content. The admin
+        persona (Platform Admin — Operations Manager) identified in the
+        product vision currently has no dedicated interface to perform their
+        curated marketplace role. Manual processes for mentor verification,
+        dispute handling, payout management, and system configuration create
+        operational bottlenecks that undermine the admin-curated quality
+        model Felly Club is built on.
+      p2: >
+        After this epic ships, platform administrators access a
+        comprehensive web-based admin portal with modules for: user
+        management (view, edit, suspend, deactivate mentees and mentors),
+        mentor management (onboarding queue, verification status, profile
+        editing), session management (session list with status filters,
+        session detail view, cancellation override), financial operations
+        (transaction list, payout queue management, refund processing,
+        revenue summary), system configuration (commission rate setting,
+        pricing bands, cancellation policy parameters, feature toggles),
+        and content management (communication email templates, help centre
+        content via Strapi CMS integration). All operations are performed
+        through a guided web interface with no direct database access
+        required.
+      p3: >
+        This epic is critical to SG-01 because the "admin-curated" model
+        depends entirely on admin having effective operational tools. It
+        also supports SG-04 by providing the admin interface for dispute
+        resolution and quality monitoring. PP-3 level 5 (Multi-Sided
+        Platform) confirms the admin as a first-class persona with distinct
+        workflows and dashboards. The admin portal is the operational
+        backbone that enables every other epic's admin-dependent function
+        — without it, mentor onboarding approvals (E1), dispute resolution
+        (E5), payout management (E4), and quality monitoring (E5) all
+        require workarounds.
+    constraints:
+      in_scope: >
+        Web-based admin portal with role-restricted access; user lifecycle
+        management (list, search, view, edit, suspend, deactivate mentees
+        and mentors); mentor onboarding review queue and verification
+        workflow; session management dashboard (list, filter by status,
+        view details, cancellation override); financial operations view
+        (transaction list, payout queue, refund processing interface,
+        revenue summary); system configuration panel (commission rate
+        10–20%, pricing band min/max per duration, cancellation policy
+        parameters, feature toggles); content management via Strapi CMS
+        integration (communication templates, help centre articles, FAQ);
+        platform-wide search across users, sessions, and transactions.
+      out_of_scope: >
+        Mobile admin access (deferred to Phase 2 — admin portal is web-
+        only); advanced analytics and reporting beyond operational views
+        (covered in E9); automated workflows (auto-suspend on threshold
+        breach — manual admin action in MVP); API management or developer
+        portal; audit logging of admin actions (covered in E8 compliance);
+        white-label or multi-tenant admin configuration.
+      must_not_break: >
+        E1 user profiles — admin edits to user profiles must be reflected
+        consistently across the platform. E3 session data — admin session
+        management must not corrupt session state machine transitions. E4
+        financial data — admin financial operations must not create
+        inconsistencies in payment records or payout calculations.
+    success_scenarios:
+      - >
+        Given a platform admin logged into the admin portal, when they
+        navigate to the mentor management section, then they see a list
+        of all mentors with status filters (pending, verified, suspended),
+        and can click on any mentor to view and edit their full profile
+        including verification status.
+      - >
+        Given a platform admin in the system configuration panel, when they
+        change the platform commission rate from 15% to 18%, then all new
+        session payments processed after the change apply the 18% commission
+        rate, while existing escrowed payments retain their original rate.
+      - >
+        Given a platform admin in the financial operations view, when they
+        view the payout queue, then they see all pending mentor payouts
+        with amount, mentor name, session reference, and can trigger payout
+        processing or flag individual payouts for review.
+    failure_conditions:
+      - >
+        A platform admin cannot access the admin portal or is shown a
+        mentee/mentor dashboard instead — role-based routing to the admin
+        experience is broken.
+      - >
+        Changes made in the system configuration panel (commission rates,
+        cancellation policies) do not take effect for new transactions —
+        the configuration system is disconnected from the operational
+        system.
+      - >
+        The admin portal displays stale or inconsistent data (e.g., a
+        session shows as "scheduled" in admin but "completed" in the
+        mentor's dashboard) — data synchronisation between the admin view
+        and the operational system is broken.
+
+  # ─── E7: Communications ─────────────────────────────────────────────────────
+  - id: "E7"
+    name: "Communications & Notification Centre"
+    strategic_goal_ref: "SG-02"
+    description: >
+      Implements the platform communication layer — transactional email
+      delivery via Twilio SendGrid, in-app notification centre, and
+      post-session engagement prompts — replacing mock email notifications
+      used by E3 and E4 with a full communication infrastructure supporting
+      the session lifecycle and user engagement.
     bucket: "mid"
     priority: "P2"
-    effort: "M"
-    depends_on: ["E4", "E5"]
-    foundation_investment: false
-    github_issue_ref: "TBD"
-    ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
-    intent:
-      p1: "Completed sessions currently generate no quality signal. Without ratings, mentees cannot distinguish between excellent and mediocre mentors, mentors receive no structured feedback, and the platform cannot identify quality problems before they damage reputation. ADPList's free model struggles with quality control at scale precisely because volunteer mentors lack accountability mechanisms. MentorCruise offers basic ratings but no domain-verified quality framework. The vision positions quality assurance and transparent ratings as core differentiators — mentees should be able to trust that a 4.5-star mentor in the Sport vertical actually delivers value."
-      p2: "After this epic ships, mentees are prompted to rate sessions after completion (1-5 stars plus optional text review). Ratings aggregate into mentor quality scores visible on profiles and in search results. Mentors with consistently high ratings earn quality badges alongside their domain-verified badges. Mentees can initiate disputes for problematic sessions (no-show, misrepresentation, inappropriate behavior) through a structured workflow that routes to admin resolution. NPS surveys collect broader satisfaction data. The quality system creates a feedback loop: good mentors gain visibility, poor mentors are flagged for review, and mentees can make informed booking decisions."
-      p3: "This epic serves SG-03 — trust and transparency as core differentiators. The target of less than 5% dispute rate and greater than 80% of mentees rating 4+ stars within 3 months is only achievable if quality mechanisms are baked into the platform, not bolted on. Ratings drive the virtuous cycle that sustains a marketplace: quality mentors attract mentees, mentee reviews attract more mentors, and visible quality signals reduce the trust barrier for new users. Without this epic, Felly Club has no mechanism to enforce quality or surface trust signals — fundamentally undermining the value proposition."
-    constraints:
-      in_scope: "Post-session rating prompt (1-5 stars, optional text review). Mentor quality score aggregation and display on profiles and search results. Review moderation by admin (profanity filter, admin approval queue). Dispute initiation workflow for mentees (no-show, misrepresentation, inappropriate behavior). Dispute routing to admin resolution queue. NPS survey delivery post-session. Quality badge assignment based on rating thresholds. Verified purchase badge on reviews (only rated by mentees who completed sessions)."
-      out_of_scope: "AI-generated review summaries or sentiment analysis. Photo or video reviews. ML-based fake review detection. Automated dispute resolution. Mentor response to reviews. Review incentive programs. Multi-dimensional ratings (separate scores for content quality, communication, punctuality)."
-      must_not_break: "E4 session lifecycle — rating prompts must trigger only on completed sessions, never on cancelled or in-progress sessions. E5 payment flows — dispute initiation must not automatically trigger refunds; admin resolution determines financial outcome."
-    success_scenarios:
-      - "Given a mentee who just completed a session, when 15 minutes have elapsed since session end, then they receive a rating prompt via email and in-platform notification, and can submit a 1-5 star rating with optional text review."
-      - "Given a mentor with 10 completed sessions and an average rating of 4.7 stars, when a mentee views their profile, then the aggregate rating, review count, and quality badge are displayed prominently alongside the domain-verified badge."
-      - "Given a mentee experiencing a no-show, when they initiate a dispute within 24 hours, then the dispute appears in the admin resolution queue with session details, payment information, and a structured resolution form."
-    failure_conditions:
-      - "Ratings are displayed on mentor profiles before moderation review, allowing inappropriate or fraudulent reviews to be publicly visible."
-      - "Mentees who did not complete a session with a mentor can submit ratings for that mentor, undermining review credibility."
-      - "Dispute initiation triggers an automatic refund without admin review, bypassing the structured resolution process."
-
-  - id: "E7"
-    name: "Compliance and Data Protection"
-    strategic_goal_ref: "SG-04"
-    description: "Implement multi-geography regulatory compliance as a built-in platform capability: GDPR consent management, India TPDP compliance, PCI DSS scope management through PayU, data export and deletion (right to be forgotten), and immutable audit logging across all compliance-relevant actions."
-    bucket: "near"
-    priority: "P1"
     effort: "M"
     depends_on: ["E1"]
-    foundation_investment: true
+    foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/payments.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/personalization.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "Felly Club operates across four countries spanning three distinct regulatory regimes: GDPR (EU/Switzerland), India TPDP (India), and US state-level privacy laws (USA/Germany also under GDPR). The platform handles highly sensitive data (NFR-7 = 4) including financial transactions, personal conversations in sessions, and PII across jurisdictions. Without compliance infrastructure built in from the start, the platform faces regulatory penalties, data protection incidents, and loss of user trust. The vision explicitly calls out zero compliance violations in the first 6 months as a success metric — compliance cannot be a retrofit, it must be a foundation."
-      p2: "After this epic ships, the platform enforces GDPR-compliant consent collection during registration (granular consent for data processing, marketing, session recording). Users can exercise data portability (export personal data in machine-readable format) and right to be forgotten (data deletion with audit trail). India TPDP consent requirements are met for Indian users. PCI DSS compliance is managed through PayU's payment gateway — the platform never stores raw card data. All compliance-relevant actions (consent changes, data access, admin operations, payment events) are captured in an immutable audit log with tamper-evident storage. Cookie consent and privacy policy acceptance flows are operational across all jurisdictions."
-      p3: "This epic directly serves SG-04 — achieving multi-geography compliance as a built-in capability. NFR-5 = 4 (Multi-Regime Compliance) and NFR-7 = 4 (Highly Sensitive Data) make this a non-negotiable foundation investment. A compliance violation in any of the four operating countries could shut down operations, incur fines (GDPR: up to 4% of annual turnover), and destroy the trust that the entire marketplace depends on. By building compliance into the platform fabric rather than bolting it on later, Felly Club establishes a competitive advantage — most competitors (MentorCruise, ADPList) operate primarily in single regulatory regimes and have not addressed multi-geography compliance."
+      p1: >
+        E3 (Session Lifecycle) and E4 (Payments) deliver their core flows
+        with basic email notifications, but the platform lacks a structured
+        communication infrastructure. There is no centralised notification
+        centre where users can review their activity, no templated email
+        system for consistent branding across transactional messages, and
+        no post-session engagement mechanism to drive repeat bookings. Users
+        must rely on checking their dashboards manually or watching for
+        individual emails that may be inconsistently formatted or land in
+        spam folders.
+      p2: >
+        After this epic ships, all transactional emails (session requests,
+        confirmations, reminders, payment receipts, payout notifications)
+        are delivered through Twilio SendGrid with branded, templated
+        formatting. Users have an in-app notification centre accessible
+        from any page, showing unread and historical notifications for
+        session updates, payment events, and platform announcements. Post-
+        session engagement prompts encourage mentees to book follow-up
+        sessions or explore new mentors. Email delivery replaces any mock
+        notifications from E3 and E4, and the notification centre provides
+        a persistent, in-platform record of all user-relevant events.
+      p3: >
+        This epic completes SG-02's vision of "seamless end-to-end session
+        lifecycle from discovery through post-session engagement." The
+        "post-session engagement" aspect specifically requires communication
+        infrastructure that nudges mentees back into the booking flow.
+        PP-1 level 4 (General Consumer) expects reliable, well-designed
+        notifications — transactional emails and in-app alerts are table
+        stakes for consumer platforms. This epic also de-mocks the basic
+        email notifications used by E3 and E4, fulfilling Rule 3 (Mocks
+        as Phased Delivery) from the epic management rules.
     constraints:
-      in_scope: "GDPR consent collection during registration with granular opt-in for data processing, marketing, and session recording. India TPDP consent requirements for Indian users. Data export (personal data in JSON/CSV format) and data deletion (right to be forgotten with audit trail). Cookie consent management across jurisdictions. Privacy policy and terms of service acceptance flows. Immutable audit logging for compliance-relevant actions (consent changes, data access, admin operations). PCI DSS scope management through PayU gateway — no raw card data storage. Audit log query interface for admin."
-      out_of_scope: "Automated regulatory reporting to authorities. Legal counsel integration or legal document generation. WCAG AA accessibility compliance (deferred per QP-6 = 2). SOC2 or ISO 27001 certification processes. Automated GDPR data protection impact assessments. Cross-border data transfer mechanism management (standard contractual clauses)."
-      must_not_break: "E1 authentication — consent collection integrates with registration flows without disrupting the signup experience. E5 payments — PCI DSS scope management must not interfere with PayU payment processing."
+      in_scope: >
+        Twilio SendGrid integration for transactional email delivery;
+        branded email templates for session lifecycle events (request sent,
+        accepted, declined, scheduled, reminder, completed, cancelled),
+        payment events (payment captured, refund processed, payout sent),
+        and account events (welcome, password reset, verification); in-app
+        notification centre with unread count badge, notification list
+        (newest first), mark as read, and notification type filtering;
+        push notification infrastructure via Firebase Cloud Messaging (FCM)
+        for mobile app; post-session engagement prompts (email suggesting
+        follow-up booking or new mentor exploration after session
+        completion); notification preferences per user (opt-in/opt-out for
+        non-essential notifications).
+      out_of_scope: >
+        In-platform messaging or chat between users (deferred to Phase 2);
+        SMS communication (deferred — email covers all transactional
+        communication in MVP); complex drip campaigns or marketing
+        automation; AI-generated notification content; multi-language
+        notification templates (English-only in MVP); advanced support
+        ticket system or live chat (deferred to Phase 2 — FAQ and help
+        centre only).
+      must_not_break: >
+        E1 user authentication and preferences — notification delivery must
+        respect user opt-out preferences and target authenticated users. E3
+        session lifecycle — replacing mock notifications must not disrupt
+        session status transitions or the booking workflow.
     success_scenarios:
-      - "Given a new user registering from Germany, when they reach the consent step, then they see GDPR-compliant granular consent options (data processing, marketing, session recording) with clear explanations, and can proceed only after providing required consents."
-      - "Given a registered user requesting data export, when they submit the request through their account settings, then they receive a downloadable file containing all their personal data in JSON format within 72 hours."
-      - "Given an admin investigating a compliance concern, when they query the audit log for a specific user's consent history, then they see an immutable, timestamped record of all consent grants, revocations, and data access events."
+      - >
+        Given a mentee who has just booked a session, when the booking is
+        confirmed, then the mentee receives a branded confirmation email
+        via SendGrid with session details (mentor name, date, time,
+        duration) and sees a notification in their in-app notification
+        centre.
+      - >
+        Given a mentee on any page of the platform, when they click the
+        notification bell icon, then they see a notification centre panel
+        showing their unread notifications (newest first), each with a
+        summary and timestamp, and they can mark notifications as read.
+      - >
+        Given a mentee whose session completed 24 hours ago, when the
+        engagement prompt triggers, then the mentee receives an email
+        suggesting they book a follow-up session with the same mentor or
+        explore other mentors in their interest categories.
     failure_conditions:
-      - "User data is processed without valid consent, or consent records are incomplete or missing for any user in any jurisdiction."
-      - "Audit log entries can be modified or deleted, rendering the compliance trail unreliable."
-      - "A data deletion request leaves residual personal data in any system component (search index, analytics, backups beyond retention period)."
+      - >
+        Transactional emails for critical events (session confirmations,
+        payment receipts) are not delivered or land in spam consistently —
+        the primary communication channel is unreliable.
+      - >
+        The in-app notification centre shows no notifications despite active
+        session and payment events occurring — the notification pipeline is
+        disconnected from platform events.
+      - >
+        Replacing mock notifications from E3 and E4 with SendGrid-delivered
+        emails introduces regressions in the session booking or payment
+        workflow — the communication upgrade breaks existing flows.
 
+  # ─── E8: Compliance ─────────────────────────────────────────────────────────
   - id: "E8"
-    name: "Platform Communications"
-    strategic_goal_ref: "SG-01"
-    description: "Deliver the notification and messaging infrastructure for the platform: SendGrid transactional emails, FCM push notifications, and in-app messaging between mentors and mentees. Covers the full session lifecycle communication chain from booking confirmation through post-session follow-up."
+    name: "Regulatory Compliance & Data Security"
+    strategic_goal_ref: "SG-06"
+    description: >
+      Implements cross-geography regulatory compliance (GDPR for EU markets,
+      TPDP for India, PCI DSS for payment data) and platform security
+      hardening (AES-256 encryption at rest, TLS 1.2+ in transit, JWT
+      token security) — ensuring the platform meets legal obligations
+      across all four target geographies before market launch.
     bucket: "mid"
-    priority: "P2"
+    priority: "P1"
     effort: "M"
     depends_on: ["E1", "E4"]
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/personalization.md"
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/nfr-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "The platform currently has no communication layer. Sessions are booked (E4) and payments are processed (E5), but users receive no confirmations, reminders, or updates. Without notifications, mentees miss sessions they booked, mentors are unaware of new bookings, and both parties lack a channel to coordinate before sessions. The marketplace lifecycle depends on timely communication at every stage: booking confirmation, session reminders, cancellation notices, payment receipts, payout confirmations, and rating prompts. Additionally, mentors and mentees need a way to exchange messages before sessions (clarify goals, share preparation materials) without resorting to external channels."
-      p2: "After this epic ships, the platform delivers transactional emails via SendGrid for all lifecycle events (booking confirmation, session reminders at 24h and 1h, cancellation notices, payment receipts, payout confirmations, rating prompts). Push notifications via FCM provide real-time alerts for time-sensitive events (session starting soon, new booking, message received). In-app messaging enables mentor-mentee conversation threads tied to booked sessions — mentees can share goals and questions before sessions, and mentors can send follow-up materials after. Notification preferences allow users to control which channels they receive communications on."
-      p3: "Communications are essential infrastructure for SG-01 — the MVP cannot function without lifecycle notifications. A marketplace where users miss sessions, do not receive payment confirmations, or cannot communicate with each other before sessions will fail regardless of how good the booking and payment flows are. The session completion rate target (greater than 85%) depends directly on reminder effectiveness. In-app messaging reduces dependency on external communication tools and keeps session context within the platform, contributing to the trust-driven experience that underpins SG-03."
+      p1: >
+        Felly Club targets four jurisdictions — India, Switzerland, USA,
+        and Germany — each with distinct data protection regulations. The
+        platform processes PII (names, emails, professional credentials),
+        financial data (payment transactions, escrow balances), and session
+        recordings (video content). Without explicit compliance mechanisms,
+        the platform risks regulatory penalties, user trust violations, and
+        potential market exclusion. GDPR (EU) mandates consent management,
+        data portability, and right-to-deletion. TPDP (India) has emerging
+        data protection requirements. PCI DSS governs payment data
+        handling. Currently, no workflow exists for users to exercise their
+        data rights or for the platform to demonstrate compliance.
+      p2: >
+        After this epic ships, the platform implements cookie consent
+        management with granular opt-in/opt-out per cookie category for
+        EU users (Germany, Switzerland). Users can exercise right-to-
+        deletion (account deletion with cascading data removal), data
+        export (download personal data in machine-readable format), and
+        data access requests. PCI DSS compliance is validated through
+        Stripe tokenisation (no raw card data on platform), and payment
+        data handling follows PCI-compliant patterns established in E4.
+        Platform security is hardened with AES-256 encryption at rest
+        for all sensitive data, TLS 1.2+ enforced for all data in transit,
+        and JWT token security with proper expiry and refresh mechanisms.
+        Privacy policy and terms of service are accessible platform-wide.
+      p3: >
+        This epic delivers SG-06: "Achieve regulatory and security
+        compliance across all target geographies." Without compliance,
+        Felly Club cannot legally operate in the EU (Germany, Switzerland)
+        or process payments securely. NFR-5 level 3 (Standard Compliance)
+        and NFR-7 level 4 (Sensitive Data) from the product profile confirm
+        that compliance is not optional — it's a market-entry requirement.
+        PP-4 level 3 (Multi-Country) targeting 4 jurisdictions creates a
+        compliance surface that must be addressed before launch, not
+        retroactively.
     constraints:
-      in_scope: "SendGrid integration for transactional email templates (booking confirmation, session reminders, cancellation, payment receipt, payout confirmation, rating prompt). FCM integration for push notifications (new booking, session starting, new message). In-app messaging between mentors and mentees tied to session context. Notification preference management (per-channel opt-in/opt-out). Email template system with platform branding. Session reminder scheduling (24-hour and 1-hour before session)."
-      out_of_scope: "Marketing email campaigns or bulk email sends. SMS notifications. Advanced drip campaigns or behavioral trigger sequences. Chat features beyond session-context messaging (no general social messaging). Notification analytics or A/B testing of message content. In-app notification center with history and read/unread states (basic for MVP)."
-      must_not_break: "E1 authentication — messaging must enforce that only matched mentor-mentee pairs can communicate. E4 session lifecycle — notification triggers must align with session state transitions. E7 compliance — marketing communications must respect GDPR consent; transactional emails are exempt."
+      in_scope: >
+        GDPR compliance: cookie consent banner with granular opt-in/opt-out
+        per category, privacy policy page, right-to-deletion workflow
+        (account deletion with cascading data removal across all platform
+        data), data export workflow (user downloads personal data in JSON/
+        CSV format), data access request interface; TPDP (India) compliance:
+        alignment of data handling practices with emerging Indian data
+        protection requirements; PCI DSS compliance validation: audit of
+        Stripe tokenisation implementation from E4, verification that no
+        raw card data is stored or logged on platform; platform security
+        hardening: AES-256 encryption at rest for sensitive data fields
+        (PII, financial data), TLS 1.2+ enforcement for all API and web
+        traffic, JWT token security audit (expiry, refresh, revocation),
+        secure headers (CSP, HSTS, X-Frame-Options); audit logging of
+        admin actions and data access events for compliance evidence.
+      out_of_scope: >
+        HIPAA compliance (not applicable — no healthcare data); SOX
+        compliance (not applicable — not a public company); advanced
+        penetration testing or third-party security audit; DPIA (Data
+        Protection Impact Assessment) documentation; cross-border data
+        transfer mechanisms (SCCs, BCRs) — deferred unless legally
+        required before MVP launch; ISO 27001 certification; security
+        operations centre (SOC) setup; WAF (Web Application Firewall)
+        configuration beyond basic cloud provider defaults.
+      must_not_break: >
+        E1 user authentication — security hardening must not break login
+        flows or session management. E4 payment processing — PCI DSS
+        audit must not interfere with active payment processing or require
+        architectural changes to the Stripe integration.
     success_scenarios:
-      - "Given a mentee who just booked a session, when the booking is confirmed, then they receive a confirmation email via SendGrid within 2 minutes containing session details, mentor name, date/time in their timezone, and a calendar link."
-      - "Given a session scheduled for 2pm, when it is 1pm, then both the mentor and mentee receive a push notification via FCM and an email reminder with a 'Join Session' link."
-      - "Given a mentee with a booked session, when they send a message to their mentor through in-app messaging, then the mentor receives the message in their inbox and a push notification within 30 seconds."
+      - >
+        Given a user in Germany visiting the platform for the first time,
+        when the landing page loads, then a cookie consent banner appears
+        with granular opt-in/opt-out options per category (essential,
+        analytics, marketing), and the user's choice is persisted and
+        respected across subsequent page loads.
+      - >
+        Given a registered mentee who requests account deletion, when they
+        confirm the deletion through the right-to-deletion workflow, then
+        their account is deactivated, all personal data (profile, session
+        history, payment records) is scheduled for deletion within the
+        GDPR-mandated timeframe, and they receive a confirmation email.
+      - >
+        Given the platform's payment data handling, when a PCI DSS
+        compliance audit is performed, then no raw card data (PAN, CVV,
+        expiry) is found stored, logged, or transmitted by the platform —
+        all card data is handled exclusively through Stripe tokenisation.
     failure_conditions:
-      - "Session reminders fail to deliver, and no retry or fallback mechanism alerts users — leading to preventable no-shows."
-      - "In-app messages are visible to users outside the mentor-mentee pair for that session, violating privacy expectations."
-      - "Notification volume overwhelms users because preference controls are absent or non-functional, leading to opt-out from all communications."
+      - >
+        The cookie consent banner does not appear for EU users, or user
+        consent choices are not respected — GDPR cookie consent requirement
+        is violated.
+      - >
+        A user exercises right-to-deletion but their personal data remains
+        in the platform's database or logs — data deletion is incomplete
+        and GDPR compliance is broken.
+      - >
+        Platform API traffic is served over HTTP instead of TLS 1.2+ or
+        sensitive data is stored unencrypted — the security baseline is
+        not met.
 
+  # ─── E9: Analytics ──────────────────────────────────────────────────────────
   - id: "E9"
-    name: "Referral and Acquisition Engine"
+    name: "Analytics & Performance Dashboards"
     strategic_goal_ref: "SG-05"
-    description: "Build the referral-driven acquisition system with unique referral link generation, tracking, configurable reward mechanics, and attribution analytics. Leverages niche community network effects in Sport, Entertainment, Business, and Entrepreneurship verticals to reduce customer acquisition cost."
-    bucket: "mid"
+    description: >
+      Delivers persona-specific analytics dashboards — mentor performance
+      dashboard (earnings, session stats, ratings), mentee activity dashboard
+      (session history, spending, favourite categories), and platform-level
+      admin KPI dashboard (GMV, session volume, user growth, quality metrics)
+      — providing actionable insights for all three personas.
+    bucket: "long"
     priority: "P2"
     effort: "M"
-    depends_on: ["E1", "E5"]
+    depends_on: ["E1", "E3", "E4"]
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/personalization.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "Felly Club currently has no organic acquisition mechanism beyond direct traffic. In niche verticals like Sport and Entertainment, traditional digital marketing is expensive and poorly targeted — the communities are tight-knit and trust word-of-mouth over advertising. Without a referral engine, the platform must rely entirely on paid acquisition, which is unsustainable at EUR 50K budget. The vision targets greater than 30% of new mentee signups from referrals within 3 months, with CAC below EUR 15 — achievable only with a structured referral system that leverages the network effects inherent in niche communities."
-      p2: "After this epic ships, every registered user (mentee and mentor) has a unique referral link they can share. When a referred user signs up and completes their first session, the referrer receives a configurable reward (platform credit, discount on next session, or cash equivalent). Referral attribution tracks the full funnel: link click, signup, first session, and reward disbursement. Both mentors and mentees can refer new users, creating a dual-sided acquisition loop. An attribution analytics dashboard shows referral performance (links generated, conversion rates, reward costs, CAC by referral source) for admin monitoring."
-      p3: "This epic directly serves SG-05 — building a referral-driven acquisition engine. Niche communities in Sport and Entertainment have strong internal networks: athletes know athletes, coaches know coaches, entertainers know entertainers. A referral system that rewards these connections converts community trust into platform growth at a fraction of paid acquisition cost. The dual-sided referral (mentors refer mentees, mentees refer mentees, mentees refer mentors) creates the network effect flywheel that marketplace businesses depend on. Without this epic, Felly Club's growth is capped by its marketing budget rather than its community value."
+      p1: >
+        With sessions being delivered and payments flowing, all three
+        personas lack visibility into their own performance and the
+        platform's health. Mentors cannot see their earnings trends,
+        session completion rates, or how their ratings compare over time.
+        Mentees cannot review their session history, spending patterns,
+        or track their engagement with the platform. Platform admin has
+        no aggregated view of key business metrics — gross merchandise
+        value (GMV), session volume, user growth, retention, or quality
+        distribution. Without analytics, decision-making for all personas
+        is blind, and the platform cannot demonstrate traction to
+        stakeholders.
+      p2: >
+        After this epic ships, mentors see a performance dashboard showing
+        total earnings, session count, completion rate, average rating
+        trend, and upcoming sessions. Mentees see an activity dashboard
+        with session history, total spend, sessions by category, and
+        mentor recommendations based on past activity. Platform admin
+        accesses a KPI dashboard with GMV (total and by period), active
+        users (mentors and mentees), session volume (by status, category,
+        and geography), quality metrics (average rating, dispute rate,
+        flagged mentor count), and revenue metrics (commission earned,
+        payout volume). All dashboards refresh on page load with data
+        sourced from existing session, payment, and user records.
+      p3: >
+        This epic delivers the analytics dimension of SG-05: "Drive mentee
+        acquisition through referral programme and deliver actionable
+        analytics to all personas." Analytics serve each persona's decision
+        loop — mentors optimise pricing and availability based on
+        performance data, mentees make informed booking decisions from
+        their history, and admin monitors platform health for operational
+        and strategic decisions. PP-3 level 5 (Multi-Sided Platform)
+        confirms that each persona needs a distinct analytics view tailored
+        to their role and incentives.
     constraints:
-      in_scope: "Unique referral link generation for every registered user. Referral tracking across the full funnel (click, signup, first session completion). Configurable reward mechanics (platform credit, session discount, cash equivalent). Reward disbursement tied to referral milestone (first completed session). Dual-sided referral support (mentors and mentees can both refer). Referral attribution analytics dashboard for admin. Anti-fraud measures (self-referral prevention, duplicate detection)."
-      out_of_scope: "Affiliate marketing programs with external partners. Multi-tier or pyramid referral structures (referrer of referrer rewards). Social media integration for one-click sharing. Referral leaderboards or gamification. Automated referral campaign emails. Integration with external analytics platforms (Google Analytics UTM tracking is separate)."
-      must_not_break: "E1 authentication — referral links must work for unauthenticated visitors and properly attribute after signup. E5 payments — reward disbursement as platform credit must integrate with the payment balance system without creating accounting inconsistencies."
+      in_scope: >
+        Mentor performance dashboard: total earnings, session count,
+        completion rate, average rating over time, cancellation count,
+        upcoming session list; mentee activity dashboard: session history
+        with mentor, date, duration, and rating given, total spend by
+        period, sessions by category breakdown; platform admin KPI
+        dashboard: GMV (total and time-series), active user counts (mentors,
+        mentees), session volume by status and category, quality metrics
+        (average platform rating, dispute count, flagged mentor count),
+        revenue metrics (commission earned, payout volume, refund volume);
+        data sourced from existing session, payment, and user tables — no
+        separate analytics data warehouse; dashboard refresh on page load.
+      out_of_scope: >
+        Advanced analytics (cohort analysis, retention metrics, revenue
+        forecasting, LTV, churn prediction — all deferred to Phase 2);
+        real-time streaming analytics; data warehouse or ETL pipeline;
+        exportable reports (CSV/PDF); customisable dashboard widgets;
+        A/B testing analytics; search analytics; comparison benchmarks
+        (how a mentor compares to platform average).
+      must_not_break: >
+        E1 user profiles, E3 session data, and E4 payment records — all
+        dashboards read from these data sources and must not modify them.
+        Dashboard queries must not degrade platform performance for
+        concurrent users.
     success_scenarios:
-      - "Given a registered mentee, when they access their referral link from their dashboard and share it, then the link contains a unique tracking code and the referral dashboard shows the link as 'generated'."
-      - "Given a new user clicking a referral link, when they sign up and complete their first session, then the referrer receives the configured reward (e.g., EUR 10 platform credit) and both parties receive notification of the successful referral."
-      - "Given an admin viewing the referral analytics dashboard, when they filter by the last 30 days, then they see total referral links generated, conversion rate (click to signup to first session), total rewards disbursed, and effective CAC for referred users."
+      - >
+        Given a mentor logged into their dashboard, when they navigate
+        to the performance section, then they see their total earnings,
+        total sessions completed, session completion rate, average rating,
+        and a list of upcoming scheduled sessions — all reflecting current
+        data from completed sessions and payments.
+      - >
+        Given a platform admin logged into the admin portal, when they
+        navigate to the KPI dashboard, then they see current-period GMV,
+        total active mentors and mentees, session volume breakdown by
+        status (completed, cancelled, no-show), and quality metrics
+        (average rating, open disputes, flagged mentors) — all sourced
+        from live platform data.
+      - >
+        Given a mentee logged into their dashboard, when they navigate to
+        the activity section, then they see their session history sorted
+        by date, showing mentor name, session duration, category, rating
+        they gave, and cumulative spend — enabling them to track their
+        mentorship engagement.
     failure_conditions:
-      - "Referral attribution is lost during the signup flow — a user clicks a referral link but the referrer receives no credit after the referred user completes their first session."
-      - "Self-referral or duplicate referral fraud is possible, allowing users to game the reward system."
-      - "Reward disbursement fails or creates negative balances in the payment system, causing accounting discrepancies."
+      - >
+        A mentor's earnings dashboard shows amounts that do not match
+        their actual completed session payouts — the data is inconsistent
+        with the payment system.
+      - >
+        The admin KPI dashboard shows zero or stale data despite active
+        sessions and transactions on the platform — the dashboard is
+        disconnected from live data.
+      - >
+        Dashboard page loads cause noticeable performance degradation for
+        other users on the platform — analytics queries are not optimised
+        and impact the production database.
 
+  # ─── E10: Referral & Acquisition ────────────────────────────────────────────
   - id: "E10"
-    name: "Admin Operations and Analytics"
-    strategic_goal_ref: "SG-01"
-    description: "Deliver the admin panel for platform operations (mentor approval pipeline, dispute management, financial oversight, user management) and role-specific analytics dashboards for administrators, mentors, and mentees. Provides the operational tooling required to run a multi-sided marketplace."
-    bucket: "mid"
+    name: "Referral Programme & User Acquisition"
+    strategic_goal_ref: "SG-05"
+    description: >
+      Implements the mentee referral programme — unique referral link
+      generation, referral tracking, and reward fulfilment on the referred
+      user's first completed session — providing an organic acquisition
+      channel to drive platform growth across target geographies.
+    bucket: "long"
     priority: "P2"
-    effort: "L"
-    depends_on: ["E2", "E4", "E5", "E6"]
+    effort: "S"
+    depends_on: ["E1", "E4"]
     foundation_investment: false
     github_issue_ref: "TBD"
     ltm_citations:
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/commerce.md"
-      - "/Users/kapilahuja/.meridian/core/memory/knowledge/domain-taxonomy/user-management.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/templates/epic-schema.md"
-      - "/Users/kapilahuja/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/personalization.md"
+      - "~/.meridian/core/memory/knowledge/project-profiling/product-profile.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
     intent:
-      p1: "The platform currently has no operational tooling for administrators. Mentor approvals (E2) create a queue but admins have no dashboard to manage it efficiently. Disputes (E6) are initiated but route to a queue that has no management interface. Financial transactions (E5) are processed but there is no oversight dashboard showing revenue, payouts, and anomalies. As the marketplace scales, manual operational processes become unsustainable — the Platform Administrator persona (PP-3 = 5) needs purpose-built tooling for multi-geography marketplace operations. Similarly, mentors need earnings and performance visibility, and mentees need session history and spending oversight."
-      p2: "After this epic ships, administrators have a unified operations panel covering: mentor approval pipeline (pending, approved, rejected with filtering and bulk actions), dispute management (open disputes, resolution workflow, outcome tracking), financial oversight (revenue dashboard, payout status, commission tracking, anomaly flagging), user management (search, view, suspend, delete users), and platform health metrics (active users, sessions, completion rates). Mentors have a dashboard showing earnings history, upcoming payouts, session statistics, and rating trends. Mentees have a dashboard showing session history, spending summary, and upcoming bookings. All dashboards are role-gated through E1's RBAC."
-      p3: "This epic supports SG-01 by providing the operational infrastructure required to run the marketplace post-launch. A marketplace without admin tooling is a marketplace that cannot scale — every mentor approval, dispute resolution, and financial reconciliation becomes a manual, error-prone process. The analytics dashboards also support SG-03 (trust and transparency) by giving mentors visibility into their earnings and ratings, and mentees visibility into their spending and session quality. For the Platform Administrator persona, this epic transforms ad-hoc operations into structured, efficient workflows that enable confident decision-making across four countries."
+      p1: >
+        The two-sided marketplace faces a classic cold-start problem —
+        without mentees, mentors have no incentive to stay; without
+        mentors, mentees cannot find value. Paid acquisition is constrained
+        by the €125,000 fixed budget, and organic growth through word-of-
+        mouth alone is slow and unmeasurable. There is no structured
+        mechanism for existing satisfied mentees to bring in new users, and
+        no way to attribute new sign-ups to referral sources. The platform
+        needs a low-cost, trackable acquisition channel that leverages
+        existing user satisfaction to drive growth.
+      p2: >
+        After this epic ships, every registered mentee has a unique referral
+        link accessible from their dashboard. When a new user signs up
+        through a referral link, the referral is tracked and attributed to
+        the referring mentee. When the referred user completes their first
+        paid session, the referrer receives a reward (admin-configurable
+        type and value). The referral dashboard shows each mentee their
+        referral link, total referrals sent, sign-ups from referrals, and
+        rewards earned. Admin can configure the referral reward type and
+        value through the system configuration panel (E6).
+      p3: >
+        This epic delivers the acquisition dimension of SG-05: "Drive
+        mentee acquisition through referral programme." The referral
+        programme directly addresses the marketplace cold-start risk
+        identified in the product vision — it creates a self-reinforcing
+        growth loop where satisfied mentees recruit new mentees at no
+        marginal cost to the platform. PP-6 level 3 (Market-Ready v1)
+        targeting real paying customers across 4 geographies confirms that
+        organic acquisition channels need to be operational at launch.
     constraints:
-      in_scope: "Admin panel with mentor approval pipeline (list, filter, approve, reject, request-info). Dispute management interface (open disputes, assign, resolve, track outcomes). Financial oversight dashboard (revenue, payouts, commissions, refunds, anomaly indicators). User management (search, view details, suspend, reactivate, delete). Platform health metrics dashboard (active users, sessions booked, sessions completed, completion rate, revenue). Mentor dashboard (earnings, payouts, session stats, rating history). Mentee dashboard (session history, spending, upcoming bookings). Role-gated access through E1 RBAC."
-      out_of_scope: "Advanced analytics with ML-based predictions (churn, LTV) — out of scope per vision. Real-time streaming analytics. Custom report builder. Data warehouse integration. White-label analytics for enterprise clients. Automated alerting rules (admin checks dashboards manually for MVP). Export to BI tools (Tableau, Looker)."
-      must_not_break: "E1 RBAC — dashboard access must be strictly role-gated. E2 mentor approval — admin panel must reflect current approval queue without lag. E5 financial data — dashboards must show accurate, consistent financial figures matching actual transaction records. E6 disputes — dispute management must show current dispute states matching the dispute workflow."
+      in_scope: >
+        Unique referral link generation per registered mentee; referral
+        link sharing (copy to clipboard, share via social/email); referral
+        tracking — attribution of new sign-ups to referring mentee via
+        referral link parameter; reward trigger on referred user's first
+        completed paid session; referral reward fulfilment (admin-
+        configurable reward type and value via E6's system configuration);
+        mentee referral dashboard showing referral link, total referrals,
+        sign-ups, completed sessions, and rewards earned; admin referral
+        analytics (total referrals, conversion rate, rewards issued).
+      out_of_scope: >
+        Complex referral tiers (multi-level referral rewards — deferred to
+        Phase 2); mentor referral programme (mentors referring other
+        mentors); referral fraud detection; time-limited referral
+        campaigns; referral leaderboards or gamification; A/B testing of
+        referral reward values; referral programme for non-mentee personas.
+      must_not_break: >
+        E1 user registration — referral tracking must integrate with the
+        registration flow without adding friction or breaking the sign-up
+        experience. E4 payment processing — reward fulfilment must not
+        interfere with session payment or payout flows.
     success_scenarios:
-      - "Given an admin logging into the admin panel, when they navigate to the mentor approval queue, then they see all pending applications with submission date, vertical, and credential summary, and can approve or reject each application with a single action."
-      - "Given a mentor logging into their dashboard, when they view the earnings section, then they see total earnings, pending payouts, completed payouts, and a per-session earnings breakdown that matches their actual transaction history."
-      - "Given an admin viewing the financial oversight dashboard, when they check the daily revenue summary, then the total matches the sum of all commission amounts from completed sessions for that day, with no discrepancies."
+      - >
+        Given a registered mentee on their dashboard, when they navigate to
+        the referral section, then they see their unique referral link with
+        a copy-to-clipboard button and a summary of their referral activity
+        (total referrals, sign-ups, rewards earned).
+      - >
+        Given a new visitor who clicks a referral link, when they complete
+        registration and subsequently complete their first paid session,
+        then the referring mentee is credited with a successful referral
+        and receives the configured reward, visible in their referral
+        dashboard.
+      - >
+        Given a platform admin in the system configuration panel, when they
+        set the referral reward to "$10 account credit," then all future
+        successful referrals issue the $10 reward to the referring mentee
+        upon the referred user's first completed session.
     failure_conditions:
-      - "Financial figures displayed on admin dashboards do not match actual transaction records, creating trust issues in operational reporting."
-      - "Admin actions (approve mentor, resolve dispute) do not propagate to the affected entities in real-time — e.g., approving a mentor in the panel does not make their profile searchable."
-      - "Role-gating fails, allowing mentors or mentees to access admin panel views or other users' dashboards."
+      - >
+        A new user signs up through a referral link but the referral is not
+        attributed to the referring mentee — the tracking mechanism is
+        broken.
+      - >
+        A referred user completes their first paid session but the referrer
+        does not receive the configured reward — the reward fulfilment
+        pipeline fails.

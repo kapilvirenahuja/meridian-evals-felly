@@ -1,354 +1,518 @@
+# Felly Club — Roadmap
+# Derived from product.yaml (LOCKED), epics.yaml, feasibility.yaml,
+# confidence-report.yaml, and pre-lock-resolutions.yaml
+# Status: DRAFT — pending lock review
+
 slug: "felly-club"
-status: "LOCKED"
-created_at: "2026-03-25T00:00:00+0530"
-updated_at: "2026-03-26T00:00:00+0530"
-product_ref: ".meridian/project/product/felly-club/product.yaml"
-approved_brief_ref: ".meridian/project/product/felly-club/briefs/approved-roadmap-brief.html"
+status: "DRAFT"
+approved_brief_ref: "briefs/approved-roadmap-brief.html"
+generated_at: "2026-03-26"
 
-# --- The Bet ---
+# ─── Thesis ───────────────────────────────────────────────────────────────────
+thesis: >
+  Felly Club bets that a web-first, admin-curated mentorship marketplace
+  covering four underserved verticals — Sport, Entrepreneurship, Business,
+  and Entertainment — can capture initial market share by delivering an
+  end-to-end session lifecycle (discovery → booking → escrow payment → video
+  delivery → ratings → dispute resolution) with multi-currency support across
+  India, Switzerland, USA, and Germany, all within a 16-week, €125,000
+  fixed-budget delivery, by sequencing foundation-first (identity and trust),
+  then transaction-core (sessions and payments), then platform maturity
+  (compliance, analytics, acquisition), deferring mobile and advanced features
+  to Phase 2.
 
-thesis: "Felly Club bets that a domain-verified mentorship marketplace spanning Sport, Entertainment, Business, and Entrepreneurship — four verticals abandoned by every existing platform — can establish a defensible position by combining credentialed supply, escrow-backed financial trust, and built-in video delivery within a 16-week, EUR 50K constraint. The bet is that niche community trust and transparent quality signals create a moat before well-funded horizontal platforms notice the opportunity."
-
+# ─── Narrative ────────────────────────────────────────────────────────────────
 narrative: |
-  The roadmap opens with two parallel foundation investments that gate everything else: Identity and Access Foundation (E1) and Compliance and Data Protection (E7). E1 establishes KeyCloak-based authentication, RBAC for the three-persona model (mentee, mentor, admin), and secure session management. E7 builds GDPR and India TPDP consent collection, immutable audit logging, and data export/deletion workflows. These run in parallel during Weeks 1-6 because no marketplace function is possible without authenticated roles and no data can be collected without consent-compliant handling. The decision to use managed KeyCloak (per pre-lock resolution) reduces operational overhead and keeps E1 within a 3-person team's capacity.
+  The sequencing of Felly Club's 10 epics across three horizons is driven by a
+  single organising principle: nothing can transact until identity, discovery,
+  sessions, and payments form a functioning end-to-end chain. E1 (User Identity
+  & Profile Foundation) is the mandatory foundation — every downstream epic
+  depends on authenticated, role-assigned users with admin-verified mentor
+  profiles. E2 (Mentor Marketplace & Discovery) immediately follows, making
+  the curated mentor supply visible and searchable. E3 (Session Lifecycle &
+  Video Delivery) and E4 (Payment Processing & Financial Operations) complete
+  the near-horizon by turning the marketplace into a transactional platform
+  where mentees can discover, book, attend, and pay for sessions. These four
+  epics represent the minimum viable transaction loop — without any one of
+  them, Felly Club is a directory, not a marketplace.
 
-  With identity and compliance in place, Weeks 5-10 focus on supply-side activation. Mentor Onboarding and Credentialing (E2) populates the marketplace with domain-verified mentors across the four target verticals, directly serving SG-02's target of 50 mentors within 8 weeks of launch. Elasticsearch-powered Mentor Discovery and Search (E3) makes that supply visible to mentees with faceted filtering, autocomplete, and sub-500ms response times. E2 and E3 overlap with the tail end of E1 — the supply pipeline needs 5-10 seeded test mentor profiles to unblock E3 integration testing.
+  The mid-horizon shifts focus to platform integrity and operational control.
+  E5 (Ratings, Reviews & Dispute Resolution) closes the trust feedback loop
+  that differentiates Felly Club from competitors without quality signals.
+  E6 (Platform Administration & Operations) delivers the admin portal that
+  the curated-marketplace model depends on — mentor onboarding approvals,
+  commission configuration, payout management, and dispute resolution all
+  require operational tooling. E7 (Communications & Notification Centre)
+  replaces the mock email notifications used by E3 and E4 with branded
+  SendGrid delivery and an in-app notification centre, ensuring real users
+  receive reliable, professional communications before the platform goes
+  live. E8 (Regulatory Compliance & Data Security) implements GDPR consent
+  management (including the per-session recording consent gate resolved in
+  pre-lock), PCI DSS validation, right-to-deletion, and security hardening
+  — all mandatory for legal operation in EU markets (Germany, Switzerland)
+  and India.
 
-  The critical path runs through Weeks 7-12 where the core marketplace transaction takes shape. Session Booking and Video Delivery (E4) closes the scheduling and delivery loop with Zoom SDK integration for in-platform video, timezone-aware booking across four countries, and the session lifecycle state machine that downstream epics depend on. Payment Processing and Escrow (E5) layers Stripe Connect (replacing PayU per pre-lock resolution) for escrow hold-and-release across all four geographies, multi-currency support (EUR, USD, CHF, INR), and platform commission calculation. E4 and E5 are the highest-risk block — Zoom SDK licensing, double-booking atomics, and Stripe Connect integration are all on the critical path. The switch from PayU to Stripe Connect, resolved during pre-lock, significantly de-risks the multi-geography escrow requirement.
+  The far-horizon delivers growth and visibility capabilities that depend on
+  stable transaction data. E9 (Analytics & Performance Dashboards) provides
+  persona-specific dashboards for mentors (earnings, ratings), mentees
+  (session history, spending), and admin (GMV, session volume, quality KPIs).
+  E10 (Referral Programme & User Acquisition) launches the organic growth
+  channel — referral link generation, attribution tracking, and reward
+  fulfilment on first completed session. Both epics read from the session,
+  payment, and user data produced by the near- and mid-horizon epics, making
+  their late sequencing both a dependency requirement and a risk-reduction
+  strategy.
 
-  Weeks 10-14 layer quality signals, communication infrastructure, acquisition mechanics, and operational tooling on the working marketplace. Quality Assurance and Ratings (E6) introduces post-session ratings, mentor quality scoring, dispute initiation, and NPS surveys. Platform Communications (E8) delivers SendGrid transactional emails, FCM push notifications, and session-context in-app messaging — the communication layer that directly impacts the 85% session completion rate target through reminder effectiveness. Referral and Acquisition Engine (E9) builds the dual-sided referral system targeting SG-05's 30% referral-driven signup goal. Admin Operations and Analytics (E10) provides the operational dashboard layer — mentor approval pipeline, dispute management, financial oversight, and role-specific analytics. E10 is the widest-data-breadth component, consuming from E2, E4, E5, and E6, and is deliberately sequenced last to ensure upstream data sources are stable.
+  A key pre-lock resolution removes mobile app delivery from the MVP scope,
+  making Felly Club web-only (mentee web app + admin portal) for the initial
+  launch. This eliminates the React Native technology decision (I-01), reduces
+  the delivery surface, and focuses the €125,000 budget on a single channel
+  with full end-to-end quality. Mobile delivery is deferred to Phase 2
+  alongside mentor self-registration, AI/ML recommendations, subscription
+  pricing, and other post-MVP capabilities.
 
-  The overall sequencing is driven by dependency reality and risk concentration. Foundation epics (E1, E7) unlock everything. Supply-side epics (E2, E3) populate the marketplace. Core transaction epics (E4, E5) close the marketplace loop. Trust and growth epics (E6, E8, E9, E10) layer quality, communication, acquisition, and operations on top. Risk is concentrated in E4 (Zoom SDK integration, double-booking), E5 (Stripe Connect escrow, multi-currency), and E7 (multi-regime compliance with data deletion across distributed systems). The EUR 50K budget and 16-week timeline mean there is no room for architectural rework — sequencing must be right the first time.
-
-# --- Timeline ---
-
+# ─── Timeline ─────────────────────────────────────────────────────────────────
 timeline:
   - horizon: "near"
-    label: "Foundation and Supply"
-    weeks: "1-10"
-    epic_refs: ["E1", "E7", "E2", "E3"]
-    rationale: "Identity, compliance, mentor supply, and discovery must be operational before any marketplace transaction can occur. E1 and E7 run in parallel as co-foundations. E2 and E3 overlap with E1's tail — supply activation starts as soon as auth is stable."
+    theme: "Foundation & Transaction Core"
+    weeks: "W1–W8"
+    epic_refs:
+      - id: "E1"
+        name: "User Identity & Profile Foundation"
+        effort: "M"
+        priority: "P1"
+        weeks: "W1–W3"
+      - id: "E2"
+        name: "Mentor Marketplace & Discovery"
+        effort: "M"
+        priority: "P1"
+        weeks: "W3–W5"
+      - id: "E3"
+        name: "Session Lifecycle & Video Delivery"
+        effort: "L"
+        priority: "P1"
+        weeks: "W4–W7"
+      - id: "E4"
+        name: "Payment Processing & Financial Operations"
+        effort: "L"
+        priority: "P1"
+        weeks: "W6–W8"
+
   - horizon: "mid"
-    label: "Core Transaction"
-    weeks: "7-12"
-    epic_refs: ["E4", "E5"]
-    rationale: "Session booking with Zoom SDK and Stripe Connect payment/escrow close the marketplace loop. This is the highest-risk block and the critical path for SG-01. E4 and E5 overlap because the session lifecycle state machine (E4) must be defined before E5 can implement escrow release triggers, but development can proceed in parallel with integration testing at the boundary."
-  - horizon: "long"
-    label: "Trust, Growth, and Operations"
-    weeks: "10-16"
-    epic_refs: ["E6", "E8", "E9", "E10"]
-    rationale: "Quality ratings, communications, referral engine, and admin operations layer on top of the working marketplace. E10 is sequenced last because it consumes data from E2, E4, E5, and E6. E8 and E9 can develop concurrently once their dependencies (E4 and E5 respectively) are stable."
+    theme: "Platform Integrity, Operations & Compliance"
+    weeks: "W7–W13"
+    epic_refs:
+      - id: "E5"
+        name: "Ratings, Reviews & Dispute Resolution"
+        effort: "M"
+        priority: "P1"
+        weeks: "W8–W10"
+      - id: "E6"
+        name: "Platform Administration & Operations"
+        effort: "L"
+        priority: "P1"
+        weeks: "W8–W11"
+      - id: "E7"
+        name: "Communications & Notification Centre"
+        effort: "M"
+        priority: "P2"
+        weeks: "W9–W11"
+      - id: "E8"
+        name: "Regulatory Compliance & Data Security"
+        effort: "M"
+        priority: "P1"
+        weeks: "W10–W13"
 
-# --- Feasibility per epic ---
+  - horizon: "far"
+    theme: "Growth, Analytics & Acquisition"
+    weeks: "W12–W16"
+    epic_refs:
+      - id: "E9"
+        name: "Analytics & Performance Dashboards"
+        effort: "M"
+        priority: "P2"
+        weeks: "W12–W14"
+      - id: "E10"
+        name: "Referral Programme & User Acquisition"
+        effort: "S"
+        priority: "P2"
+        weeks: "W14–W16"
 
+# ─── Feasibility ──────────────────────────────────────────────────────────────
 feasibility:
   - epic_ref: "E1"
-    epic_name: "Identity and Access Foundation"
+    epic_name: "User Identity & Profile Foundation"
     risk_level: "medium"
     technical_risks:
-      - risk: "KeyCloak is an operationally heavyweight IdP — it requires a dedicated JVM process, a PostgreSQL backing store, and non-trivial initial configuration for realm setup, client registration, and RBAC policy authoring. For a 3-person team under a EUR 50K budget, the operational footprint of KeyCloak may consume disproportionate infrastructure spend and setup time compared to a managed SaaS IdP alternative."
-        severity: "medium"
-        affected_systems: "Authentication layer, infrastructure budget, deployment pipeline"
-        mitigation: "Use managed KeyCloak via cloud-hosted offering (e.g., Phase Two or Keycloak Cloud) per pre-lock resolution. Monthly SaaS cost is Felly Club's responsibility. This eliminates self-hosting operational burden."
-      - risk: "Social login integration (Google, Apple) via KeyCloak requires registering OAuth2 clients in each provider's developer console and configuring identity provider federation inside KeyCloak. Apple's Sign In requires additional App Store developer account setup and callback URL HTTPS enforcement. Any misconfiguration silently breaks the auth flow without clear error messages."
-        severity: "low"
-        affected_systems: "Registration and login flows, KeyCloak identity provider config"
-        mitigation: "Implement email/password auth first and validate the full registration-to-RBAC flow before adding social login. Treat social login as additive once the core auth pipeline is stable."
-      - risk: "Multi-tenant RBAC configuration in KeyCloak is non-trivial for teams unfamiliar with the platform. KeyCloak's role model (realm roles vs. client roles, role composites) is powerful but easy to misconfigure in ways that produce incorrect access control behaviour."
-        severity: "medium"
-        affected_systems: "RBAC enforcement, all downstream epics that depend on role-gated access"
-        mitigation: "Define all three roles (mentee, mentor, admin) and their client-level scopes as code before any UI development begins. Write integration tests that assert role-specific access denial (403s) for all protected routes from day one."
+      - "KeyCloak integration complexity — realm configuration, client registration, and RBAC role mapping for 3 personas"
+      - "Social login OAuth flow (Google and Apple) on top of KeyCloak identity brokering; Apple requires paid Developer account"
+      - "Admin-driven mentor onboarding with file uploads (verification artefacts) — storage, validation, and admin review queue built from scratch"
     blockers: []
-    sequencing_constraints: "E1 is the hard prerequisite for the entire platform. No other epic can begin integration testing until E1 delivers working authentication tokens and role assignments. E7 (Compliance) shares the registration flow — coordinate consent collection injection point before E1's registration form is finalized to avoid rework."
-    architecture_impact: "KeyCloak introduces a dedicated identity service requiring its own database (PostgreSQL), container, health checks, and network policy. Every backend service must validate JWT tokens issued by KeyCloak — this mandates a shared token validation middleware that all epics consume. The RBAC model defined in E1 governs access control across the entire platform."
+    sequencing_constraints: >
+      E1 is the mandatory foundation — no other epic can begin until E1's auth,
+      profile, and RBAC layers are stable. Must ship in W1–W3.
+    architecture_impact: >
+      Establishes IAM foundation (KeyCloak, JWT, RBAC, API gateway auth middleware),
+      file storage infrastructure (verification artefacts), and user/mentor_profile
+      data model schema referenced by all subsequent epics.
 
   - epic_ref: "E2"
-    epic_name: "Mentor Onboarding and Credentialing"
+    epic_name: "Mentor Marketplace & Discovery"
     risk_level: "medium"
     technical_risks:
-      - risk: "Credential file upload (certifications, portfolio documents) requires a storage backend (S3-compatible object store) with secure signed URL access — files must not be publicly accessible but must be viewable by the submitting mentor and the admin reviewer."
-        severity: "medium"
-        affected_systems: "File storage infrastructure, admin review panel, mentor profile"
-        mitigation: "Use a managed object storage service (AWS S3 or equivalent) with bucket policies that deny public access. Generate pre-signed upload URLs server-side with 15-minute expiry. Enforce MIME type and file size server-side. Defer virus scanning for MVP."
-      - risk: "Pricing band enforcement requires server-side validation against admin-configured pricing ranges. If the pricing band configuration is stored as application-level config rather than in the database, updating pricing bands requires a deployment."
-        severity: "low"
-        affected_systems: "Mentor profile service, admin configuration, pricing validation"
-        mitigation: "Seed initial pricing bands as database fixtures at deployment time. Build the admin pricing band management UI as part of E10. For E2, validate against DB-stored bands."
-      - risk: "The mentor approval state machine (applied, under_review, approved, rejected, request_more_info) must be persisted correctly and transitions must be idempotent."
-        severity: "low"
-        affected_systems: "Mentor application service, admin queue"
-        mitigation: "Apply optimistic locking on application state transitions. Admin review actions should check current state before transitioning — reject transitions from unexpected states with a 409 Conflict."
+      - "Elasticsearch setup, index design, and event-driven sync pipeline — broken sync produces stale search results"
+      - "Category taxonomy consistency — rule-based recommendations require enforced enum categories, not free-text"
+      - "Empty-state handling for new marketplace with potentially thin mentor supply at launch"
     blockers: []
-    sequencing_constraints: "Depends on E1 for authentication and role assignment. The mentor approval workflow creates the supply-side data (approved mentor profiles) that E3 (Discovery) indexes. E3's Elasticsearch index cannot be populated or tested meaningfully until E2 delivers at least a small set of approved mentor profiles. Target 5-10 seeded test mentor profiles at end of E2 to unblock E3 integration testing."
-    architecture_impact: "Introduces a file storage subsystem (object store) as new infrastructure. The mentor profile entity is the central data model that E3 (search index), E4 (booking availability), E10 (admin queue) all read from — schema changes to this model after E2 ships will cascade across multiple consumers."
+    sequencing_constraints: >
+      Depends on E1 for verified mentor profiles. E3 depends on E2 for mentor
+      discovery before session booking.
+    architecture_impact: >
+      Introduces Elasticsearch as a second data store alongside the relational
+      database. Requires an index sync strategy. Pagination pattern established
+      here is reused across E9 analytics views.
 
   - epic_ref: "E3"
-    epic_name: "Mentor Discovery and Search"
-    risk_level: "medium"
+    epic_name: "Session Lifecycle & Video Delivery"
+    risk_level: "high"
     technical_risks:
-      - risk: "Elasticsearch introduces significant operational complexity: cluster setup, index mapping design, index lifecycle management, and keeping the search index in sync with the primary database. Index-database synchronisation is a common failure mode — if an approved mentor's profile update is not propagated to Elasticsearch within the 5-minute SLA, search results become stale."
-        severity: "high"
-        affected_systems: "Elasticsearch cluster, mentor profile service, search sync pipeline"
-        mitigation: "Use a change-data-capture (CDC) or event-driven sync pattern: when a mentor profile transitions to approved or is updated, publish a profile_updated event that a sync worker consumes to re-index. Do not use synchronous dual-writes."
-      - risk: "Elasticsearch index mapping must be designed upfront for the faceted filter requirements. Changing field types or adding nested mappings after the index is populated requires a full re-index operation."
-        severity: "medium"
-        affected_systems: "Elasticsearch index, search API, faceted filter UI"
-        mitigation: "Design and document the Elasticsearch index mapping before writing any indexing code. Include all filter fields as keyword type for exact-match facets. Include rating and price as numeric fields with sort capability."
-      - risk: "Autocomplete (typeahead) requires either a separate Elasticsearch completion suggester index or a prefix query on the main index. The completion suggester requires a separate input field structure in the mapping."
-        severity: "low"
-        affected_systems: "Elasticsearch index mapping, search API, UI"
-        mitigation: "Include the completion suggester field in the initial index mapping design even if autocomplete is implemented after the core search."
-    blockers: []
-    sequencing_constraints: "Depends on E2 for approved mentor profiles to populate the search index. Cannot produce meaningful search results without at least minimal mentor supply. Elasticsearch cluster must be provisioned and validated before E4 (Session Booking) begins."
-    architecture_impact: "Adds Elasticsearch as a new infrastructure component requiring provisioning, monitoring, and operational runbooks. Introduces an async sync pipeline between the primary database and the search index — new infrastructure (queue + worker) that must be provisioned alongside Elasticsearch."
+      - "Video provider API integration (Zoom preferred for MVP) — meeting creation, recording callbacks, webhook delivery"
+      - "Session state machine with 8 states and multiple transition triggers — state bugs can leave sessions in inconsistent states"
+      - "Auto-recording with 3-day TTL, admin-only access, and GDPR per-session consent gate at session join"
+      - "GDPR recording consent (I-05 resolved) — per-session explicit consent mechanism required for both parties before recording starts"
+    blockers:
+      - "I-05 RESOLVED: Per-session explicit consent required. E3 join flow must include a consent gate for both mentor and mentee before recording begins."
+    sequencing_constraints: >
+      Depends on E1 and E2. E4 payment capture triggers on session booking and
+      completion. E5 depends on E3 completion state. E7 mocks are used during E3
+      and replaced after E7 ships.
+    architecture_impact: >
+      Introduces the session state machine, webhook ingestion layer for video
+      provider events, recording storage infrastructure with TTL lifecycle policies,
+      and the notification interface that E7 must implement.
 
   - epic_ref: "E4"
-    epic_name: "Session Booking and Video Delivery"
+    epic_name: "Payment Processing & Financial Operations"
     risk_level: "high"
     technical_risks:
-      - risk: "The Zoom SDK integration for in-platform video delivery is the highest-risk technical component in the MVP. Zoom's Web SDK requires a valid JWT signature and a valid meeting ID created via the Zoom Meetings API. The in-browser SDK has known constraints: specific browser version requirements, Safari WebRTC limitations, HTTPS enforcement. SDK version updates from Zoom can break existing integrations silently."
-        severity: "high"
-        affected_systems: "Video session delivery, session join flow, browser compatibility"
-        mitigation: "Prototype the Zoom Web SDK integration in isolation before building the booking flow around it. Validate browser compatibility matrix across target user geographies. Pin the Zoom SDK version. Implement a fallback: if the in-browser SDK fails to load, surface a Zoom join link as an escape hatch. Fallback to Jitsi or Daily.co if Zoom costs exceed expectations (per pre-lock resolution)."
-      - risk: "Double-booking prevention requires atomic slot reservation. If two mentees simultaneously attempt to book the same time slot, a naive check-then-act implementation will fail under concurrent load."
-        severity: "high"
-        affected_systems: "Session booking service, availability management, database"
-        mitigation: "Implement slot reservation using a database-level unique constraint on (mentor_id, slot_datetime) or a SELECT FOR UPDATE lock during booking transaction. Test concurrent booking scenarios explicitly."
-      - risk: "Timezone handling across India (IST), Switzerland (CET/CEST), USA (multiple zones), and Germany (CET/CEST) is a persistent source of bugs in booking systems."
-        severity: "medium"
-        affected_systems: "Session booking service, calendar invite generation, UI date display"
-        mitigation: "Store all session datetimes as UTC in the database. Accept user timezone as a required field during booking. Display times in user timezone in all UI surfaces. Generate calendar invites with explicit TZID fields."
-      - risk: "Session recording with mutual consent requires storing consent flags at booking time, controlling Zoom recording start/stop via API, and handling stored recording access securely."
-        severity: "low"
-        affected_systems: "Zoom API integration, consent management, E7 compliance"
-        mitigation: "Implement recording consent as a simple boolean flag on the booking entity. Default to opt-out. Defer recording playback and access management to post-launch iteration."
+      - "Stripe escrow via delayed capture (7-day limit) — sessions scheduled >7 days ahead require re-authorisation strategy"
+      - "Dual Stripe account architecture — separate Stripe India (INR) and Stripe Global (USD/CHF/EUR) with different settlement rails"
+      - "Stripe Connect mentor onboarding — handled in E4 scope per pre-lock resolution, not E1"
+      - "Webhook reliability — idempotent processing, signature validation, dead-letter queuing for failed events"
     blockers:
-      - "Zoom SDK license and API credentials must be obtained before integration development begins. The Zoom Marketplace approval process can take 3-7 business days. Per pre-lock resolution: Zoom Pro account ($13.33/mo) budgeted; fallback to Jitsi or Daily.co if procurement delays."
-    sequencing_constraints: "E4 is a critical path epic — E5 (Payment) depends on the session lifecycle state machine defined in E4. E6 (Quality/Ratings) triggers on session completion events from E4. E8 (Communications) sends session notifications triggered by E4 state transitions. E4's session state machine must be formally defined and documented before E5 and E8 begin implementation."
-    architecture_impact: "Introduces Zoom as an external real-time dependency — session delivery reliability is partially outside the platform's control. Session state machine is a shared contract that E5, E6, and E8 all depend on. Requires a webhook endpoint to receive Zoom events. Google Calendar invite generation requires a server-side calendar library or Google Calendar API integration."
+      - "CB-2 RESOLVED: Separate Stripe India entity for INR and global Stripe account for USD/CHF/EUR. Dual-account routing required."
+      - "CB-3 RESOLVED: Stripe Connect mentor onboarding kept out of E1. Handled as part of E4 or as a separate setup step."
+    sequencing_constraints: >
+      Depends on E3 for session booking and completion triggers. E5 refunds depend
+      on E4. E6 financial operations depend on E4 data model. E9 reads E4 financial
+      records.
+    architecture_impact: >
+      Introduces Stripe with Payment Intents (escrow), Stripe Connect (mentor payouts),
+      dual-account routing (India/Global), and financial data model (transactions,
+      escrow records, payout queue, commission ledger).
 
   - epic_ref: "E5"
-    epic_name: "Payment Processing and Escrow"
-    risk_level: "high"
-    technical_risks:
-      - risk: "Stripe Connect integration for escrow-equivalent hold-and-release across four geographies (India, Switzerland, USA, Germany) requires understanding Stripe's connected accounts model, payment intents with capture delay, and per-geography regulatory nuances. India specifically has RBI restrictions on payment aggregation that Stripe handles via its India entity, but onboarding connected accounts in India has additional KYC requirements."
-        severity: "high"
-        affected_systems: "Payment processing, escrow workflow, multi-currency support, regulatory compliance"
-        mitigation: "Per pre-lock resolution: Use Stripe Connect instead of PayU. Stripe Connect supports hold-and-release across all four geographies via a single API. Stripe's connected accounts model means Felly Club does not hold funds directly, sidestepping RBI/FINMA licensing concerns. Validate Stripe Connect onboarding flow for Indian mentor accounts early in development."
-      - risk: "Webhook handling for payment lifecycle events must be idempotent. Stripe delivers webhooks at-least-once — duplicate events will be received. A non-idempotent webhook handler that processes a payment_intent.succeeded event twice will release escrow twice."
-        severity: "high"
-        affected_systems: "Payment webhook handler, escrow service, mentor payout service"
-        mitigation: "Implement an idempotency key store for all incoming payment webhooks. Before processing any webhook, check if the event ID has been seen before. Use Stripe's event ID as the idempotency key. Store processed event IDs with a 30-day TTL."
-      - risk: "Multi-currency payment flows (EUR, USD, CHF, INR) require consistent currency handling. A common failure mode is mixing integer (minor units: cents, paise) and decimal (major units) representations, leading to commission calculation errors."
-        severity: "medium"
-        affected_systems: "Payment service, commission calculation, payout processing, financial reporting"
-        mitigation: "Store and transmit all monetary values in minor currency units (integer cents/paise). Never use floating-point for money. Per pre-lock resolution: mentors set prices in their preferred currency, mentees are charged in local currency via Stripe's automatic currency conversion."
-      - risk: "PCI DSS compliance scope requires the platform to never log, store, or transmit raw card data."
-        severity: "medium"
-        affected_systems: "Payment endpoint, application logging, request middleware"
-        mitigation: "Stripe Elements handles card data collection client-side. Implement a global request logging middleware that masks or excludes payment endpoint request body from all logs."
-    blockers:
-      - "Stripe Connect account setup and API credentials must be obtained. Connected account onboarding flow for mentors in India requires additional KYC validation — test early."
-    sequencing_constraints: "Depends on E4 for the session lifecycle state machine — escrow release is triggered by session.completed events from E4. E9 (Referral rewards as platform credit) depends on E5's payment balance model. E10 (Financial dashboard) depends on E5's transaction records. E5 must define and document its transaction data model before E10 begins dashboard development."
-    architecture_impact: "Payment processing must be implemented as an isolated module with strict input/output boundaries. Webhook endpoint must be exposed on a separate, authenticated path. Escrow state must be tracked in a dedicated payment ledger table, not inferred from session state. Financial data requires field-level encryption at rest."
-
-  - epic_ref: "E6"
-    epic_name: "Quality Assurance and Ratings"
-    risk_level: "low"
-    technical_risks:
-      - risk: "The review moderation flow introduces latency between review submission and public visibility. If the admin team is small, the review queue could back up."
-        severity: "low"
-        affected_systems: "Review moderation service, mentor profile display, admin operations"
-        mitigation: "Implement a basic automated profanity filter as a first-pass gate — reviews that pass the filter can be auto-approved for display while simultaneously queued for admin review."
-      - risk: "Dispute initiation workflow must not be conflated with the refund trigger in E5. If the dispute API is accessible without proper authentication, bad actors can file spurious disputes."
-        severity: "medium"
-        affected_systems: "Dispute service, payment service (E5), admin operations (E10)"
-        mitigation: "Validate dispute eligibility server-side: only mentees with a completed session can submit a dispute. Enforce a time window. Rate-limit dispute submissions per user. Disputes must not trigger any payment action — they route to the admin queue only."
-      - risk: "NPS survey delivery depends on the E8 notification infrastructure. If E6 is delivered before E8's SendGrid integration is complete, the post-session rating prompt has no delivery channel."
-        severity: "low"
-        affected_systems: "Rating prompt trigger, E8 notification service"
-        mitigation: "Design E6's rating prompt as a published event (session.completed -> rating_prompt.triggered). E8 subscribes to this event and handles delivery via SendGrid."
-    blockers: []
-    sequencing_constraints: "Depends on E4 (session completion state) and E5 (payment confirmation). Should be integrated with E8 (Communications) for email delivery of rating prompts. Dispute data feeds E10's admin dispute management panel."
-    architecture_impact: "Rating aggregation must be maintained as a materialised value on the mentor profile entity, not computed on read. Use an increment-aggregate pattern: update the mentor's aggregate rating atomically when a new review is approved."
-
-  - epic_ref: "E7"
-    epic_name: "Compliance and Data Protection"
-    risk_level: "high"
-    technical_risks:
-      - risk: "Data deletion (right to be forgotten) in a distributed system with multiple data stores is significantly more complex than a single-table DELETE. Felly Club's data landscape includes PostgreSQL, KeyCloak's user store, the Elasticsearch search index, SendGrid email logs, Zoom session recording metadata, and backup storage. Missing any one store constitutes a GDPR violation."
-        severity: "high"
-        affected_systems: "PostgreSQL, KeyCloak, Elasticsearch index, SendGrid, Zoom API, backup systems"
-        mitigation: "Create a Data Asset Register at the start of E7. Implement data deletion as a choreographed workflow: delete from primary DB, publish deletion event, downstream services consume and delete. Verify deletion completeness with a post-deletion audit query."
-      - risk: "Immutable audit log implementation requires write-only append storage — not a standard database table that can be updated or deleted."
-        severity: "medium"
-        affected_systems: "Audit log storage, database permissions model, compliance reporting"
-        mitigation: "Create a dedicated audit_log table accessible only via INSERT from the application service user — revoke UPDATE and DELETE permissions. Include a SHA-256 hash of the previous entry in each record for tamper-evidence."
-      - risk: "India TPDP is relatively new (implemented 2023-2025 phased rollout) and implementation guidance is still evolving."
-        severity: "medium"
-        affected_systems: "Consent management, data processing records, user data deletion"
-        mitigation: "Align TPDP implementation with GDPR consent architecture. Implement a jurisdiction-aware consent renderer. Flag TPDP-specific requirements for post-launch legal review."
-    blockers:
-      - "Confirming whether the platform qualifies as a 'payment institution' under local financial regulations is a legal question. Per pre-lock resolution: Stripe Connect's connected accounts model delegates payment institution obligations to Stripe, but legal counsel should validate before launch."
-    sequencing_constraints: "E7 shares the registration flow with E1 — consent collection must be integrated into E1's signup form. E7 must be treated as a parallel development track alongside E1. E7's audit logging must be instrumented in E5 (payment events), E2 (admin approval actions), and E10 (admin operations)."
-    architecture_impact: "Introduces a compliance data layer: consent records table, audit log table, data deletion workflow orchestrator. The consent service becomes a read dependency for marketing communications (E8 must check consent). The audit log writer is a cross-cutting concern. Data deletion workflow requires a choreography mechanism."
-
-  - epic_ref: "E8"
-    epic_name: "Platform Communications"
-    risk_level: "low"
-    technical_risks:
-      - risk: "SendGrid transactional email delivery requires domain authentication (DKIM/SPF/DMARC records) to achieve high deliverability rates. DNS propagation can take 24-48 hours."
-        severity: "medium"
-        affected_systems: "Email deliverability, SendGrid setup, DNS configuration"
-        mitigation: "Configure DKIM/SPF/DMARC records during infrastructure setup, not during E8 feature development. Verify deliverability with test sends to major email providers before launch."
-      - risk: "FCM push notification delivery requires device token registration and management. Device tokens expire and require graceful handling of stale tokens."
-        severity: "low"
-        affected_systems: "FCM integration, device token management, service worker"
-        mitigation: "Treat FCM push as a best-effort channel. All critical notifications must also be delivered via email as the authoritative channel. Prune stale FCM tokens automatically."
-      - risk: "In-app messaging threading must enforce that only the matched mentor-mentee pair for a specific booking can exchange messages in that thread."
-        severity: "medium"
-        affected_systems: "In-app messaging service, message thread access control, E1 RBAC"
-        mitigation: "Anchor each message thread to a specific booking_id, not just user IDs. Server-side thread access validation must verify the requesting user is a party to the booking. Thread IDs should be UUIDs to prevent enumeration."
-    blockers: []
-    sequencing_constraints: "Depends on E4 for session lifecycle events that trigger notifications. Should be developed concurrently with E4 but notification triggers are defined by E4's state machine. E8 provides the delivery channel for E6's post-session rating prompt."
-    architecture_impact: "Introduces an asynchronous notification pipeline: session lifecycle events, notification service, SendGrid/FCM delivery. This queue-based architecture is new infrastructure that other epics also benefit from (E6 rating events, E9 referral events)."
-
-  - epic_ref: "E9"
-    epic_name: "Referral and Acquisition Engine"
-    risk_level: "low"
-    technical_risks:
-      - risk: "Referral attribution across the signup funnel requires maintaining referral context through multiple stateless HTTP requests. If any step fails to persist the referral code, attribution is lost."
-        severity: "medium"
-        affected_systems: "Referral tracking, signup flow, session completion webhook"
-        mitigation: "Persist the referral code in a first-party cookie on link click with a 30-day TTL. Read the cookie during signup and attach the referral_code to the new user's account record."
-      - risk: "Anti-fraud measures require careful definition. Over-aggressive fraud detection blocks legitimate referrals."
-        severity: "low"
-        affected_systems: "Referral service, fraud detection logic, reward disbursement"
-        mitigation: "For MVP, implement only deterministic fraud checks: same-account self-referral prevention and same-email duplicate detection. Defer device fingerprinting to post-launch."
-      - risk: "Referral reward disbursement as platform credit must integrate with E5's payment balance model. Platform credit must be denominated in a specific currency."
-        severity: "low"
-        affected_systems: "Referral reward service, E5 payment balance, multi-currency handling"
-        mitigation: "Denominate all referral credit in EUR as the platform's base currency for MVP. Apply current exchange rate at redemption time."
-    blockers: []
-    sequencing_constraints: "Depends on E5 for payment balance infrastructure. Should be developed after E5 delivers its payment balance model. Reward disbursement events feed E10's financial dashboard."
-    architecture_impact: "Referral tracking introduces a new data model (referral_links, referral_events, referral_rewards) that is largely self-contained. The referral code persistence via first-party cookie requires coordination with the registration flow (E1)."
-
-  - epic_ref: "E10"
-    epic_name: "Admin Operations and Analytics"
+    epic_name: "Ratings, Reviews & Dispute Resolution"
     risk_level: "medium"
     technical_risks:
-      - risk: "Financial dashboard accuracy requires that all aggregation queries produce results that exactly match underlying transaction records. Discrepancies arise from eventually-consistent read replicas, differing rounding rules, or unexcluded refunded transactions."
-        severity: "medium"
-        affected_systems: "Financial dashboard, reporting queries, E5 transaction data"
-        mitigation: "Compute financial aggregates from the same transaction ledger table that E5 uses. Implement a staleness indicator if read replicas are used. Reconcile dashboard totals against Stripe records in a nightly batch job."
-      - risk: "The admin panel aggregates real-time operational data from multiple upstream epics. If E10 directly queries each module's database, it creates tight coupling and performance risk."
-        severity: "medium"
-        affected_systems: "Admin panel, E2 mentor data, E5 payment data, E6 dispute data, E9 referral data"
-        mitigation: "Build E10's dashboard queries on read-optimised reporting tables or materialised views updated asynchronously from upstream events. For MVP, a simple reporting schema with scheduled refresh every 5 minutes is sufficient."
-      - risk: "Role-gating of the admin panel is critical — inconsistent RBAC enforcement creates data exposure gaps."
-        severity: "medium"
-        affected_systems: "Admin panel API routes, E1 RBAC, data privacy"
-        mitigation: "Implement role enforcement as mandatory middleware at the router level. Write an integration test that asserts every admin panel endpoint returns 403 with non-admin JWT."
+      - "Auto-flagging triggers must be idempotent — duplicate flags or missed triggers degrade quality monitoring"
+      - "Session recording 3-day TTL creates a hard window for dispute evidence access; disputes must be filed within retention period"
+      - "Abuse reporting scope and triage — resolution workflow must remain distinct from dispute resolution"
     blockers: []
-    sequencing_constraints: "Depends on E2, E4, E5, and E6 for the data that powers dashboards. Cannot deliver meaningful operational dashboards until upstream epics are functional. Financial dashboard should not go live until E5 is in production with real transaction data."
-    architecture_impact: "Introduces a reporting layer — either a reporting schema with materialised views or an async event-driven aggregation pipeline. The admin panel is the highest data-breadth component, consuming from the widest range of upstream modules."
+    sequencing_constraints: >
+      Depends on E3 (completed session state) and E4 (dispute-triggered refunds).
+      Sequenced to mid-bucket after E3 and E4 are stable.
+    architecture_impact: >
+      Introduces rating/review data model, auto-flagging event pipeline, and dispute
+      state machine. Reads session recordings from E3's storage. Triggers E4 refund
+      API on dispute resolution.
 
-# --- Critical blockers (resolved in pre-lock) ---
+  - epic_ref: "E6"
+    epic_name: "Platform Administration & Operations"
+    risk_level: "medium"
+    technical_risks:
+      - "Strapi CMS integration adds a third persistent data store; template sync between Strapi and SendGrid (E7)"
+      - "Configuration changes (commission rates, policies) must apply only to NEW sessions — version-at-capture semantics required"
+      - "Platform-wide admin search against production tables needs read replicas and query timeout limits"
+    blockers: []
+    sequencing_constraints: >
+      Admin session management depends on E3, financial operations on E4, dispute UI
+      on E5. System configuration (commission rates, policies) is needed by E3/E4 —
+      stubbed defaults used until E6 delivers dynamic config.
+    architecture_impact: >
+      Adds Strapi CMS as third persistence layer. Establishes system configuration
+      service as shared dependency. Version-at-capture pattern for commission rates.
+      Admin portal is a separate frontend with KeyCloak RBAC admin role auth.
 
+  - epic_ref: "E7"
+    epic_name: "Communications & Notification Centre"
+    risk_level: "low"
+    technical_risks:
+      - "Replacing mock notifications from E3/E4 with SendGrid — requires clean notification interface abstraction"
+      - "Firebase Cloud Messaging for push notifications — device token registration and silent failure handling (web-only for MVP)"
+      - "SendGrid deliverability — domain authentication (SPF, DKIM, DMARC) setup needed in Sprint 1"
+    blockers: []
+    sequencing_constraints: >
+      Depends on E1 for user preferences. De-mocks E3 and E4 notifications — should
+      ship before E3/E4 reach production to avoid mocked notifications for real users.
+    architecture_impact: >
+      Introduces Twilio SendGrid and FCM as communication infrastructure. Establishes
+      notification service as a shared platform component. In-app notification centre
+      adds notifications data model.
+
+  - epic_ref: "E8"
+    epic_name: "Regulatory Compliance & Data Security"
+    risk_level: "high"
+    technical_risks:
+      - "Right-to-deletion cascade across all data stores (relational DB, Elasticsearch, S3, SendGrid, notifications)"
+      - "TPDP (India) rules partially notified — GDPR-equivalent controls used as baseline per pre-lock resolution"
+      - "Encryption at rest (AES-256) requires key management infrastructure; field-level vs database-level decision"
+      - "Recording consent audit — must verify E3's per-session consent gate is GDPR-compliant"
+    blockers:
+      - "CB-1 RESOLVED: Per-session explicit GDPR consent required for recording. E3 join flow implements consent gate. E8 audits compliance."
+    sequencing_constraints: >
+      Depends on E1 (identity for right-to-deletion) and E4 (PCI DSS audit of
+      tokenisation). Must be validated in staging before production launch.
+      Security hardening (TLS, JWT, secure headers) should begin in Sprint 1 as
+      infrastructure provisioning.
+    architecture_impact: >
+      Adds deletion orchestrator as cross-cutting compliance component. Cookie consent
+      requires frontend changes across all pages. JWT security audit may require E1
+      auth changes. Compliance audit trail adds logging infrastructure shared with E9.
+
+  - epic_ref: "E9"
+    epic_name: "Analytics & Performance Dashboards"
+    risk_level: "low"
+    technical_risks:
+      - "Dashboard queries on production tables without read replicas degrade platform performance"
+      - "Analytics data consistency depends on accuracy of E1/E3/E4 data — incorrect upstream data produces misleading dashboards"
+      - "Schedule risk — E9 is far-bucket and depends on upstream epics delivering on time"
+    blockers: []
+    sequencing_constraints: >
+      Depends on E1, E3, and E4 for stable data models. Read replicas and summary
+      tables should be provisioned from day one. Dashboard development can proceed
+      in parallel using mocked API responses.
+    architecture_impact: >
+      Introduces summary tables (pre-computed aggregates). Dashboard API must be
+      isolated from write-path APIs. Admin KPI dashboard shares E6's admin portal
+      infrastructure.
+
+  - epic_ref: "E10"
+    epic_name: "Referral Programme & User Acquisition"
+    risk_level: "low"
+    technical_risks:
+      - "Referral attribution through registration flow — parameter must survive browser close and OAuth redirect"
+      - "Reward fulfilment pipeline (session completion → payment confirmation → attribution check → reward) — silent failures block rewards"
+      - "Minimal fraud guards (self-referral block, email verification, reward cap) needed without a full fraud detection system"
+    blockers: []
+    sequencing_constraints: >
+      Depends on E1 (registration for attribution) and E4 (first paid session for
+      reward trigger). Referral parameter handling must be built into E1's registration
+      flow as a hook.
+    architecture_impact: >
+      Adds referral tracking service and event consumer for session completion events.
+      Minimal new infrastructure — referral links stored in relational database.
+      Reward configuration hooks into E6's system configuration.
+
+# ─── Critical Blockers ────────────────────────────────────────────────────────
 critical_blockers:
-  - blocker: "Zoom SDK license and API credentials procurement"
+  - id: "CB-1"
+    description: >
+      I-05 — Session recording consent for GDPR: Mandatory auto-recording
+      without an explicit GDPR-compliant consent mechanism at session start
+      may violate GDPR Article 7 in Germany and Switzerland. Affects E3
+      (session join flow) and E8 (GDPR compliance implementation).
+    affected_epics: ["E3", "E8"]
     status: "resolved"
-    resolution: "Zoom Pro account ($13.33/mo) budgeted. Fallback: Jitsi or Daily.co if procurement delays."
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - blocker: "Payment gateway escrow capability per geography"
-    status: "resolved"
-    resolution: "Switched from PayU to Stripe Connect. Stripe Connect supports hold-and-release across all four geographies via single API."
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - blocker: "Legal/financial structure for holding funds in escrow"
-    status: "resolved"
-    resolution: "Stripe Connect connected accounts model — Felly Club does not hold funds directly. Legal review recommended pre-launch."
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - blocker: "Payment institution qualification under RBI/FINMA"
-    status: "resolved"
-    resolution: "Stripe Connect delegates payment institution obligations to Stripe. Pre-launch legal validation recommended."
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
+    resolution: >
+      Follow GDPR guidelines — implement per-session explicit consent
+      mechanism at session start. Both mentor and mentee must consent before
+      recording begins. E3 session join flow updated to include a consent
+      gate; E8 compliance scope updated to audit per-session consent.
 
-# --- Open questions (resolved in pre-lock) ---
-
-open_questions:
-  - question: "Does PayU support escrow across all 4 geographies?"
-    status: "resolved"
-    answer: "Switching to Stripe Connect which supports all four geographies. PayU decision deferred."
-    affected_epics: ["E5", "E4", "E9"]
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - question: "Legal/regulatory status for escrow model?"
-    status: "resolved"
-    answer: "Stripe Connect connected-accounts model mitigates most licensing concerns. Pre-launch legal review recommended."
-    affected_epics: ["E5", "E7"]
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - question: "KeyCloak self-hosted or managed?"
-    status: "resolved"
-    answer: "Managed KeyCloak via cloud-hosted offering (Phase Two or Keycloak Cloud). Self-hosting adds operational burden incompatible with budget and timeline."
-    affected_epics: ["E1", "E7"]
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - question: "Zoom SDK licensing tier and budget?"
-    status: "resolved"
-    answer: "Zoom Pro account ($13.33/mo) sufficient for MVP volumes. Fallback to Jitsi or Daily.co if costs exceed expectations."
+  - id: "CB-2"
+    description: >
+      Stripe India account structure: INR domestic payment routing may require
+      a separate Stripe India entity with different API endpoints, onboarding,
+      and settlement rails than the global Stripe account. Architecture-defining
+      decision for E4 — a wrong initial choice requires significant rework.
     affected_epics: ["E4"]
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
-  - question: "Multi-currency pricing display vs charge currency?"
     status: "resolved"
-    answer: "Mentors set prices in preferred currency. Mentees charged in local currency via Stripe's automatic currency conversion. Platform stores prices in mentor's base currency."
-    affected_epics: ["E5", "E3"]
-    resolution_ref: ".meridian/project/product/felly-club/evidence/plan-roadmap/pre-lock-resolutions.yaml"
+    resolution: >
+      Assume separate Stripe accounts — Stripe India entity for INR domestic
+      transactions and a global Stripe account for USD/CHF/EUR. E4 architecture
+      must support dual-account routing from the start.
 
-# --- Risk summary ---
+  - id: "CB-3"
+    description: >
+      Stripe Connect scope gap: Mentor payout infrastructure (E4) requires
+      mentors to complete Stripe Connect onboarding (identity verification,
+      bank account linking), but this step was not included in E1's scope.
+      Mentors without Connect onboarding cannot receive payouts.
+    affected_epics: ["E1", "E4"]
+    status: "resolved"
+    resolution: >
+      Keep Stripe Connect mentor onboarding out of E1 scope. Handle as part
+      of E4 (Payment Processing) or as a distinct mentor setup step. E1
+      remains focused on identity and profile foundation only.
 
+# ─── Open Questions ───────────────────────────────────────────────────────────
+open_questions:
+  - id: "OQ-1"
+    question: >
+      What is the legal basis for auto-recording all sessions in GDPR markets
+      (Germany, Switzerland)? Does blanket ToS consent at registration suffice,
+      or is per-session explicit consent required under GDPR Article 7?
+    affected_epics: ["E3", "E8"]
+    status: "resolved"
+    resolution: >
+      Follow GDPR guidelines — per-session explicit consent required.
+      Both parties must consent before recording begins at each session.
+
+  - id: "OQ-2"
+    question: >
+      Technology stack decisions (React Native vs Swift/Kotlin for mobile;
+      Node.js vs Next.js for backend; API gateway vendor) are deferred to
+      architecture phase. These decisions affect E1 social login, E3 video
+      join flow, and E7 push notification infrastructure.
+    affected_epics: ["E1", "E2", "E3", "E7"]
+    status: "resolved"
+    resolution: >
+      Mobile removed from MVP scope entirely — MVP is web-only (mentee web
+      app + admin portal). React Native decision (I-01) no longer relevant
+      for MVP. Backend and API gateway decisions deferred to architecture
+      phase.
+
+  - id: "OQ-3"
+    question: >
+      Can a single Stripe account handle INR domestic transactions alongside
+      USD, CHF, EUR transactions? Or does the India market require a separate
+      Stripe India account with different onboarding and settlement rails?
+    affected_epics: ["E4"]
+    status: "resolved"
+    resolution: >
+      Assume separate Stripe accounts — Stripe India entity for INR
+      domestic transactions and a global Stripe account for USD/CHF/EUR.
+
+  - id: "OQ-4"
+    question: >
+      The current E1 scope does not include Stripe Connect identity
+      verification and bank account linking as a mentor setup step, but
+      mentors cannot receive payouts (E4) without completing Connect
+      onboarding. Should Stripe Connect onboarding be added to E1 or E4?
+    affected_epics: ["E1", "E4"]
+    status: "resolved"
+    resolution: >
+      Keep Stripe Connect mentor onboarding out of E1. Handle separately
+      as part of E4 payment epic or as a distinct setup step.
+
+  - id: "OQ-5"
+    question: >
+      How should system configuration changes (commission rates, cancellation
+      policies) behave for in-flight sessions — sessions booked under the old
+      rate but not yet completed?
+    affected_epics: ["E4", "E6"]
+    status: "resolved"
+    resolution: >
+      Config changes (commission rates, cancellation policies) apply only to
+      NEW sessions booked after the change. In-flight sessions retain the
+      rates and policies under which they were booked.
+
+  - id: "OQ-6"
+    question: >
+      What specific obligations does India's DPDP Act (2023, partially
+      notified as of early 2026) impose on Felly Club's India operations?
+      Are GDPR-equivalent controls sufficient?
+    affected_epics: ["E8"]
+    status: "resolved"
+    resolution: >
+      Use GDPR-equivalent controls (consent, deletion, portability) as
+      sufficient for India operations at MVP. No additional India-specific
+      data localisation needed for MVP launch.
+
+  - id: "OQ-7"
+    question: >
+      If a dispute is filed against a session whose recording will expire
+      within 24 hours, can the admin preserve the recording (pausing TTL
+      deletion) for the duration of dispute resolution?
+    affected_epics: ["E5", "E8"]
+    status: "resolved"
+    resolution: >
+      No recording preservation or TTL extension mechanism needed. Platform
+      includes a disclaimer that disputes must be filed within the recording
+      retention period (3 days). Users are informed that recordings expire
+      and disputes must be submitted before expiry.
+
+# ─── Risk Summary ─────────────────────────────────────────────────────────────
 risk_summary:
-  total_epics: 10
+  foundation_epics: ["E1"]
   high_risk_count: 3
   medium_risk_count: 4
   low_risk_count: 3
-  blocker_count: 4
-  all_blockers_resolved: true
-  foundation_epics: ["E1", "E7"]
-  high_risk_epics: ["E4", "E5", "E7"]
-  critical_path: ["E1", "E2", "E3", "E4", "E5"]
+  high_risk_epics: ["E3", "E4", "E8"]
+  medium_risk_epics: ["E1", "E2", "E5", "E6"]
+  low_risk_epics: ["E7", "E9", "E10"]
+  key_risk_themes:
+    - "Video provider integration and GDPR per-session recording consent — affects E3 and E8"
+    - "Stripe escrow delayed-capture window and dual India/Global account architecture — affects E4"
+    - "Cross-data-store GDPR right-to-deletion cascade and TPDP uncertainty — affects E8"
+    - "Greenfield codebase: no existing infrastructure — all 10 epics start from zero"
+    - "Fixed-budget (€125k) and 16-week timeline with 7+ external integrations creates scope-quality tension"
 
-# --- Exclusions ---
-
+# ─── Exclusions ───────────────────────────────────────────────────────────────
 exclusions:
-  - category: "Group mentorship sessions and cohort-based programs"
-    rationale: "Out of scope per vision — MVP focuses on 1:1 session model"
-  - category: "AI-powered mentor-mentee matching algorithms"
-    rationale: "Out of scope per vision — manual search and filtering for MVP"
-  - category: "Native mobile applications (React Native)"
-    rationale: "MVP targets responsive web; mobile apps deferred to Phase 2"
-  - category: "Custom video infrastructure"
-    rationale: "MVP uses Zoom SDK; proprietary video deferred to Phase 2"
-  - category: "Advanced analytics with ML-based predictions"
-    rationale: "Churn, LTV predictions out of scope per vision — admin dashboards with aggregate metrics for MVP"
-  - category: "Multi-language platform UI localization"
-    rationale: "English-only for MVP per vision"
-  - category: "Integration with calendar providers beyond Google Calendar"
-    rationale: "Google Calendar only for MVP per vision"
-  - category: "Mentor-led content publishing"
-    rationale: "Blogs, articles, podcasts out of scope per vision"
-  - category: "White-label or B2B2C enterprise licensing"
-    rationale: "Out of scope per vision"
+  - category: "Mobile app"
+    rationale: "Removed from MVP per pre-lock resolution — web-only delivery (mentee web app + admin portal). Mobile deferred to Phase 2."
+  - category: "Mentor self-registration"
+    rationale: "BRD explicitly defers to Phase 2 — MVP uses admin-driven onboarding only to maintain quality-gated supply"
+  - category: "AI/ML recommendation engine"
+    rationale: "BRD explicitly defers to Phase 2 — MVP uses simple rule-based matching (string match of mentee interests to mentor expertise)"
+  - category: "Session recording user playback"
+    rationale: "BRD explicitly defers to Phase 2 — MVP recordings stored for admin-only dispute resolution with 3-day auto-deletion"
+  - category: "Mobile admin access"
+    rationale: "BRD explicitly defers to Phase 2 — admin portal is web-only in MVP"
+  - category: "Multi-language support"
+    rationale: "BRD explicitly defers to Phase 2 — English-only in MVP"
+  - category: "Subscription and bundle pricing"
+    rationale: "BRD explicitly defers to Phase 2 — MVP supports pay-per-session model only; bundles, subscriptions, and membership tiers deferred"
+  - category: "Academia category"
+    rationale: "BRD explicitly defers to Phase 2 — MVP categories limited to Sport, Entrepreneurship, Business, and Entertainment"
+  - category: "Advanced analytics beyond MVP dashboards"
+    rationale: "BRD explicitly defers to Phase 2 — cohort analysis, retention metrics, revenue forecasting, LTV, churn prediction deferred"
+  - category: "In-platform messaging and chat"
+    rationale: "BRD explicitly defers to Phase 2 — MVP uses email and in-app notifications only"
+  - category: "Group mentoring sessions"
+    rationale: "BRD explicitly defers to Phase 2 — MVP supports one-on-one sessions only"
+  - category: "Corporate and enterprise accounts"
+    rationale: "BRD explicitly defers to Phase 2 — B2B offering with bulk licenses deferred"
+  - category: "Long-term mentorship programs"
+    rationale: "BRD explicitly defers to Phase 2 — workflow to be defined post-MVP"
+  - category: "Community forums"
+    rationale: "BRD explicitly defers to Phase 2 — peer networking features deferred"
+  - category: "Advanced support ticket system and live chat"
+    rationale: "BRD explicitly defers to Phase 2 — FAQ and help centre only in MVP"
+  - category: "SMS communication"
+    rationale: "BRD explicitly marks MVP Phase as No — email notifications cover all transactional communication in MVP"
+  - category: "Complex referral tiers"
+    rationale: "BRD explicitly defers to Phase 2 — MVP uses simple flat-reward referral only"
 
-# --- Assumptions ---
-
+# ─── Assumptions ──────────────────────────────────────────────────────────────
 assumptions:
-  - "Domain experts in Sport and Entertainment are willing to mentor online at EUR 30-150 per session price points"
-  - "Mentees in Sport and Entertainment verticals will pay for structured mentorship when discovery, credentialing, and quality assurance reduce uncertainty"
-  - "Zoom SDK integration provides sufficient video quality and reliability for MVP (with Jitsi/Daily.co fallback per pre-lock resolution)"
-  - "Stripe Connect supports escrow-equivalent hold-and-release across India, Switzerland, USA, and Germany via connected accounts (per pre-lock resolution, replacing PayU assumption)"
-  - "Managed KeyCloak (Phase Two or Keycloak Cloud) can be configured for multi-tenant RBAC with social login within 16 weeks (per pre-lock resolution)"
-  - "EUR 50K budget is sufficient for a 3-person engineering team over 16 weeks, covering infrastructure and third-party service costs"
-  - "Initial mentor supply (50+ mentors) can be seeded through founder networks before paid acquisition is needed"
-  - "GDPR and India TPDP compliance can be achieved at MVP level through consent management and data handling policies"
-  - "Responsive web application provides adequate mobile experience for MVP"
-  - "10-20% platform commission rate is competitive and acceptable to mentors"
-  - "Stripe Connect connected accounts model sidesteps RBI/FINMA payment institution licensing (per pre-lock resolution, pending legal validation)"
-  - "Mentees are charged in local currency via Stripe FX; mentors set prices in their preferred currency (per pre-lock resolution)"
+  - "MVP is web-only — mentee web app and admin portal; mobile app removed from MVP scope per pre-lock resolution and deferred to Phase 2"
+  - "Admin-driven mentor onboarding only in MVP; mentor self-registration deferred to Phase 2"
+  - "Personalization is rule-based string matching; no AI/ML recommendation engine in MVP"
+  - "Session recordings accessible only to admin for dispute resolution; user playback deferred to Phase 2"
+  - "Per-session explicit GDPR consent required for session recording — both mentor and mentee must consent before recording begins"
+  - "Admin portal is web-only; no mobile admin access in MVP"
+  - "English-only in MVP; multi-language support deferred to Phase 2"
+  - "Pay-per-session model only; subscriptions and bundles deferred to Phase 2"
+  - "Stripe confirmed as payment provider — separate Stripe India account for INR domestic transactions and global Stripe account for USD/CHF/EUR"
+  - "Stripe Connect mentor onboarding handled in E4 (Payment Processing), not E1 (Identity Foundation)"
+  - "Configuration changes (commission rates, cancellation policies) apply only to NEW sessions — in-flight sessions retain their original rates"
+  - "GDPR-equivalent controls (consent, deletion, portability) sufficient for India (TPDP) operations at MVP; no additional data localisation needed"
+  - "Disputes must be filed within the session recording retention period (3 days); no recording preservation or TTL extension mechanism"
+  - "Backend and API gateway technology decisions deferred to architecture phase; React Native decision no longer relevant for web-only MVP"
+  - "MVP categories limited to Sport, Entrepreneurship, Business, and Entertainment; Academia deferred to Phase 2"
+  - "Video conferencing via Zoom API integration (preferred for MVP); Google Meet as potential fallback"
+  - "Mentor pricing bands (min/max per duration) are admin-configurable platform parameters — values set via admin portal, not fixed at vision stage"
+  - "Referral reward type and value are admin-configurable platform parameters — programme workflow specified, incentive details configured at implementation"

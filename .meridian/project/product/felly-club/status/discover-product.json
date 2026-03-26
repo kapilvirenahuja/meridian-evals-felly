@@ -20,7 +20,7 @@
     "checkpoint-validation": { "status": "completed", "completed_at": "2026-03-26T13:20:00+0530" },
     "pre-lock-resolution": { "status": "completed", "completed_at": "2026-03-26T13:25:00+0530" },
     "lock-vision": { "status": "completed", "completed_at": "2026-03-26T13:25:00+0530" },
-    "evidence-self-commit": { "status": "in_progress", "started_at": "2026-03-26T13:25:00+0530" },
-    "summary": { "status": "pending" }
+    "evidence-self-commit": { "status": "completed", "completed_at": "2026-03-26T13:28:00+0530" },
+    "summary": { "status": "completed", "completed_at": "2026-03-26T13:28:00+0530" }
   }
 }
