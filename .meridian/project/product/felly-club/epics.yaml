@@ -1128,3 +1128,101 @@ epics:
         A referred user completes their first paid session but the referrer
         does not receive the configured reward — the reward fulfilment
         pipeline fails.
+
+  # ─── E11: Production Integration ────────────────────────────────────────────
+  - id: "E11"
+    name: "Production Integration — KeyCloak & Stripe"
+    strategic_goal_ref: "SG-01"
+    description: >
+      Replaces mock auth and payment adapters with production KeyCloak and
+      Stripe integrations. Swaps DI tokens from mock providers to real
+      adapters. Configures KeyCloak realm, social login brokers (Google,
+      Apple), RBAC roles, and MFA for admin. Configures dual Stripe accounts
+      (India + Global), Connect onboarding flow, webhook endpoints, and
+      PCI-compliant Stripe.js integration. Validates end-to-end flows in
+      staging before production cutover.
+    bucket: "near"
+    priority: "P1"
+    effort: "L"
+    depends_on: ["E1", "E4"]
+    foundation_investment: false
+    github_issue_ref: "TBD"
+    ltm_citations:
+      - "~/.meridian/core/memory/knowledge/infrastructure/security-infrastructure.md"
+      - "~/.meridian/core/memory/knowledge/domain-taxonomy/payment-processing.md"
+      - "~/.meridian/core/memory/standards/templates/epic-schema.md"
+      - "~/.meridian/core/memory/standards/agent-lifecycle/epic-management-rules.md"
+    intent:
+      p1: >
+        During initial development (E1-E10), KeyCloak authentication and
+        Stripe payment processing are served by mock adapters. This allows
+        teams to build and test domain logic without external service
+        dependencies. However, the platform cannot go to production with
+        mocked auth or payments — real user identity verification, social
+        login, RBAC enforcement, PCI-compliant card capture, multi-currency
+        payment processing, and mentor payouts all require production
+        integration with KeyCloak and Stripe.
+      p2: >
+        After this epic ships, the platform authenticates users via a
+        production KeyCloak instance with Google and Apple social login,
+        MFA for admin accounts, and JWT-based RBAC. Payments are processed
+        through production Stripe accounts — INR via Stripe India, USD/CHF/EUR
+        via Stripe Global — with real Payment Intents, delayed capture for
+        escrow, Stripe Connect for mentor payouts, and PCI-compliant card
+        capture via Stripe.js. All webhook endpoints are validated against
+        production Stripe and Zoom signatures.
+      p3: >
+        The system will NOT introduce new domain features — it only replaces
+        mock adapters with production service integrations. It will NOT
+        change the API contracts, module boundaries, or data models
+        established in E1-E10. It will NOT require frontend changes beyond
+        updating environment configuration for KeyCloak and Stripe endpoints.
+    constraints:
+      in_scope:
+        - "KeyCloak realm configuration (Mentee, Mentor, Admin roles)"
+        - "Google OAuth2 and Apple Sign In identity provider setup in KeyCloak"
+        - "MFA configuration for Admin role"
+        - "JWT validation against KeyCloak JWKS endpoint via Lambda Authorizer"
+        - "Stripe India account configuration and API key setup"
+        - "Stripe Global account configuration and API key setup"
+        - "Stripe Connect onboarding flow for mentor payout accounts"
+        - "Stripe webhook endpoint registration and signature validation"
+        - "Stripe.js integration in mentee-web-app for PCI-compliant card capture"
+        - "CurrencyRouter production configuration for INR vs USD/CHF/EUR routing"
+        - "AWS Secrets Manager setup for all production API keys"
+        - "End-to-end staging validation of auth and payment flows"
+      out_of_scope:
+        - "New domain features or API endpoints"
+        - "Changes to mock adapter interfaces (they were designed to match production)"
+        - "Mobile app integration"
+        - "Additional payment providers beyond Stripe"
+      must_not_break:
+        - "Existing session booking flow must work identically with real Stripe"
+        - "Existing login/registration flow must work identically with real KeyCloak"
+        - "All E1-E10 test suites must pass with production adapters"
+    success_scenarios:
+      - >
+        Given a mentee on the registration page, when they click "Sign in with
+        Google," then KeyCloak brokers the OAuth2 flow and the mentee is
+        authenticated with a valid JWT containing Mentee role claim.
+      - >
+        Given a mentee booking a session with an India-based mentor priced in
+        INR, when they enter card details via Stripe Elements, then the payment
+        is processed through the Stripe India account with delayed capture.
+      - >
+        Given a completed session, when the payout scheduler runs, then the
+        mentor receives their payout via Stripe Connect to their linked bank
+        account minus the platform commission.
+      - >
+        Given all E1-E10 integration tests, when run against production
+        KeyCloak and Stripe test-mode, then all tests pass without modification.
+    failure_conditions:
+      - >
+        Mock adapters leak into production deployment — real users encounter
+        fake auth tokens or simulated payments.
+      - >
+        Stripe webhook signature validation fails in production, causing
+        payment lifecycle events to be silently dropped.
+      - >
+        KeyCloak JWKS endpoint is unreachable and API Gateway Lambda
+        Authorizer cache expires — all authenticated requests fail.

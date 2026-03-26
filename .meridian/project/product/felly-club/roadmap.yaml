@@ -1,10 +1,11 @@
 # Felly Club — Roadmap
 # Derived from product.yaml (LOCKED), epics.yaml, feasibility.yaml,
 # confidence-report.yaml, and pre-lock-resolutions.yaml
-# Status: DRAFT — pending lock review
+# Status: LOCKED — validated and approved
 
 slug: "felly-club"
-status: "DRAFT"
+status: "LOCKED"
+updated_at: "2026-03-26T14:20:00+0530"
 approved_brief_ref: "briefs/approved-roadmap-brief.html"
 generated_at: "2026-03-26"
 
@@ -137,6 +138,15 @@ timeline:
         effort: "S"
         priority: "P2"
         weeks: "W14–W16"
+      - id: "E11"
+        name: "Production Integration — KeyCloak & Stripe"
+        effort: "L"
+        priority: "P1"
+        weeks: "W14–W16"
+        note: >
+          Replaces mock auth and payment adapters with production KeyCloak and
+          Stripe integrations. Must complete before production launch. Depends
+          on E1 (auth interfaces) and E4 (payment interfaces) being stable.
 
 # ─── Feasibility ──────────────────────────────────────────────────────────────
 feasibility:

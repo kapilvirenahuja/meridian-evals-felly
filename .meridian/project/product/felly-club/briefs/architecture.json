@@ -1,0 +1,700 @@
+{
+  "slug": "felly-club",
+  "status": "DRAFT",
+  "generated_at": "2026-03-26T14:30:00+0530",
+  "principles": [
+    {
+      "id": "TP1",
+      "principle": "API-First Modular Monolith — two frontend clients served by a single NestJS backend from day one",
+      "rationale": "The mentee web app and admin portal are independent Next.js apps consuming the same NestJS backend via REST APIs. LTM evolutionary-scaling.md places this at Phase 2 (API-First) from launch because multiple clients exist immediately — not Phase 1 (server-rendered monolith). The backend is a modular monolith (not microservices), maximizing velocity within the €125k fixed budget and 16-week timeline while maintaining strong module boundaries for future service extraction. PP-6 level 3 (Market-Ready v1) and PP-3 level 5 (Multi-Sided Platform) together drive this choice: market-ready quality with multi-persona complexity."
+    },
+    {
+      "id": "TP2",
+      "principle": "TypeScript Full-Stack — unified type system across all deployment units",
+      "rationale": "Next.js (TypeScript), NestJS (TypeScript), and Prisma (TypeScript ORM) share type definitions for API contracts and domain models. A shared-types package eliminates frontend-backend integration bugs at compile time. Critical for a 16-week fixed-price engagement (Nagarro) where runtime type errors carry schedule and budget risk. LTM backend-nodejs.md recommends TypeScript for all new Node.js projects and specifically recommends NestJS for teams needing structured governance over 7+ integrations."
+    },
+    {
+      "id": "TP3",
+      "principle": "Stateless API Layer — JWT-based authentication, no server-side session affinity",
+      "rationale": "NestJS backend is stateless: all request context travels in JWT claims (user ID, role, Stripe Connect account reference, KeyCloak realm). Enables horizontal ECS Fargate task scaling without session affinity routing. JWT access tokens expire in 15 minutes; KeyCloak manages refresh token lifecycle. NFR-3 level 3 (Fast) + NFR-6 level 3 (Growth-Oriented) both require the backend to scale horizontally without state migration."
+    },
+    {
+      "id": "TP4",
+      "principle": "Event-Driven Async for Side Effects — BullMQ queues for all non-critical paths",
+      "rationale": "Email delivery (SendGrid), push notifications (FCM), Zoom recording webhook processing, payout scheduling, Elasticsearch mentor index sync, and recording TTL deletion are all async via BullMQ (Redis-backed job queue). API endpoints enqueue and return immediately; side effects execute in dedicated background worker processes. Prevents API p95 latency from being inflated by external service call latency. BullMQ is preferred over Kafka/RabbitMQ because Redis is already in the stack. LTM messaging-queues.md confirms Redis Streams / BullMQ is appropriate at MVP scale (< 10K initial users)."
+    },
+    {
+      "id": "TP5",
+      "principle": "Config Captured at Booking Time — commission rate and cancellation policy versioned per session",
+      "rationale": "When a session is booked, the current commission rate (10-20%) and cancellation policy are captured in the session record. In-flight sessions retain their original config values. Admin portal config changes apply only to sessions booked after the change. Resolved OQ-5 from roadmap.yaml. Prevents retroactive financial recomputation and protects mentor payout expectations."
+    },
+    {
+      "id": "TP6",
+      "principle": "Multi-Store Deletion Orchestrator — GDPR right-to-deletion cascade as a first-class component",
+      "rationale": "GDPR right-to-deletion must cascade across: PostgreSQL (soft-delete PII, hard-delete after retention period), Elasticsearch (mentor profile index deletion), S3 (recording and artefact object deletion), Redis (cache key invalidation), SendGrid (contact suppression), and FCM (device token removal). ComplianceModule contains a DeletionOrchestrator service designed upfront to avoid multi-sprint refactoring when E8 ships. NFR-7 level 4 (Sensitive) and NFR-5 level 3 (Standard Compliance) both drive this architectural decision. Resolved CB-1 (per-session GDPR consent) and OQ-6 (TPDP)."
+    },
+    {
+      "id": "TP7",
+      "principle": "Managed Services Over Self-Hosted — AWS managed offerings reduce operational burden for the fixed-budget team",
+      "rationale": "AWS RDS PostgreSQL, ElastiCache Redis, OpenSearch Service, and S3 are all fully managed. LTM search-engines.md explicitly warns: 'Elasticsearch for small teams without DevOps capacity — it's operationally complex to run and tune.' A small delivery team on a €125k fixed budget cannot sustain the operational overhead of self-managed database, cache, and search clusters. Managed services provide Multi-AZ availability, automated backups, and patch management at a cost that fits within the NFR-4 level 3 (Standard Availability) target of 99.5% uptime."
+    },
+    {
+      "id": "TP8",
+      "principle": "Dual Stripe Account Routing — INR and non-INR transactions on separate Stripe entities",
+      "rationale": "Indian domestic payment regulations require a separate Stripe India entity with INR settlement rails (distinct API keys, separate merchant account). The PaymentModule routes by currency: INR → Stripe India; USD/CHF/EUR → Stripe Global. Both accounts use Stripe Connect for mentor payouts. Resolved CB-2 and OQ-3 from roadmap.yaml. This dual-account architecture must be built into the PaymentModule from Sprint 1 — retrofitting currency routing is high-risk."
+    }
+  ],
+  "architecture": {
+    "topology": "┌──────────────────────────────────────────────────────────────────────────────┐\n│                         Vercel Edge Network (CDN)                           │\n│  ┌──────────────────────────────────┐  ┌────────────────────────────────┐  │\n│  │  Mentee Web App (Next.js 15 SSR) │  │  Admin Portal (Next.js 15 CSR) │  │\n│  │  • Mentor discovery (SSR/SEO)    │  │  • Mentor onboarding & mgmt    │  │\n│  │  • Session booking & payment     │  │  • Session & financial ops      │  │\n│  │  • Mentee dashboard & notifs     │  │  • Dispute resolution & KPIs   │  │\n│  └────────────────┬─────────────────┘  └───────────────┬────────────────┘  │\n└───────────────────┼───────────────────────────────────┼───────────────────┘\n                    │ HTTPS/REST + JWT Bearer            │ HTTPS/REST + JWT Bearer\n                    └──────────────┬────────────────────┘\n                                   │\n                   ┌───────────────▼──────────────────┐\n                   │   AWS API Gateway (HTTP API)     │\n                   │   JWT Lambda Authorizer (JWKS)   │\n                   │   Rate Limiting + AWS WAF         │\n                   └───────────────┬──────────────────┘\n                                   │ Internal VPC (Private Subnet)\n       ┌───────────────────────────▼────────────────────────────────┐\n       │         NestJS Backend API (AWS ECS Fargate, 2+ tasks)     │\n       │  ┌─────────────────────────────────────────────────────┐   │\n       │  │ AuthModule    | UserModule      | MarketplaceModule  │   │\n       │  │ SessionModule | PaymentModule   | RatingsModule      │   │\n       │  │ AdminModule   | CommsModule     | ComplianceModule   │   │\n       │  │ AnalyticsModule | ReferralModule | ConfigModule      │   │\n       │  └─────────────────────────────────────────────────────┘   │\n       └────┬─────────────┬──────────────┬───────────┬──────────────┘\n            │             │              │           │\n ┌──────────▼───┐  ┌──────▼──────────┐  ┌──▼──────┐  ┌▼──────────────┐\n │  AWS RDS     │  │ AWS ElastiCache  │  │  AWS    │  │    AWS S3     │\n │  PostgreSQL  │  │  Redis 7.x       │  │OpenSearch  │  (recordings+ │\n │  16 (Multi-  │  │  (BullMQ jobs +  │  │Service  │  │  artefacts;   │\n │  AZ, 1 read  │  │   API cache +    │  │(Mentor  │  │  3-day TTL    │\n │  replica)    │  │   rate limits)   │  │ Search) │  │  on records)  │\n └──────────────┘  └─────────────────┘  └─────────┘  └───────────────┘\n            │\n ┌──────────▼───────────────────────────────────────────────────────┐\n │    Background Workers (AWS ECS Fargate, 1 dedicated task)        │\n │  BullMQ Consumers: EmailWorker | PushWorker | ZoomWebhookWorker  │\n │  PayoutScheduler | RecordingTTLWorker | SearchSyncWorker          │\n └──────────────────────────────────────────────────────────────────┘\n\nExternal: KeyCloak (IAM) | Stripe India (INR) | Stripe Global (USD/CHF/EUR)\n          Zoom REST API (Video) | Twilio SendGrid (Email) | FCM (Push)\n          Strapi CMS (Content) | AWS Secrets Manager (Credentials)",
+    "deployment_units": [
+      {
+        "name": "mentee-web-app",
+        "responsibility": "Mentee-facing web application. Server-side rendered mentor discovery and profile pages for SEO indexability. Client-side rendered authenticated flows: session booking, payment confirmation, session history dashboard, in-app notification centre, and referral programme. Implements GDPR cookie consent banner and per-session recording consent gate at session join (CB-1 resolved).",
+        "communication": "HTTPS REST to AWS API Gateway with JWT Bearer token in Authorization header. Stripe.js (client-side SDK) for Payment Intent confirmation without raw card data touching the platform. KeyCloak auth code flow (PKCE) for login and token exchange."
+      },
+      {
+        "name": "admin-portal",
+        "responsibility": "Admin-facing SPA for platform operations: mentor onboarding approvals and verification artefact review, session oversight, financial operations (manual payouts, refund processing), dispute resolution (session recording access), quality monitoring (auto-flag queue), system configuration (commission rates, cancellation policies, pricing bands), analytics KPI dashboards, platform content management via Strapi.",
+        "communication": "HTTPS REST to AWS API Gateway with JWT Bearer token carrying Admin role claim. NestJS AdminModule guards all admin-scoped routes with RBAC role guard. Read-only access to Strapi CMS REST API for content template management."
+      },
+      {
+        "name": "backend-api",
+        "responsibility": "NestJS modular monolith. Single deployable containing 12 domain modules: AuthModule, UserModule, MarketplaceModule, SessionModule, PaymentModule, RatingsModule, AdminModule, CommsModule, ComplianceModule (DeletionOrchestrator), AnalyticsModule, ReferralModule, ConfigModule (commission rates, cancellation policies, pricing bands with version-at-capture).",
+        "communication": "Receives HTTPS from API Gateway (internal VPC). Reads/writes PostgreSQL via Prisma ORM. Reads Redis via ioredis for caching and rate limiting. Writes BullMQ jobs to Redis for async side effects. Calls OpenSearch SDK for Elasticsearch operations. Calls AWS S3 SDK for recording and artefact storage. Calls Zoom REST API for meeting management. Calls KeyCloak Admin REST API for user provisioning and role assignment. Calls Stripe Node SDK for Payment Intents, Stripe Connect, and webhook validation."
+      },
+      {
+        "name": "background-workers",
+        "responsibility": "BullMQ consumer processes running in a dedicated ECS Fargate task. Processes async jobs: EmailWorker (SendGrid templates), PushWorker (FCM web push), ZoomWebhookWorker (recording ready callbacks, S3 upload), PayoutScheduler (cron-driven post-session), RecordingTTLWorker (3-day S3 lifecycle deletion), SearchSyncWorker (mentor profile → OpenSearch index).",
+        "communication": "Consumes BullMQ jobs from Redis (ElastiCache). Calls Twilio SendGrid REST API. Calls Firebase Admin SDK for FCM. Calls Zoom REST API for recording download and deletion. Calls AWS S3 SDK for recording lifecycle management. Writes payout records to PostgreSQL via Prisma. Updates OpenSearch mentor index via OpenSearch SDK."
+      },
+      {
+        "name": "keycloak",
+        "responsibility": "Identity and Access Management: user registration (email + password), social login brokering (Google OAuth2, Apple Sign In), JWT issuance and validation (JWKS endpoint), RBAC realm roles (Mentee, Mentor, Admin), refresh token management, MFA capability (optional for admin role), single sign-on across web app and admin portal.",
+        "communication": "Frontends redirect to KeyCloak for auth code flow (PKCE). API Gateway Lambda Authorizer validates JWT signatures against KeyCloak JWKS endpoint. NestJS AuthModule calls KeyCloak Admin REST API for programmatic user creation and role assignment."
+      },
+      {
+        "name": "strapi-cms",
+        "responsibility": "Headless CMS for platform content: email notification HTML templates (session confirmation, payment receipt, dispute update, payout confirmation), help centre articles, terms and conditions, privacy policy, and platform content. Enables non-technical admin to update content without code deployments.",
+        "communication": "NestJS CommsModule and AdminModule consume Strapi Content REST API over HTTPS. Content editors access Strapi admin panel directly via separate URL."
+      }
+    ]
+  },
+  "nfrs": {
+    "performance": [
+      {
+        "requirement": "API response time < 500ms at p95 for all synchronous endpoints (BRD NFR-02)",
+        "priority": "must",
+        "profile_source": "NFR-3 level 3 (Fast) — direct BRD NFR-02 derivation"
+      },
+      {
+        "requirement": "Mentor discovery search results returned < 1s via OpenSearch with Redis cache hit for repeated queries",
+        "priority": "must",
+        "profile_source": "NFR-3 level 3 (Fast) — search is the primary mentee journey entry point"
+      },
+      {
+        "requirement": "Page load time < 3 seconds on a 4G mobile connection for SSR mentor listing pages (BRD NFR-01)",
+        "priority": "must",
+        "profile_source": "NFR-3 level 3 (Fast) — direct BRD NFR-01 derivation"
+      },
+      {
+        "requirement": "Payment Intent creation and confirmation < 2s end-to-end for session booking flow",
+        "priority": "must",
+        "profile_source": "NFR-3 level 3 (Fast) — payment latency directly affects booking conversion"
+      },
+      {
+        "requirement": "Dashboard API queries (analytics, session history) return < 800ms using read-replica routing",
+        "priority": "should",
+        "profile_source": "NFR-3 level 3 (Fast) — dashboard is secondary journey; slightly relaxed target"
+      }
+    ],
+    "scalability": [
+      {
+        "requirement": "Backend API horizontally scalable to 50+ ECS Fargate tasks via ECS Service auto-scaling without code changes",
+        "priority": "must",
+        "profile_source": "NFR-6 level 3 (Growth-Oriented) — designed for 10x growth from initial user base"
+      },
+      {
+        "requirement": "PostgreSQL read replicas serving analytics and dashboard queries in isolation from write-path APIs",
+        "priority": "should",
+        "profile_source": "NFR-6 level 3 (Growth-Oriented) — query isolation prevents analytics load from degrading booking flows"
+      },
+      {
+        "requirement": "OpenSearch Service cluster horizontally scalable without reindexing; index alias strategy for zero-downtime reindex",
+        "priority": "should",
+        "profile_source": "NFR-6 level 3 (Growth-Oriented) — mentor catalog growth should not require service downtime"
+      },
+      {
+        "requirement": "Connection pooling (PgBouncer or Prisma connection limit configuration) preventing connection exhaustion at scale",
+        "priority": "must",
+        "profile_source": "NFR-6 level 3 (Growth-Oriented) — ECS task autoscaling creates connection spike risk without pooling"
+      }
+    ],
+    "security": [
+      {
+        "requirement": "All data encrypted at rest (AES-256) — AWS RDS storage encryption, S3 server-side encryption (SSE-S3), ElastiCache encryption at rest",
+        "priority": "must",
+        "profile_source": "NFR-2 level 3 (Business Grade) + NFR-7 level 4 (Sensitive) — BRD NFR-07 explicit requirement"
+      },
+      {
+        "requirement": "All data encrypted in transit via TLS 1.2+ — enforced at API Gateway, RDS, ElastiCache, and S3 endpoints",
+        "priority": "must",
+        "profile_source": "NFR-2 level 3 (Business Grade) — BRD NFR-07 explicit requirement"
+      },
+      {
+        "requirement": "JWT access tokens expire in 15 minutes; refresh tokens managed by KeyCloak with rotation; token revocation on logout",
+        "priority": "must",
+        "profile_source": "NFR-2 level 3 (Business Grade) — short-lived tokens limit breach exposure window"
+      },
+      {
+        "requirement": "RBAC enforced at NestJS route-guard level for all API endpoints: Mentee, Mentor, and Admin role claims validated on every request",
+        "priority": "must",
+        "profile_source": "NFR-2 level 3 (Business Grade) — PP-3 level 5 multi-sided platform requires strict role separation"
+      },
+      {
+        "requirement": "All API keys and service credentials stored in AWS Secrets Manager; never in source code or environment variables committed to git",
+        "priority": "must",
+        "profile_source": "NFR-2 level 3 (Business Grade) — QP-7 level 3 SAST includes secret scanning"
+      },
+      {
+        "requirement": "PCI DSS compliance via Stripe tokenisation — no raw card data reaches platform servers; Stripe.js handles card capture client-side",
+        "priority": "must",
+        "profile_source": "NFR-2 level 3 (Business Grade) + NFR-5 level 3 (Standard Compliance) — BRD explicit requirement"
+      },
+      {
+        "requirement": "Session recordings accessible only to Admin role via signed S3 URLs with 15-minute expiry; direct S3 URLs never exposed to mentee or mentor",
+        "priority": "must",
+        "profile_source": "NFR-7 level 4 (Sensitive) — admin-only access model mandated by BRD"
+      },
+      {
+        "requirement": "Rate limiting enforced at API Gateway: 100 req/min per authenticated user; 20 req/min per IP for unauthenticated endpoints",
+        "priority": "should",
+        "profile_source": "NFR-2 level 3 (Business Grade) — protection against abuse and credential stuffing"
+      }
+    ],
+    "availability": [
+      {
+        "requirement": "99.5% uptime SLA excluding scheduled maintenance windows (BRD NFR-05)",
+        "priority": "must",
+        "profile_source": "NFR-4 level 3 (Standard) — direct BRD NFR-05 derivation"
+      },
+      {
+        "requirement": "AWS RDS Multi-AZ deployment for PostgreSQL automatic failover with < 60-second RTO",
+        "priority": "must",
+        "profile_source": "NFR-4 level 3 (Standard) — database is critical path for all transactions"
+      },
+      {
+        "requirement": "Blue-green ECS service deployments with health check validation before traffic shift; zero-downtime deploys",
+        "priority": "should",
+        "profile_source": "NFR-4 level 3 (Standard) — QP-4 level 3 (Continuous Delivery) supports this"
+      },
+      {
+        "requirement": "ECS Fargate task health checks with automatic task replacement on health check failure",
+        "priority": "must",
+        "profile_source": "NFR-4 level 3 (Standard) — self-healing infrastructure for standard availability"
+      },
+      {
+        "requirement": "Backup retention: RDS automated backups 7-day retention; S3 versioning for verification artefacts (recordings excluded — TTL applies)",
+        "priority": "should",
+        "profile_source": "NFR-4 level 3 (Standard) — data recovery capability within standard window"
+      }
+    ],
+    "compliance": [
+      {
+        "requirement": "GDPR (EU — Germany, Switzerland): cookie consent banner, data export (right to portability), right-to-deletion cascade, breach notification procedure",
+        "priority": "must",
+        "profile_source": "NFR-5 level 3 (Standard Compliance) + NFR-7 level 4 (Sensitive) — multi-country operation (PP-4 level 3) in EU markets"
+      },
+      {
+        "requirement": "Per-session GDPR recording consent gate: both mentor and mentee must explicitly consent at session join before Zoom recording activates (CB-1 resolved)",
+        "priority": "must",
+        "profile_source": "NFR-5 level 3 (Standard Compliance) — GDPR Article 7 explicit consent for recording"
+      },
+      {
+        "requirement": "TPDP (India): GDPR-equivalent controls (consent, deletion, portability) applied to Indian user data at MVP; no data localisation required at MVP (OQ-6 resolved)",
+        "priority": "must",
+        "profile_source": "NFR-5 level 3 (Standard Compliance) + NFR-7 level 4 (Sensitive) — Indian market operation"
+      },
+      {
+        "requirement": "Session recordings auto-deleted after 3-day retention window via S3 lifecycle rules; no preservation mechanism; dispute filing within 3 days required (OQ-7 resolved)",
+        "priority": "must",
+        "profile_source": "NFR-5 level 3 (Standard Compliance) — GDPR data minimisation principle + BRD recording policy"
+      },
+      {
+        "requirement": "Audit trail for all financial operations (session booking, payment capture, escrow release, commission deduction, mentor payout) retained in PostgreSQL for minimum 7 years",
+        "priority": "must",
+        "profile_source": "NFR-5 level 3 (Standard Compliance) + NFR-7 level 4 (Sensitive) — financial audit trail requirement"
+      }
+    ]
+  },
+  "stack": [
+    {
+      "component": "Mentee Web App — Framework",
+      "technology": "Next.js 15.x (App Router)",
+      "purpose": "SSR for mentor discovery and profile pages (SEO indexability); CSR for authenticated session flows",
+      "rationale": "Pre-decided in product.yaml delivery_context. LTM frontend-react-nextjs.md confirms: 'Choose when SSR/SSG for SEO matters for consumer-facing products (PP-7 = 2-4).' PP-1 level 4 (General Consumer) + PP-7 level 3 (Professional Services) = mentor profile pages need SSR for Google indexing. App Router enables per-route rendering strategy (SSR for discovery, CSR for authenticated flows)."
+    },
+    {
+      "component": "Mentee Web App — UI Toolkit",
+      "technology": "Tailwind CSS 3.x + shadcn/ui",
+      "purpose": "Utility-first styling and accessible component primitives for mentee-facing UI",
+      "rationale": "PP-1 level 4 (General Consumer) and PP-2 level 3 (Multi-Channel Responsive) demand polished, accessible UI with responsive layouts. shadcn/ui provides Radix UI-based accessible components (dialogs, dropdowns, forms) as copy-paste code — no opaque dependency. QP-6 level 2 (Basic Accessibility) is met by Radix UI's ARIA compliance."
+    },
+    {
+      "component": "Mentee Web App — State Management",
+      "technology": "TanStack Query 5.x (React Query)",
+      "purpose": "Server state management, API data caching, background refresh, and optimistic updates for booking flows",
+      "rationale": "PP-5 level 3 (Bidirectional integrations) means the UI needs real-time-ish data freshness for session status, payment confirmation, and notification counts. TanStack Query handles cache invalidation, loading states, and error boundaries without global state complexity."
+    },
+    {
+      "component": "Mentee Web App — Payment UI",
+      "technology": "Stripe.js + @stripe/react-stripe-js",
+      "purpose": "Client-side Payment Intent confirmation and card element rendering without raw card data touching platform",
+      "rationale": "PCI DSS compliance requires card data to be handled entirely by Stripe's client-side SDK. Stripe Elements renders PCI-compliant card capture UI in an iframe. The backend creates Payment Intents; Stripe.js confirms client-side. NFR-2 level 3 (Business Grade) mandates PCI DSS tokenisation."
+    },
+    {
+      "component": "Admin Portal — Framework",
+      "technology": "Next.js 15.x (App Router, CSR-dominant)",
+      "purpose": "Admin SPA for platform operations — no SSR needed (not public-facing, no SEO requirement)",
+      "rationale": "Consistent with mentee-web-app stack (shared Next.js expertise). LTM frontend-react-nextjs.md notes: 'Avoid SSR for purely client-side SPAs where SEO doesn't matter (admin dashboards, internal tools).' Admin portal uses Next.js App Router with 'use client' components dominant."
+    },
+    {
+      "component": "Admin Portal — Data Tables & Charts",
+      "technology": "TanStack Table 8.x + Recharts 2.x",
+      "purpose": "Data-dense admin tables (mentor list, session queue, payout queue) and analytics chart components",
+      "rationale": "PP-3 level 5 (Multi-Sided Platform) means the admin portal has complex tabular data (dispute queues, financial dashboards, quality monitoring). TanStack Table provides headless table primitives with sorting, filtering, and pagination. Recharts provides composable React chart components for the E9 analytics dashboards."
+    },
+    {
+      "component": "Backend API — Framework",
+      "technology": "NestJS 10.x (Node.js 20 LTS, TypeScript 5.x)",
+      "purpose": "Structured backend framework providing module system, dependency injection, decorators, and middleware for the modular monolith",
+      "rationale": "Node.js confirmed in product.yaml (I-02 resolved). LTM backend-nodejs.md recommends NestJS for teams needing structured governance over complex codebases. 10+ domain modules with 7+ external integrations justify NestJS's governance overhead over Express or Fastify. TypeScript-first with native OpenAPI (Swagger) generation. Node 20 LTS is the current long-term support release."
+    },
+    {
+      "component": "Backend API — HTTP Adapter",
+      "technology": "Fastify 4.x (NestJS Fastify adapter)",
+      "purpose": "High-performance HTTP request handling replacing NestJS's default Express adapter",
+      "rationale": "Fastify delivers 2-3x higher throughput than Express for I/O-bound API workloads. NFR-3 level 3 (Fast) requires < 500ms p95. Fastify's schema-based validation (JSON Schema) aligns with NestJS's DTO/ValidationPipe pattern. NestJS Fastify adapter is production-stable and recommended for performance-sensitive APIs."
+    },
+    {
+      "component": "Backend API — ORM",
+      "technology": "Prisma ORM 5.x",
+      "purpose": "Type-safe database client for PostgreSQL with migrations, schema management, and generated TypeScript types",
+      "rationale": "Prisma generates TypeScript types from the schema, providing compile-time type safety for all database queries. Prisma Migrate handles schema versioning and deployment. NFR-7 level 4 (Sensitive) benefits from type-safe queries reducing SQL injection risk."
+    },
+    {
+      "component": "Backend API — Validation",
+      "technology": "class-validator 0.14.x + class-transformer 0.5.x",
+      "purpose": "DTO validation decorators for all NestJS controller inputs; transforms raw request body to typed DTO instances",
+      "rationale": "NestJS's ValidationPipe with class-validator is the standard NestJS validation pattern. TP2 (TypeScript Full-Stack) is reinforced by having validated DTOs at the API boundary. QP-2 level 3 (Enforced Standards) requires input validation on all endpoints."
+    },
+    {
+      "component": "Backend API — Authentication",
+      "technology": "Passport.js 0.7.x + passport-keycloak-bearer + @nestjs/passport",
+      "purpose": "JWT bearer token validation against KeyCloak JWKS endpoint for all protected routes",
+      "rationale": "KeyCloak is pre-decided as the IAM provider. Passport-keycloak-bearer handles JWT validation by fetching KeyCloak's JWKS public keys. NestJS guards wrap Passport strategies for route-level RBAC. Standard approach for NestJS + KeyCloak integration per LTM security-infrastructure.md."
+    },
+    {
+      "component": "Backend API — Job Queue",
+      "technology": "BullMQ 5.x + ioredis 5.x",
+      "purpose": "Redis-backed job queue for async side effects: email delivery, push notifications, Zoom webhook processing, payout scheduling, search sync, recording TTL",
+      "rationale": "TP4 (Event-Driven Async) mandates a job queue. BullMQ is built on top of Redis, which is already in the stack (LTM messaging-queues.md: 'Redis Streams / BullMQ: built into Redis — appropriate for MVP scale'). BullMQ provides job retry, rate limiting, priority queues, delayed jobs (payout scheduling), and per-job progress tracking."
+    },
+    {
+      "component": "Backend API — Session State Machine",
+      "technology": "XState 5.x",
+      "purpose": "Explicit state machine for session lifecycle with 8 states and transition guards (requested → accepted → scheduled → active → completed/cancelled/disputed/expired)",
+      "rationale": "E3 feasibility identifies session state machine as high-risk: 'state bugs can leave sessions in inconsistent states.' XState provides auditable state transitions, guards, and side effects as explicit declarations. The session state machine is complex enough (8 states, multiple transition triggers including webhooks) to warrant a formal FSM library over ad-hoc boolean flags."
+    },
+    {
+      "component": "Primary Database",
+      "technology": "PostgreSQL 16 (AWS RDS Multi-AZ, db.t3.medium, 1 read replica)",
+      "purpose": "Primary relational data store for all transactional data: users, mentor profiles, sessions, payments, ratings, referrals, notifications, audit trail",
+      "rationale": "LTM relational.md: 'Financial operations and ACID guarantees mandate PostgreSQL.' E4 (Payment Processing), E5 (Ratings/Disputes), and E6 (Admin Operations) all require ACID transactions for financial data integrity. PostgreSQL 16 on AWS RDS Multi-AZ provides automated failover (< 60s RTO) meeting NFR-4 level 3 availability."
+    },
+    {
+      "component": "Cache Layer",
+      "technology": "Redis 7.x (AWS ElastiCache for Redis, cache.t3.micro)",
+      "purpose": "API response caching for mentor search results, session-level caching, rate limit counters, BullMQ job queue backend",
+      "rationale": "Pre-decided in product.yaml (NFR-3 rationale). LTM nosql-keyvalue.md confirms Redis for 'session caching, rate limiting, real-time counters, search result caching.' Redis 7.x on ElastiCache provides managed, Multi-AZ Redis with automatic failover. Dual-purpose: API cache + BullMQ backing store eliminates need for a separate queue broker."
+    },
+    {
+      "component": "Search Engine",
+      "technology": "AWS OpenSearch Service 2.11 (1x t3.medium.search node, managed)",
+      "purpose": "Full-text mentor search with category, geography, and pricing filters; mentor discovery and recommendation ranking",
+      "rationale": "Elasticsearch pre-decided in product.yaml (E2 architecture impact). LTM search-engines.md: 'When content volume exceeds database full-text search capability and for e-commerce/content discovery.' AWS OpenSearch Service (managed Elasticsearch-compatible) eliminates self-hosted operational burden. TP7 (Managed Services) drives this choice."
+    },
+    {
+      "component": "Object Storage",
+      "technology": "AWS S3 (Standard tier + Lifecycle rules)",
+      "purpose": "Session recording storage (3-day TTL via S3 Lifecycle rules), mentor verification artefact storage (indefinite retention), and uploaded profile media",
+      "rationale": "E3 and E8 require secure, reliable storage with TTL enforcement for recordings. S3 Lifecycle rules implement the 3-day recording deletion automatically (OQ-7 resolved). S3 is the natural choice when backend is on AWS ECS — same account, IAM policies for admin-only access via signed URLs, server-side encryption (SSE-S3) satisfying NFR-7 level 4."
+    },
+    {
+      "component": "Headless CMS",
+      "technology": "Strapi 5.x (self-hosted on ECS Fargate, db.t3.micro PostgreSQL)",
+      "purpose": "Email notification templates, help centre articles, platform terms and privacy policy content management",
+      "rationale": "Pre-decided in product.yaml (E6 architecture impact: 'Strapi CMS as third persistence layer'). Strapi 5.x provides a content REST API and admin panel. Self-hosted on ECS Fargate (separate task) to keep it within the AWS infrastructure boundary. Uses its own small PostgreSQL instance to avoid schema coupling with the main application database."
+    },
+    {
+      "component": "Identity and Access Management",
+      "technology": "KeyCloak 24.x (self-hosted on ECS Fargate, db.t3.small PostgreSQL)",
+      "purpose": "User registration, login, social login brokering (Google OAuth2, Apple Sign In), JWT issuance, RBAC realm roles, MFA",
+      "rationale": "Pre-decided in product.yaml scope and NFR rationale. KeyCloak is the enterprise-grade IAM solution supporting all required auth flows. Self-hosted on ECS Fargate within the same AWS account — avoids vendor lock-in for a security-critical component and keeps PII (user credentials) under platform control. KeyCloak 24.x is the current stable release with active security support."
+    },
+    {
+      "component": "Container Runtime",
+      "technology": "Docker 25.x + AWS ECS Fargate",
+      "purpose": "Container build and serverless container orchestration for backend-api, background-workers, keycloak, and strapi",
+      "rationale": "Product.yaml QP4 rationale confirms Docker containerisation. LTM containerization.md: 'AWS ECS Fargate removes the need to manage EC2 instances — pay per task, auto-scaling, IAM task roles.' ECS Fargate is preferred over EKS (Kubernetes) at this scale. Kubernetes is LTM anti-pattern for teams < 5 engineers on MVP budgets."
+    },
+    {
+      "component": "CI/CD Pipeline",
+      "technology": "GitHub Actions (multi-stage: lint → typecheck → test → build → deploy)",
+      "purpose": "Automated testing, container builds, and deployments to dev/staging/production environments",
+      "rationale": "Pre-decided in product.yaml (QP4 rationale). LTM ci-cd.md: 'GitHub Actions — integrated with GitHub, marketplace plugins, generous free tier.' QP-4 level 3 (Continuous Delivery) requires automated pipelines for all environments. GitHub Actions native integration with GitHub repository (Nagarro delivery) eliminates external CI setup."
+    },
+    {
+      "component": "Secrets Management",
+      "technology": "AWS Secrets Manager",
+      "purpose": "Secure storage and rotation for all API keys: Stripe India key, Stripe Global key, Zoom OAuth credentials, SendGrid API key, FCM service account JSON, KeyCloak admin credentials",
+      "rationale": "TP2 principle mandates no credentials in source code or environment variables committed to git. QP-7 level 3 (SAST + Dependencies) includes secret scanning in CI. AWS Secrets Manager integrates natively with ECS task role IAM — containers receive secrets at runtime via IAM without storing them in environment variables."
+    },
+    {
+      "component": "Static Analysis",
+      "technology": "CodeQL (GitHub Advanced Security) + ESLint 9.x + Prettier 3.x",
+      "purpose": "SAST scanning on every PR for security vulnerabilities; ESLint enforces coding standards; Prettier enforces formatting",
+      "rationale": "QP-7 level 3 (SAST + Dependencies) and QP-2 level 3 (Enforced Standards) drive this. CodeQL is GitHub-native (no additional cost with GitHub Advanced Security). ESLint with typescript-eslint ruleset enforces TypeScript best practices. Prettier eliminates formatting debates. Pre-commit hooks via Husky + lint-staged enforce standards before push."
+    },
+    {
+      "component": "Dependency Scanning",
+      "technology": "GitHub Dependabot + npm audit",
+      "purpose": "Automated dependency vulnerability scanning with auto-generated PRs for security patches",
+      "rationale": "QP-7 level 3 (SAST + Dependencies) explicitly includes dependency scanning. Dependabot provides automatic security advisory monitoring and PR generation for vulnerable dependencies across both JavaScript/TypeScript packages. npm audit in CI pipeline blocks builds with high-severity vulnerabilities."
+    },
+    {
+      "component": "Infrastructure as Code",
+      "technology": "AWS CloudFormation (or Terraform 1.x — team preference)",
+      "purpose": "Declarative infrastructure provisioning for ECS clusters, RDS, ElastiCache, OpenSearch, S3, API Gateway, and IAM roles",
+      "rationale": "LTM iac.md: 'Declarative IaC ensures reproducible environments and enables blue-green deployments.' QP-4 level 3 (Continuous Delivery) requires multiple environments (dev/staging/prod) with consistent configuration. Both CloudFormation and Terraform provide the required state management and diff-before-apply workflow."
+    }
+  ],
+  "platforms": [
+    {
+      "category": "auth",
+      "platform": "KeyCloak 24.x",
+      "purpose": "Centralised IAM for all three personas (Mentee, Mentor, Admin); JWT issuance and validation; social login brokering",
+      "rationale": "Pre-decided. Enterprise-grade open-source IAM with RBAC, OIDC, social login brokering (Google, Apple), and MFA. Self-hosted on ECS Fargate for PII control. NFR-2 level 3 (Business Grade) security posture requires centralised IAM with MFA capability.",
+      "features_served": ["E1", "E3", "E6", "E8"]
+    },
+    {
+      "category": "payments",
+      "platform": "Stripe (Stripe India account + Stripe Global account + Stripe Connect)",
+      "purpose": "Payment Intent-based escrow capture, multi-currency processing, mentor payout via Connect, refund processing",
+      "rationale": "Pre-decided (I-04 resolved). Stripe supports all 4 target currencies (INR, USD, CHF, EUR), provides Payment Intents for escrow-compatible delayed capture, and Stripe Connect for mentor payouts. Dual account architecture (CB-2 resolved): Stripe India entity for INR domestic transactions, Stripe Global for other currencies. PCI DSS compliance via client-side Stripe.js tokenisation.",
+      "features_served": ["E4", "E1", "E5", "E9"]
+    },
+    {
+      "category": "messaging",
+      "platform": "Twilio SendGrid",
+      "purpose": "Transactional email delivery for session confirmations, payment receipts, booking reminders, dispute updates, payout confirmations",
+      "rationale": "Pre-decided in product.yaml scope. SendGrid provides reliable transactional email with domain authentication (SPF, DKIM, DMARC), delivery analytics, and template management integrating with Strapi CMS content. Domain authentication must be configured in Sprint 1 as per E7 feasibility note.",
+      "features_served": ["E7", "E3", "E4", "E5"]
+    },
+    {
+      "category": "messaging",
+      "platform": "Firebase Cloud Messaging (FCM) — web push, MVP scope",
+      "purpose": "Web push notifications for session reminders, booking status updates, and dispute notifications on the mentee web app",
+      "rationale": "Pre-decided in product.yaml scope. FCM provides web push notifications for browser-based notifications on the mentee web app. Mobile app is out of MVP scope, so native FCM mobile push is deferred to Phase 2. Firebase Admin SDK integrates with the NestJS background worker for server-side push dispatch.",
+      "features_served": ["E7", "E3", "E5"]
+    },
+    {
+      "category": "cms",
+      "platform": "Strapi 5.x",
+      "purpose": "Headless CMS for email notification templates, help centre articles, platform terms and privacy policy",
+      "rationale": "Pre-decided in product.yaml (E6 architecture impact). Strapi enables non-technical content editors to update notification templates and help centre content without code deployments. REST Content API consumed by NestJS CommsModule and AdminModule. Self-hosted on ECS Fargate to avoid SaaS cost overhead at MVP scale.",
+      "features_served": ["E6", "E7"]
+    },
+    {
+      "category": "analytics",
+      "platform": "AWS CloudWatch + AWS X-Ray",
+      "purpose": "Platform observability: API metrics, error rates, latency histograms, distributed tracing, and operational alerting",
+      "rationale": "QP-5 level 3 (Monitored) and NFR-1 level 3 (Balanced Risk) require monitoring and alerting. AWS CloudWatch is cloud-native for ECS Fargate (no additional infrastructure), integrates with AWS X-Ray for distributed tracing across API Gateway → NestJS → RDS. TP7 (Managed Services) drives the CloudWatch-first choice over self-hosted Grafana stack.",
+      "features_served": ["E8", "E9"]
+    },
+    {
+      "category": "search",
+      "platform": "AWS OpenSearch Service 2.11",
+      "purpose": "Full-text mentor search with category, geography, and pricing filters; mentor discovery ranking",
+      "rationale": "Pre-decided (Elasticsearch confirmed in product.yaml). AWS OpenSearch Service is the fully managed Elasticsearch-compatible service. LTM search-engines.md anti-pattern: 'Do not self-host Elasticsearch for small teams.' TP7 (Managed Services) and E2 architecture impact both mandate managed Elasticsearch. Index alias strategy enables zero-downtime reindexing.",
+      "features_served": ["E2", "E9"]
+    }
+  ],
+  "integrations": [
+    {
+      "name": "KeyCloak Admin REST API",
+      "type": "api",
+      "provider": "KeyCloak (self-hosted)",
+      "purpose": "Programmatic user provisioning for mentor onboarding (admin-driven), role assignment (Mentee/Mentor/Admin), and account lifecycle management (deactivation, deletion)",
+      "direction": "outbound",
+      "auth_method": "Service account OAuth2 client credentials flow",
+      "features_served": ["E1", "E6", "E8"]
+    },
+    {
+      "name": "KeyCloak JWKS Endpoint",
+      "type": "api",
+      "provider": "KeyCloak (self-hosted)",
+      "purpose": "JWT public key retrieval for Lambda Authorizer signature validation; cached at API Gateway",
+      "direction": "outbound",
+      "auth_method": "None (public JWKS endpoint)",
+      "features_served": ["E1", "E3", "E4", "E6"]
+    },
+    {
+      "name": "Stripe India Payment Intents API",
+      "type": "api",
+      "provider": "Stripe (India entity)",
+      "purpose": "INR session booking payment capture with delayed capture (escrow), refund processing, and webhook ingestion for payment lifecycle events",
+      "direction": "bidirectional",
+      "auth_method": "Stripe Secret Key (restricted key, stored in AWS Secrets Manager)",
+      "features_served": ["E4", "E5"]
+    },
+    {
+      "name": "Stripe Global Payment Intents API",
+      "type": "api",
+      "provider": "Stripe (Global entity)",
+      "purpose": "USD/CHF/EUR session booking payment capture with delayed capture (escrow), refund processing, and webhook ingestion for payment lifecycle events",
+      "direction": "bidirectional",
+      "auth_method": "Stripe Secret Key (restricted key, stored in AWS Secrets Manager)",
+      "features_served": ["E4", "E5"]
+    },
+    {
+      "name": "Stripe Connect API",
+      "type": "api",
+      "provider": "Stripe (both entities)",
+      "purpose": "Mentor payout account onboarding (identity verification, bank account linking), payout transfers post-session, and payout status webhooks",
+      "direction": "bidirectional",
+      "auth_method": "Stripe Connect OAuth + Stripe Secret Key",
+      "features_served": ["E4", "E6"]
+    },
+    {
+      "name": "Stripe Webhooks",
+      "type": "webhook",
+      "provider": "Stripe (both entities)",
+      "purpose": "Inbound payment lifecycle events: payment_intent.succeeded, payment_intent.payment_failed, transfer.created, payout.paid, charge.dispute.created",
+      "direction": "inbound",
+      "auth_method": "Stripe-Signature header (HMAC-SHA256 signature validation)",
+      "features_served": ["E4", "E5", "E9"]
+    },
+    {
+      "name": "Zoom REST API",
+      "type": "api",
+      "provider": "Zoom",
+      "purpose": "Meeting creation for booked sessions, auto-recording activation (with GDPR consent gate), meeting join URL generation for both parties",
+      "direction": "outbound",
+      "auth_method": "Zoom Server-to-Server OAuth (JWT deprecated — using OAuth app credentials stored in AWS Secrets Manager)",
+      "features_served": ["E3"]
+    },
+    {
+      "name": "Zoom Webhooks",
+      "type": "webhook",
+      "provider": "Zoom",
+      "purpose": "Inbound recording lifecycle events: recording.completed (triggers recording storage), meeting.ended (triggers session state machine transition)",
+      "direction": "inbound",
+      "auth_method": "Zoom Webhook Secret Token (header validation)",
+      "features_served": ["E3", "E5", "E8"]
+    },
+    {
+      "name": "Twilio SendGrid Email API",
+      "type": "api",
+      "provider": "Twilio SendGrid",
+      "purpose": "Transactional email delivery with dynamic template rendering for session lifecycle, payment, dispute, and payout notifications",
+      "direction": "outbound",
+      "auth_method": "SendGrid API Key (stored in AWS Secrets Manager)",
+      "features_served": ["E7", "E3", "E4", "E5"]
+    },
+    {
+      "name": "Firebase Admin SDK (FCM)",
+      "type": "sdk",
+      "provider": "Google Firebase",
+      "purpose": "Server-side web push notification dispatch to mentee and mentor browsers; device token registration and management",
+      "direction": "outbound",
+      "auth_method": "Firebase service account JSON (stored in AWS Secrets Manager)",
+      "features_served": ["E7", "E3", "E5"]
+    },
+    {
+      "name": "Google OAuth2 (Social Login)",
+      "type": "api",
+      "provider": "Google (via KeyCloak identity broker)",
+      "purpose": "Social login for mentees and mentors via Google account; KeyCloak brokers the OAuth2 flow transparently",
+      "direction": "inbound",
+      "auth_method": "OAuth2 Authorization Code flow (managed by KeyCloak identity provider)",
+      "features_served": ["E1"]
+    },
+    {
+      "name": "Apple Sign In (Social Login)",
+      "type": "api",
+      "provider": "Apple (via KeyCloak identity broker)",
+      "purpose": "Social login for mentees and mentors via Apple ID; requires Apple Developer Program enrollment",
+      "direction": "inbound",
+      "auth_method": "OAuth2 / OIDC Authorization Code flow (managed by KeyCloak identity provider)",
+      "features_served": ["E1"]
+    },
+    {
+      "name": "Strapi Content REST API",
+      "type": "api",
+      "provider": "Strapi (self-hosted)",
+      "purpose": "Retrieval of email notification HTML templates, help centre articles, and platform content for rendering and delivery",
+      "direction": "outbound",
+      "auth_method": "Strapi API token (stored in AWS Secrets Manager)",
+      "features_served": ["E6", "E7"]
+    },
+    {
+      "name": "AWS S3 API",
+      "type": "api",
+      "provider": "Amazon Web Services",
+      "purpose": "Storage of session recordings (admin-only, 3-day TTL), mentor verification artefacts (permanent), and profile media uploads",
+      "direction": "outbound",
+      "auth_method": "IAM task role (no static credentials; ECS task assumes role at runtime)",
+      "features_served": ["E1", "E3", "E5", "E8"]
+    }
+  ],
+  "agentic": null,
+  "technical_risks": [
+    {
+      "risk": "Stripe dual-account routing complexity — INR vs USD/CHF/EUR routing logic and dual Stripe Connect architectures must be built from Sprint 1; retrofitting adds high regression risk to the payment system",
+      "affected_features": ["E4", "E5", "E9"],
+      "severity": "high",
+      "mitigation": "Design PaymentModule with a CurrencyRouter service from day one that selects the correct Stripe client based on session currency. Implement idempotency keys on all Stripe API calls to prevent double-charges on network retries. Unit test both routing paths with Stripe test mode before any production transactions. Dual webhook handlers for both Stripe accounts with shared processing logic."
+    },
+    {
+      "risk": "Stripe Payment Intent delayed-capture 7-day limit — sessions booked more than 7 days in advance require re-authorization before capture; failed re-auth leaves session in limbo",
+      "affected_features": ["E4", "E3"],
+      "severity": "high",
+      "mitigation": "Implement a PayoutScheduler BullMQ worker that checks for Payment Intents approaching the 7-day capture window 24 hours before expiry. If re-authorization fails, notify mentee and mentor, cancel the session, and refund the authorization hold. SessionModule state machine must include a payment_expired terminal state."
+    },
+    {
+      "risk": "GDPR per-session recording consent gate (E3) — both parties must consent before Zoom recording activates; implementation requires frontend consent gate + backend enforcement + audit trail; any gap creates GDPR liability",
+      "affected_features": ["E3", "E8"],
+      "severity": "high",
+      "mitigation": "Session join flow: frontend renders consent modal with explicit Accept/Decline buttons before joining the Zoom meeting URL. Backend records consent timestamp, IP, and user ID in PostgreSQL audit table. Zoom recording is not activated until both parties have consented and backend has recorded consent. Consent records are retained even after session deletion (legal basis documentation)."
+    },
+    {
+      "risk": "GDPR right-to-deletion cascade across 6 data stores (PostgreSQL, OpenSearch, S3, Redis, SendGrid, FCM) — any missed store creates GDPR violation; cascade failures must be retried without data inconsistency",
+      "affected_features": ["E8", "E1"],
+      "severity": "high",
+      "mitigation": "DeletionOrchestrator in ComplianceModule implements a saga pattern: each deletion step is recorded in a deletion_log table in PostgreSQL before execution. Steps are idempotent. Failed steps are retried via BullMQ with exponential backoff. Full deletion cascade (excluding financial audit trail retained 7 years for compliance) completes within 30 days per GDPR Article 17."
+    },
+    {
+      "risk": "Zoom Server-to-Server OAuth expiry — OAuth tokens expire and must be refreshed; recording webhook validation must be robust against replay attacks",
+      "affected_features": ["E3"],
+      "severity": "medium",
+      "mitigation": "NestJS SessionModule implements a ZoomTokenService that refreshes OAuth tokens before expiry (cached in Redis with TTL). Zoom webhook Secret Token validation (HMAC-SHA256 header check) enforced on every inbound webhook. Replay protection via webhook event timestamp check (reject events older than 30 minutes)."
+    },
+    {
+      "risk": "OpenSearch index sync lag — mentor profile updates may take up to 5 seconds to reflect in search results; admin-approved mentor may not appear immediately in search",
+      "affected_features": ["E2", "E6"],
+      "severity": "medium",
+      "mitigation": "SearchSyncWorker processes index update jobs with low BullMQ priority for profile updates, high priority for profile activations (new admin-approved mentors). Add approximate sync delay disclaimer in admin portal. Implement manual reindex trigger in AdminModule for urgent corrections. Use OpenSearch index aliases for zero-downtime full reindexing."
+    },
+    {
+      "risk": "KeyCloak self-hosted availability — KeyCloak ECS task failure breaks all authentication across both frontends; no auth = full platform outage",
+      "affected_features": ["E1", "E3", "E4", "E6"],
+      "severity": "medium",
+      "mitigation": "KeyCloak runs with minimum 2 ECS Fargate tasks behind an Application Load Balancer. API Gateway JWT Lambda Authorizer caches JWKS public keys (15-minute cache TTL), allowing short-duration tolerance of KeyCloak unavailability for existing authenticated sessions. Monitor KeyCloak health with CloudWatch alarms and immediate PagerDuty alert on task failure."
+    },
+    {
+      "risk": "NestJS background worker BullMQ job loss — if the ECS worker task crashes with in-flight jobs, BullMQ jobs may be lost unless lock expiry is configured correctly",
+      "affected_features": ["E4", "E7", "E3"],
+      "severity": "medium",
+      "mitigation": "BullMQ configured with job retention (completed and failed jobs kept 24h) and automatic job retry with exponential backoff (3 retries). Set BullMQ lock duration to 60 seconds for long-running jobs (payout processing, recording upload). Failed jobs after max retries generate CloudWatch metric alarms for manual investigation."
+    },
+    {
+      "risk": "Prisma connection pool exhaustion under ECS autoscaling — each new ECS task opens a connection pool; rapid horizontal scaling creates PostgreSQL connection limit breaches",
+      "affected_features": ["E1", "E2", "E3", "E4"],
+      "severity": "medium",
+      "mitigation": "Set Prisma connection_limit to 10 per task (not default). For peak scaling scenarios, evaluate PgBouncer as a connection pooler sitting between ECS tasks and RDS. CloudWatch metric for RDS DatabaseConnections with alarm at 80% of max_connections. RDS instance class (db.t3.medium) supports up to 1000 connections."
+    },
+    {
+      "risk": "Apple Sign In requires paid Apple Developer Program enrollment — missing credential blocks social login for iOS Safari users",
+      "affected_features": ["E1"],
+      "severity": "low",
+      "mitigation": "Ensure Apple Developer Program enrollment is completed before Sprint 1 development begins. Apple Sign In configuration in KeyCloak requires Apple private key, Key ID, and Team ID. Document as a prerequisite in the Sprint 0 setup checklist. Google OAuth2 is available as fallback social login if Apple Sign In setup is delayed."
+    },
+    {
+      "risk": "SendGrid domain authentication setup lag — SPF, DKIM, DMARC DNS propagation takes 24-72 hours; email deliverability poor without domain auth",
+      "affected_features": ["E7"],
+      "severity": "low",
+      "mitigation": "Domain authentication (SPF, DKIM, DMARC) DNS configuration is a Sprint 0 prerequisite per E7 feasibility note. Felly Club platform domain must be ready before Sprint 1. Mock SendGrid delivery during Sprint 1-8 using SendGrid sandbox mode; replace with authenticated production delivery before E7 ships."
+    }
+  ],
+  "deployment": [
+    {
+      "service": "mentee-web-app",
+      "platform": "Vercel (Next.js deployment, Preview + Production environments)",
+      "purpose": "Vercel provides native Next.js SSR deployment with automatic CDN distribution, preview deployments per PR branch (QA without separate hosting), and Edge Network for static asset caching. Frontend-first platform appropriate for Next.js (LTM vercel.md confirms). Vercel handles Next.js-specific concerns (ISR, image optimization, Edge Middleware)."
+    },
+    {
+      "service": "admin-portal",
+      "platform": "Vercel (Next.js deployment, Preview + Production environments)",
+      "purpose": "Same Vercel organisation as mentee-web-app. Separate Vercel project for access control isolation. Admin portal preview deployments use staging API Gateway endpoint; production uses production API Gateway. Consistent deployment workflow across both frontend applications."
+    },
+    {
+      "service": "backend-api",
+      "platform": "AWS ECS Fargate (us-east-1 primary, 2 tasks minimum)",
+      "purpose": "Serverless container orchestration — no EC2 instance management. ECS task role provides IAM access to RDS, ElastiCache, OpenSearch, S3, and Secrets Manager. Fargate spot instances for non-production environments (cost reduction). Application Load Balancer routes traffic across tasks. Health check endpoint: GET /health."
+    },
+    {
+      "service": "background-workers",
+      "platform": "AWS ECS Fargate (us-east-1, 1 dedicated task)",
+      "purpose": "Separate ECS service from backend-api for resource isolation — worker tasks consume different memory/CPU profiles (spike-based vs steady request handling). BullMQ consumers run as long-lived processes, not suitable for serverless functions. Separate deployment allows independent scaling of async processing capacity."
+    },
+    {
+      "service": "keycloak",
+      "platform": "AWS ECS Fargate (us-east-1, 2 tasks behind ALB)",
+      "purpose": "Self-hosted for PII control — user credentials and auth tokens never leave AWS account. 2 tasks behind Application Load Balancer for high availability. KeyCloak uses its own small RDS PostgreSQL instance (db.t3.small) in the same VPC. HTTPS via ACM certificate on ALB."
+    },
+    {
+      "service": "strapi-cms",
+      "platform": "AWS ECS Fargate (us-east-1, 1 task)",
+      "purpose": "Low-traffic content management workload — single Fargate task is sufficient. Strapi admin panel access restricted to admin VPN or IP allowlist. Separate small RDS PostgreSQL instance (db.t3.micro) to avoid schema coupling."
+    },
+    {
+      "service": "postgresql-main",
+      "platform": "AWS RDS (PostgreSQL 16, db.t3.medium, Multi-AZ, us-east-1)",
+      "purpose": "Primary relational data store. Multi-AZ provides automatic failover with < 60s RTO. 1 read replica in same AZ for analytics query isolation. Automated backups with 7-day retention. Encryption at rest via RDS storage encryption."
+    },
+    {
+      "service": "redis-cache",
+      "platform": "AWS ElastiCache for Redis (Redis 7.x, cache.t3.micro, Multi-AZ with automatic failover)",
+      "purpose": "API response caching, BullMQ job queue, and rate limit counters. ElastiCache Multi-AZ provides automatic failover. In-transit and at-rest encryption enabled. Cluster mode disabled at MVP scale (single primary + replica is sufficient)."
+    },
+    {
+      "service": "opensearch-search",
+      "platform": "AWS OpenSearch Service (2.11, t3.medium.search, 1 node)",
+      "purpose": "Managed Elasticsearch-compatible service. Single t3.medium.search node appropriate for MVP mentor catalog size (hundreds of profiles). Encryption at rest and in transit. VPC deployment — no public endpoint. Scale to multi-node cluster when catalog grows."
+    },
+    {
+      "service": "s3-storage",
+      "platform": "AWS S3 (Standard tier, us-east-1)",
+      "purpose": "Two S3 buckets: (1) felly-recordings — session recordings with 3-day lifecycle rule, SSE-S3 encryption, no public access, IAM policy restricts signed URL generation to AdminModule role only. (2) felly-artefacts — mentor verification documents, permanent retention, SSE-S3, IAM policy allows backend-api read/write."
+    }
+  ],
+  "observability": {
+    "tracing": "AWS X-Ray with NestJS OpenTelemetry SDK (aws-xray-sdk-node) — traces all inbound API requests through API Gateway → NestJS modules → RDS/ElastiCache/OpenSearch/S3 calls. Distributed trace IDs propagated via X-Amzn-Trace-Id header. Sampling rate: 5% in production, 100% for error traces.",
+    "metrics": [
+      "API Gateway p50/p95/p99 latency per endpoint",
+      "ECS task CPU and memory utilization (alarm at 80%)",
+      "RDS DatabaseConnections (alarm at 80% of max_connections)",
+      "RDS CPUUtilization (alarm at 75%)",
+      "ElastiCache CurrConnections and CacheHitRate",
+      "OpenSearch ClusterStatus.red / ClusterStatus.yellow",
+      "BullMQ job queue depth per queue (failed jobs alarm at > 10)",
+      "Stripe webhook delivery failure rate (via Stripe dashboard webhook logs)",
+      "SendGrid email delivery rate and bounce rate (via SendGrid Activity API)",
+      "S3 recording deletion success rate (RecordingTTLWorker job completion)",
+      "Payment processing success rate per currency (INR vs USD/CHF/EUR)",
+      "Session state machine transition error rate (invalid state transitions)",
+      "KeyCloak authentication success/failure rate (login errors alarm)"
+    ],
+    "logging": "Structured JSON logging via Pino (NestJS Pino Logger integration). All log lines include: trace_id, user_id (hashed for PII), endpoint, duration_ms, status_code, and correlation_id. Logs shipped to AWS CloudWatch Logs via ECS Firelens log router. Log levels: ERROR (always), WARN (always), INFO (in production), DEBUG (dev/staging only). Financial operation logs tagged with financial=true for dedicated CloudWatch Insights queries and 7-year retention policy. GDPR-sensitive fields (email, name, IP) masked in logs via Pino redaction paths."
+  }
+}

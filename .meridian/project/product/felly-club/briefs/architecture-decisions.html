@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Felly Club — How We Chose the Architecture</title>
+<style>
+:root { --bg: #fafafa; --surface: #fff; --border: #e5e7eb; --text: #1a1a2e; --muted: #6b7280; --accent: #4f46e5; --green: #059669; --orange: #d97706; --pink: #db2777; --purple: #7c3aed; --cyan: #0891b2; --red: #dc2626; --light-accent: #eef2ff; --light-green: #ecfdf5; --light-orange: #fffbeb; --light-pink: #fdf2f8; --light-purple: #f5f3ff; --light-red: #fef2f2; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+.page { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+.subtitle { font-size: 15px; color: var(--muted); margin-bottom: 40px; }
+.tldr { background: var(--light-accent); border: 1px solid #c7d2fe; border-radius: 10px; padding: 20px 24px; margin-bottom: 40px; }
+.tldr h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 10px; }
+.tldr p { font-size: 14px; color: var(--text); }
+.tldr strong { color: var(--accent); }
+
+.decision { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.d-header { padding: 18px 22px; cursor: pointer; display: flex; align-items: flex-start; gap: 14px; }
+.d-header:hover { background: #f9fafb; }
+.d-num { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.d-head-text { flex: 1; }
+.d-question { font-size: 15px; font-weight: 600; color: var(--text); }
+.d-answer { font-size: 14px; color: var(--green); margin-top: 3px; font-weight: 500; }
+.d-arrow { color: var(--muted); font-size: 18px; transition: transform 0.2s; margin-top: 4px; }
+.decision.open .d-arrow { transform: rotate(90deg); }
+
+.d-body { display: none; border-top: 1px solid var(--border); padding: 20px 22px; }
+.decision.open .d-body { display: block; }
+
+.reason-block { margin-bottom: 18px; }
+.reason-block:last-child { margin-bottom: 0; }
+.reason-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.reason-label.because { color: var(--accent); }
+.reason-label.picked { color: var(--green); }
+.reason-label.not { color: var(--red); }
+
+.reason-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+.badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; white-space: nowrap; margin-top: 2px; }
+.badge.product { background: var(--light-accent); color: var(--accent); }
+.badge.knowledge { background: var(--light-orange); color: var(--orange); }
+.badge.user-decision { background: var(--light-pink); color: var(--pink); }
+.badge.budget { background: var(--light-purple); color: var(--purple); }
+.reason-text { color: #374151; }
+
+.tech-chip { display: inline-block; padding: 5px 12px; background: var(--light-green); color: var(--green); border-radius: 6px; font-size: 13px; font-weight: 500; margin: 0 6px 6px 0; }
+.reject-chip { display: inline-block; padding: 5px 12px; background: var(--light-red); color: var(--red); border-radius: 6px; font-size: 13px; margin: 0 6px 6px 0; }
+.reject-chip .why { color: #9ca3af; font-weight: 400; }
+
+.nav-strip { position: sticky; top: 0; z-index: 10; background: rgba(250,250,250,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 10px 0; margin-bottom: 24px; }
+.nav-inner { max-width: 780px; margin: 0 auto; padding: 0 24px; display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-btn { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); font-size: 12px; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.filter-banner { background: var(--light-accent); border: 1px solid #c7d2fe; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; color: var(--accent); display: none; align-items: center; }
+.filter-banner .x { margin-left: auto; cursor: pointer; font-size: 16px; color: var(--muted); }
+.filter-banner .x:hover { color: var(--red); }
+
+.decision.dim { opacity: 0.12; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="nav-strip">
+  <div class="nav-inner">
+    <div class="nav-btn active" onclick="showAll(this)">All 8 decisions</div>
+    <div class="nav-btn" onclick="filterBy('budget',this)">Budget drove it</div>
+    <div class="nav-btn" onclick="filterBy('knowledge',this)">LTM recommended it</div>
+    <div class="nav-btn" onclick="filterBy('user-decision',this)">You decided it</div>
+    <div class="nav-btn" onclick="filterBy('product',this)">Profile shaped it</div>
+  </div>
+</div>
+
+<div class="page">
+<h1>How We Chose the Architecture</h1>
+<p class="subtitle">8 decisions that shaped Felly Club's technical design. Each one traces back to a profile dimension, an LTM recommendation, a budget constraint, or a decision you made during planning.</p>
+
+<div class="tldr">
+  <h2>The one-line story</h2>
+  <p>A <strong>TypeScript modular monolith</strong> (NestJS) on <strong>AWS managed services</strong> (ECS Fargate, RDS, ElastiCache, OpenSearch) with <strong>dual Stripe accounts</strong> (India + Global), <strong>KeyCloak</strong> for identity, <strong>BullMQ</strong> for async work, and <strong>GDPR per-session consent</strong> for recordings. Web-only MVP on <strong>Next.js / Vercel</strong>. No microservices, no Kubernetes, no mobile — built for a EUR125K / 16-week delivery.</p>
+</div>
+
+<div class="filter-banner" id="filter-banner">
+  <span id="filter-text"></span>
+  <span class="x" onclick="showAll(document.querySelector('.nav-btn'))">&times;</span>
+</div>
+
+<div id="cards">
+
+<!-- 1 -->
+<div class="decision" data-tags="budget,knowledge,product" id="d1">
+  <div class="d-header" onclick="toggle(1)">
+    <div class="d-num">1</div>
+    <div class="d-head-text">
+      <div class="d-question">Should we use microservices or a monolith?</div>
+      <div class="d-answer">Modular monolith with clean API boundaries</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge budget">Budget</span><span class="reason-text">EUR125K and 16 weeks rules out the operational overhead of microservices</span></div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">evolutionary-scaling.md: "API-First required when multiple frontend clients exist from day one" — the mentee app and admin portal are two separate clients</span></div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">modular-monolith.md: best fit for greenfield, small team, market-ready delivery</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">Multi-sided platform (3 personas) needs a shared API, but market-ready ambition (PP-6=3) means we can't afford microservice overhead</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">NestJS 10 modular monolith</div><div class="tech-chip">12 domain modules with DI</div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label not">We rejected</div>
+      <div class="reject-chip">Microservices <span class="why">— too slow and expensive for fixed budget</span></div>
+      <div class="reject-chip">Server-rendered monolith <span class="why">— two frontends need a shared API</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 -->
+<div class="decision" data-tags="knowledge,budget,product" id="d2">
+  <div class="d-header" onclick="toggle(2)">
+    <div class="d-num">2</div>
+    <div class="d-head-text">
+      <div class="d-question">What programming language and backend framework?</div>
+      <div class="d-answer">TypeScript everywhere — NestJS backend, Next.js frontend, Prisma ORM</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">backend-nodejs.md: "Full-stack TypeScript when frontend is React — same language, shared types, fewer integration bugs"</span></div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">backend-nodejs.md: "NestJS for teams needing structured governance over 7+ integrations" — we have 14 external integrations</span></div>
+      <div class="reason-item"><span class="badge budget">Budget</span><span class="reason-text">16-week fixed-price with Nagarro — shared types between frontend and backend catch bugs at compile time, not in production</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">7+ bidirectional integrations (PP-5=3) justify NestJS's module structure over lightweight Express</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">NestJS 10</div><div class="tech-chip">Next.js 15</div><div class="tech-chip">Prisma ORM 5</div><div class="tech-chip">Fastify adapter (2-3x faster than Express)</div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label not">We rejected</div>
+      <div class="reject-chip">Express <span class="why">— LTM anti-pattern: "Express without structure" for complex codebases</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="decision" data-tags="product,knowledge" id="d3">
+  <div class="d-header" onclick="toggle(3)">
+    <div class="d-num">3</div>
+    <div class="d-head-text">
+      <div class="d-question">How do users log in and how do we manage access control?</div>
+      <div class="d-answer">KeyCloak with stateless JWT tokens — 3 roles, no server-side sessions</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">security-infrastructure.md: "KeyCloak for centralised IAM with MFA, RBAC, JWT-based API access"</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">3 distinct personas (mentee, mentor, admin) each need different permissions — strict RBAC is essential (PP-3=5)</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">Stateless JWT allows the backend to scale horizontally without sticky sessions (NFR-6=3, NFR-3=3)</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">Business-grade security (NFR-2=3) requires centralised IAM with short-lived tokens (15 min)</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">KeyCloak 24 (self-hosted, 2 instances)</div><div class="tech-chip">JWT with 15-min expiry</div><div class="tech-chip">Google + Apple social login</div><div class="tech-chip">AWS API Gateway Lambda Authorizer</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="decision" data-tags="knowledge,product" id="d4">
+  <div class="d-header" onclick="toggle(4)">
+    <div class="d-num">4</div>
+    <div class="d-head-text">
+      <div class="d-question">How do we handle emails, push notifications, webhook processing, and scheduled jobs?</div>
+      <div class="d-answer">BullMQ job queues backed by Redis — everything non-critical runs async</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">messaging-queues.md: "Redis Streams / BullMQ built into Redis — appropriate for MVP scale under 10K users"</span></div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">messaging-queues.md: "Full Kafka is NOT warranted at MVP scale — adds operational complexity without benefit"</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">API must respond in under 500ms (NFR-3=3) — offloading emails, push, and webhooks prevents latency spikes</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">BullMQ 5</div><div class="tech-chip">6 workers: Email, Push, Zoom, Payouts, Recording TTL, Search Sync</div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label not">We rejected</div>
+      <div class="reject-chip">Kafka <span class="why">— LTM: overkill at MVP scale, adds operational complexity</span></div>
+      <div class="reject-chip">RabbitMQ <span class="why">— separate broker not justified when Redis is already in the stack</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="decision" data-tags="user-decision" id="d5">
+  <div class="d-header" onclick="toggle(5)">
+    <div class="d-num">5</div>
+    <div class="d-head-text">
+      <div class="d-question">When admin changes commission rates, does it affect existing bookings?</div>
+      <div class="d-answer">No — config is captured at booking time. Changes only affect new sessions.</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge user-decision">Your decision</span><span class="reason-text">You resolved OQ-5: "this needs to be for sessions after, even after the cutoff time"</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">Financial data is sensitive (NFR-7=4) — retroactive recomputation creates accounting risk</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">Config snapshot columns on session record</div><div class="tech-chip">ConfigModule version-at-capture pattern</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 -->
+<div class="decision" data-tags="user-decision,product" id="d6">
+  <div class="d-header" onclick="toggle(6)">
+    <div class="d-num">6</div>
+    <div class="d-head-text">
+      <div class="d-question">How do we handle GDPR deletion across multiple databases and services?</div>
+      <div class="d-answer">A dedicated Deletion Orchestrator that cascades across all 6 data stores</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge user-decision">Your decision</span><span class="reason-text">You chose to follow GDPR guidelines (CB-1) — per-session explicit consent before recording</span></div>
+      <div class="reason-item"><span class="badge user-decision">Your decision</span><span class="reason-text">You resolved: GDPR-equivalent controls are sufficient for India/TPDP at MVP (OQ-6)</span></div>
+      <div class="reason-item"><span class="badge user-decision">Your decision</span><span class="reason-text">You resolved: disputes must be filed within 3-day recording window, no TTL extension (OQ-7)</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">Standard compliance (NFR-5=3) and sensitive data (NFR-7=4) — deletion must cascade across PostgreSQL, OpenSearch, S3, Redis, SendGrid, and FCM</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">ComplianceModule DeletionOrchestrator (saga pattern)</div><div class="tech-chip">S3 Lifecycle Rules (3-day auto-delete)</div><div class="tech-chip">Consent audit table in PostgreSQL</div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 -->
+<div class="decision" data-tags="budget,knowledge,product" id="d7">
+  <div class="d-header" onclick="toggle(7)">
+    <div class="d-num">7</div>
+    <div class="d-head-text">
+      <div class="d-question">Where does everything run? Self-hosted or managed cloud services?</div>
+      <div class="d-answer">All AWS managed services — no self-hosted databases, no Kubernetes</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">search-engines.md WARNING: "Elasticsearch for small teams without DevOps capacity — it's operationally complex to run and tune"</span></div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">containerization.md: "ECS Fargate removes EC2 management — pay per task, auto-scaling"</span></div>
+      <div class="reason-item"><span class="badge knowledge">LTM</span><span class="reason-text">vercel.md ANTI-PATTERN: "Avoid Vercel for backend — no long-running processes, workers, or cron jobs"</span></div>
+      <div class="reason-item"><span class="badge budget">Budget</span><span class="reason-text">EUR125K team cannot sustain self-managed database, cache, and search clusters</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">99.5% uptime target (NFR-4=3) — managed Multi-AZ gives automated failover and backups</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">AWS ECS Fargate (backend + workers)</div><div class="tech-chip">AWS RDS PostgreSQL 16 (Multi-AZ)</div><div class="tech-chip">AWS ElastiCache Redis 7</div><div class="tech-chip">AWS OpenSearch 2.11</div><div class="tech-chip">AWS S3</div><div class="tech-chip">AWS API Gateway</div><div class="tech-chip">AWS Secrets Manager</div><div class="tech-chip">CloudWatch + X-Ray</div><div class="tech-chip">Vercel (frontends only)</div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label not">We rejected</div>
+      <div class="reject-chip">Self-hosted Elasticsearch <span class="why">— LTM: operationally complex for small teams</span></div>
+      <div class="reject-chip">Kubernetes <span class="why">— LTM anti-pattern for teams under 5 on MVP budgets</span></div>
+      <div class="reject-chip">Backend on Vercel <span class="why">— LTM: can't run long-lived workers or cron jobs</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 -->
+<div class="decision" data-tags="user-decision,product" id="d8">
+  <div class="d-header" onclick="toggle(8)">
+    <div class="d-num">8</div>
+    <div class="d-head-text">
+      <div class="d-question">Can one Stripe account handle payments in India and Europe?</div>
+      <div class="d-answer">No — two separate Stripe accounts with automatic currency-based routing</div>
+    </div>
+    <div class="d-arrow">&#9656;</div>
+  </div>
+  <div class="d-body">
+    <div class="reason-block">
+      <div class="reason-label because">Why this choice</div>
+      <div class="reason-item"><span class="badge user-decision">Your decision</span><span class="reason-text">You resolved CB-2: "assume different Stripe accounts will be needed" for India vs global</span></div>
+      <div class="reason-item"><span class="badge user-decision">Your decision</span><span class="reason-text">You confirmed Stripe as the payment provider (I-04) and kept Connect out of E1 (CB-3)</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">4 countries and 4 currencies from day one (PP-4=3) — India has separate domestic payment rails</span></div>
+      <div class="reason-item"><span class="badge product">Profile</span><span class="reason-text">PCI DSS compliance (NFR-2=3) — card data never touches our servers, handled by Stripe.js</span></div>
+    </div>
+    <div class="reason-block">
+      <div class="reason-label picked">We picked</div>
+      <div class="tech-chip">Stripe India (INR domestic)</div><div class="tech-chip">Stripe Global (USD/CHF/EUR)</div><div class="tech-chip">Stripe Connect (mentor payouts)</div><div class="tech-chip">Stripe.js (PCI-compliant card capture)</div><div class="tech-chip">CurrencyRouter service</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- cards -->
+</div><!-- page -->
+
+<script>
+function toggle(n) {
+  document.getElementById('d'+n).classList.toggle('open');
+}
+
+function showAll(btn) {
+  document.querySelectorAll('.decision').forEach(d => d.classList.remove('dim'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('filter-banner').style.display = 'none';
+}
+
+const filterLabels = {
+  'budget': 'Showing decisions driven by the EUR125K / 16-week budget constraint',
+  'knowledge': 'Showing decisions recommended by LTM architecture knowledge files',
+  'user-decision': 'Showing decisions that trace back to choices you made during planning',
+  'product': 'Showing decisions shaped by the product/NFR/quality profile dimensions'
+};
+
+function filterBy(tag, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.decision').forEach(d => {
+    const tags = d.dataset.tags.split(',');
+    if (tags.includes(tag)) {
+      d.classList.remove('dim');
+      d.classList.add('open');
+    } else {
+      d.classList.add('dim');
+      d.classList.remove('open');
+    }
+  });
+  document.getElementById('filter-text').textContent = filterLabels[tag];
+  document.getElementById('filter-banner').style.display = 'flex';
+}
+</script>
+</body>
+</html>

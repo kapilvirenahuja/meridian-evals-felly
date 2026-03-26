@@ -1,0 +1,236 @@
+{
+  "graph": {
+    "directed": true,
+    "metadata": {
+      "title": "Felly Club Architecture Decision Knowledge Graph",
+      "slug": "felly-club",
+      "generated_at": "2026-03-26T14:45:00+0530",
+      "description": "Captures how profile dimensions, LTM knowledge files, pre-lock resolutions, and constraints drove every architecture decision. Nodes represent decisions, inputs, technologies, and knowledge sources. Edges represent influence relationships."
+    }
+  },
+  "nodes": [
+    { "id": "PP1", "label": "PP-1: User Sophistication = 4", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp1_user_sophistication", "level": 4, "label_text": "General Consumer" } },
+    { "id": "PP2", "label": "PP-2: UX Maturity = 3", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp2_ux_maturity", "level": 3, "label_text": "Multi-Channel Responsive" } },
+    { "id": "PP3", "label": "PP-3: Persona Complexity = 5", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp3_persona_complexity", "level": 5, "label_text": "Multi-Sided Platform" } },
+    { "id": "PP4", "label": "PP-4: Geographic Scope = 3", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp4_geographic_scope", "level": 3, "label_text": "Multi-Country" } },
+    { "id": "PP5", "label": "PP-5: Integration Density = 3", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp5_integration_density", "level": 3, "label_text": "Bidirectional" } },
+    { "id": "PP6", "label": "PP-6: Delivery Ambition = 3", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp6_delivery_ambition", "level": 3, "label_text": "Market-Ready v1" } },
+    { "id": "PP7", "label": "PP-7: Industry Vertical = 3", "type": "profile", "group": "product_profile", "properties": { "dimension": "pp7_industry_vertical", "level": 3, "label_text": "Professional Services" } },
+
+    { "id": "NFR1", "label": "NFR-1: Risk = 3", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr1_risk", "level": 3, "label_text": "Balanced Risk" } },
+    { "id": "NFR2", "label": "NFR-2: Security = 3", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr2_security", "level": 3, "label_text": "Business Grade" } },
+    { "id": "NFR3", "label": "NFR-3: Performance = 3", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr3_performance", "level": 3, "label_text": "Fast" } },
+    { "id": "NFR4", "label": "NFR-4: Availability = 3", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr4_availability", "level": 3, "label_text": "Standard" } },
+    { "id": "NFR5", "label": "NFR-5: Compliance = 3", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr5_compliance", "level": 3, "label_text": "Standard" } },
+    { "id": "NFR6", "label": "NFR-6: Scalability = 3", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr6_scalability", "level": 3, "label_text": "Growth-Oriented" } },
+    { "id": "NFR7", "label": "NFR-7: Data Sensitivity = 4", "type": "profile", "group": "nfr_profile", "properties": { "dimension": "nfr7_data_sensitivity", "level": 4, "label_text": "Sensitive" } },
+
+    { "id": "QP1", "label": "QP-1: Testing Depth = 3", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp1_testing_depth", "level": 3, "label_text": "Layered Testing" } },
+    { "id": "QP2", "label": "QP-2: Code Quality = 3", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp2_code_quality", "level": 3, "label_text": "Enforced Standards" } },
+    { "id": "QP3", "label": "QP-3: Documentation = 3", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp3_documentation", "level": 3, "label_text": "Comprehensive" } },
+    { "id": "QP4", "label": "QP-4: CI/CD Maturity = 3", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp4_ci_cd_maturity", "level": 3, "label_text": "Continuous Delivery" } },
+    { "id": "QP5", "label": "QP-5: Observability = 3", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp5_observability", "level": 3, "label_text": "Monitored" } },
+    { "id": "QP6", "label": "QP-6: Accessibility = 2", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp6_accessibility", "level": 2, "label_text": "Basic" } },
+    { "id": "QP7", "label": "QP-7: Security Testing = 3", "type": "profile", "group": "quality_profile", "properties": { "dimension": "qp7_security_testing", "level": 3, "label_text": "SAST + Dependencies" } },
+
+    { "id": "LTM_EVO", "label": "evolutionary-scaling.md", "type": "ltm", "group": "ltm_patterns", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/patterns/evolutionary-scaling.md", "category": "patterns" } },
+    { "id": "LTM_MOD", "label": "modular-monolith.md", "type": "ltm", "group": "ltm_patterns", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/patterns/modular-monolith.md", "category": "patterns" } },
+    { "id": "LTM_EVT", "label": "event-driven.md", "type": "ltm", "group": "ltm_patterns", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/patterns/event-driven.md", "category": "patterns" } },
+    { "id": "LTM_REACT", "label": "frontend-react-nextjs.md", "type": "ltm", "group": "ltm_stacks", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/stacks/frontend-react-nextjs.md", "category": "stacks" } },
+    { "id": "LTM_NODE", "label": "backend-nodejs.md", "type": "ltm", "group": "ltm_stacks", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/stacks/backend-nodejs.md", "category": "stacks" } },
+    { "id": "LTM_REL", "label": "relational.md", "type": "ltm", "group": "ltm_data", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/data/relational.md", "category": "data" } },
+    { "id": "LTM_KV", "label": "nosql-keyvalue.md", "type": "ltm", "group": "ltm_data", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/data/nosql-keyvalue.md", "category": "data" } },
+    { "id": "LTM_SEARCH", "label": "search-engines.md", "type": "ltm", "group": "ltm_data", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/data/search-engines.md", "category": "data" } },
+    { "id": "LTM_MQ", "label": "messaging-queues.md", "type": "ltm", "group": "ltm_data", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/data/messaging-queues.md", "category": "data" } },
+    { "id": "LTM_VERCEL", "label": "vercel.md", "type": "ltm", "group": "ltm_platforms", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/platforms/vercel.md", "category": "platforms" } },
+    { "id": "LTM_AWS", "label": "aws.md", "type": "ltm", "group": "ltm_platforms", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/platforms/aws.md", "category": "platforms" } },
+    { "id": "LTM_CICD", "label": "ci-cd.md", "type": "ltm", "group": "ltm_operations", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/operations/ci-cd.md", "category": "operations" } },
+    { "id": "LTM_OBS", "label": "observability.md", "type": "ltm", "group": "ltm_operations", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/operations/observability.md", "category": "operations" } },
+    { "id": "LTM_SEC", "label": "security-infrastructure.md", "type": "ltm", "group": "ltm_operations", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/operations/security-infrastructure.md", "category": "operations" } },
+    { "id": "LTM_CONT", "label": "containerization.md", "type": "ltm", "group": "ltm_operations", "properties": { "path": "~/.meridian/core/memory/knowledge/architecture/operations/containerization.md", "category": "operations" } },
+
+    { "id": "RES_CB1", "label": "CB-1: GDPR per-session consent", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "Per-session explicit consent for recordings" } },
+    { "id": "RES_CB2", "label": "CB-2: Dual Stripe accounts", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "Separate Stripe India (INR) + Global (USD/CHF/EUR)" } },
+    { "id": "RES_CB3", "label": "CB-3: Stripe Connect in E4", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "Keep Connect out of E1, handle in E4" } },
+    { "id": "RES_MOBILE", "label": "Mobile removed from MVP", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "Web-only delivery" } },
+    { "id": "RES_OQ5", "label": "OQ-5: Config at booking time", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "Changes apply to new sessions only" } },
+    { "id": "RES_OQ6", "label": "OQ-6: GDPR-equiv for TPDP", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "No additional India-specific requirements at MVP" } },
+    { "id": "RES_OQ7", "label": "OQ-7: Dispute within 3-day window", "type": "resolution", "group": "pre_lock", "properties": { "source": "roadmap pre-lock", "resolution": "Disclaimer, no TTL extension" } },
+    { "id": "RES_I04", "label": "I-04: Stripe confirmed", "type": "resolution", "group": "pre_lock", "properties": { "source": "product pre-lock", "resolution": "Stripe as payment provider" } },
+
+    { "id": "CON_BUDGET", "label": "Budget: EUR125K / 16 weeks", "type": "constraint", "group": "constraints", "properties": { "source": "product.yaml delivery_context" } },
+    { "id": "CON_GREENFIELD", "label": "Greenfield codebase", "type": "constraint", "group": "constraints", "properties": { "source": "context-report.md codebase scan" } },
+    { "id": "CON_NAGARRO", "label": "External delivery: Nagarro", "type": "constraint", "group": "constraints", "properties": { "source": "product.yaml delivery_context" } },
+
+    { "id": "DEC_PATTERN", "label": "DECISION: API-First Modular Monolith", "type": "decision", "group": "architecture_pattern", "properties": { "principle": "TP1", "alternatives_rejected": ["microservices", "server-rendered monolith"] } },
+    { "id": "DEC_LANG", "label": "DECISION: TypeScript Full-Stack", "type": "decision", "group": "language", "properties": { "principle": "TP2" } },
+    { "id": "DEC_STATELESS", "label": "DECISION: Stateless JWT API Layer", "type": "decision", "group": "api_design", "properties": { "principle": "TP3" } },
+    { "id": "DEC_ASYNC", "label": "DECISION: BullMQ Async Side Effects", "type": "decision", "group": "messaging", "properties": { "principle": "TP4", "alternatives_rejected": ["Kafka", "RabbitMQ"] } },
+    { "id": "DEC_CONFIG", "label": "DECISION: Config Captured at Booking", "type": "decision", "group": "business_logic", "properties": { "principle": "TP5" } },
+    { "id": "DEC_DELETION", "label": "DECISION: Multi-Store Deletion Orchestrator", "type": "decision", "group": "compliance", "properties": { "principle": "TP6" } },
+    { "id": "DEC_MANAGED", "label": "DECISION: Managed Services Over Self-Hosted", "type": "decision", "group": "infrastructure", "properties": { "principle": "TP7" } },
+    { "id": "DEC_DUALSTRIPE", "label": "DECISION: Dual Stripe Account Routing", "type": "decision", "group": "payments", "properties": { "principle": "TP8" } },
+
+    { "id": "TECH_NEXTJS", "label": "Next.js 15 (App Router)", "type": "technology", "group": "frontend", "properties": { "category": "framework", "deployment": "Vercel" } },
+    { "id": "TECH_TAILWIND", "label": "Tailwind CSS 3 + shadcn/ui", "type": "technology", "group": "frontend", "properties": { "category": "ui_toolkit" } },
+    { "id": "TECH_TANSTACK_Q", "label": "TanStack Query 5", "type": "technology", "group": "frontend", "properties": { "category": "state_management" } },
+    { "id": "TECH_STRIPEJS", "label": "Stripe.js + react-stripe-js", "type": "technology", "group": "frontend", "properties": { "category": "payment_ui" } },
+    { "id": "TECH_TANSTACK_T", "label": "TanStack Table 8 + Recharts 2", "type": "technology", "group": "frontend", "properties": { "category": "admin_data" } },
+    { "id": "TECH_NESTJS", "label": "NestJS 10 (Node 20 LTS, TS 5)", "type": "technology", "group": "backend", "properties": { "category": "framework" } },
+    { "id": "TECH_FASTIFY", "label": "Fastify 4 (NestJS adapter)", "type": "technology", "group": "backend", "properties": { "category": "http_adapter" } },
+    { "id": "TECH_PRISMA", "label": "Prisma ORM 5", "type": "technology", "group": "backend", "properties": { "category": "orm" } },
+    { "id": "TECH_BULLMQ", "label": "BullMQ 5 + ioredis 5", "type": "technology", "group": "backend", "properties": { "category": "job_queue" } },
+    { "id": "TECH_XSTATE", "label": "XState 5", "type": "technology", "group": "backend", "properties": { "category": "state_machine" } },
+    { "id": "TECH_PASSPORT", "label": "Passport.js + passport-keycloak-bearer", "type": "technology", "group": "backend", "properties": { "category": "auth" } },
+    { "id": "TECH_PG", "label": "PostgreSQL 16 (RDS Multi-AZ)", "type": "technology", "group": "data", "properties": { "category": "primary_db" } },
+    { "id": "TECH_REDIS", "label": "Redis 7 (ElastiCache)", "type": "technology", "group": "data", "properties": { "category": "cache" } },
+    { "id": "TECH_OPENSEARCH", "label": "AWS OpenSearch 2.11", "type": "technology", "group": "data", "properties": { "category": "search" } },
+    { "id": "TECH_S3", "label": "AWS S3 (lifecycle rules)", "type": "technology", "group": "data", "properties": { "category": "object_storage" } },
+    { "id": "TECH_KEYCLOAK", "label": "KeyCloak 24 (ECS Fargate)", "type": "technology", "group": "platform", "properties": { "category": "iam" } },
+    { "id": "TECH_STRIPE", "label": "Stripe (India + Global + Connect)", "type": "technology", "group": "platform", "properties": { "category": "payments" } },
+    { "id": "TECH_SENDGRID", "label": "Twilio SendGrid", "type": "technology", "group": "platform", "properties": { "category": "email" } },
+    { "id": "TECH_FCM", "label": "FCM (web push only)", "type": "technology", "group": "platform", "properties": { "category": "push" } },
+    { "id": "TECH_STRAPI", "label": "Strapi 5 (ECS Fargate)", "type": "technology", "group": "platform", "properties": { "category": "cms" } },
+    { "id": "TECH_ZOOM", "label": "Zoom REST API + Webhooks", "type": "technology", "group": "platform", "properties": { "category": "video" } },
+    { "id": "TECH_ECS", "label": "AWS ECS Fargate", "type": "technology", "group": "infrastructure", "properties": { "category": "container_runtime" } },
+    { "id": "TECH_APIGW", "label": "AWS API Gateway (HTTP API)", "type": "technology", "group": "infrastructure", "properties": { "category": "api_gateway" } },
+    { "id": "TECH_GHA", "label": "GitHub Actions", "type": "technology", "group": "operations", "properties": { "category": "ci_cd" } },
+    { "id": "TECH_CODEQL", "label": "CodeQL + ESLint 9 + Prettier 3", "type": "technology", "group": "operations", "properties": { "category": "sast" } },
+    { "id": "TECH_DEPENDABOT", "label": "Dependabot + npm audit", "type": "technology", "group": "operations", "properties": { "category": "dependency_scanning" } },
+    { "id": "TECH_SECRETS", "label": "AWS Secrets Manager", "type": "technology", "group": "operations", "properties": { "category": "secrets" } },
+    { "id": "TECH_CW", "label": "CloudWatch + X-Ray + Pino", "type": "technology", "group": "operations", "properties": { "category": "observability" } },
+    { "id": "TECH_IAC", "label": "CloudFormation / Terraform", "type": "technology", "group": "operations", "properties": { "category": "iac" } },
+
+    { "id": "ANTI_MICRO", "label": "REJECTED: Microservices", "type": "anti_pattern", "group": "rejected", "properties": { "reason": "Too expensive and slow for EUR125K/16-week fixed budget" } },
+    { "id": "ANTI_SELFES", "label": "REJECTED: Self-hosted Elasticsearch", "type": "anti_pattern", "group": "rejected", "properties": { "reason": "LTM warns operationally complex for small teams" } },
+    { "id": "ANTI_K8S", "label": "REJECTED: Kubernetes", "type": "anti_pattern", "group": "rejected", "properties": { "reason": "LTM anti-pattern for teams <5 on MVP budgets" } },
+    { "id": "ANTI_VERCEL_BE", "label": "REJECTED: Backend on Vercel", "type": "anti_pattern", "group": "rejected", "properties": { "reason": "LTM: avoid for long-running processes, workers, cron jobs" } },
+    { "id": "ANTI_KAFKA", "label": "REJECTED: Kafka/RabbitMQ", "type": "anti_pattern", "group": "rejected", "properties": { "reason": "LTM: not warranted at MVP scale <10K users" } },
+    { "id": "ANTI_EXPRESS", "label": "REJECTED: Express without structure", "type": "anti_pattern", "group": "rejected", "properties": { "reason": "LTM anti-pattern for 7+ integration complexity" } }
+  ],
+
+  "edges": [
+    { "source": "PP6", "target": "DEC_PATTERN", "label": "drives", "properties": { "quote": "Market-Ready v1 → modular monolith maximizes velocity" } },
+    { "source": "PP3", "target": "DEC_PATTERN", "label": "drives", "properties": { "quote": "Multi-Sided Platform → API-First (2 frontends need API from day one)" } },
+    { "source": "CON_BUDGET", "target": "DEC_PATTERN", "label": "constrains", "properties": { "quote": "EUR125K/16 weeks rules out microservices" } },
+    { "source": "LTM_EVO", "target": "DEC_PATTERN", "label": "recommends", "properties": { "quote": "Phase 2 API-First required when multiple frontend clients exist from day one" } },
+    { "source": "LTM_MOD", "target": "DEC_PATTERN", "label": "recommends", "properties": { "quote": "greenfield, small team, PP-6=3 → modular monolith" } },
+    { "source": "DEC_PATTERN", "target": "TECH_NESTJS", "label": "selects", "properties": {} },
+    { "source": "DEC_PATTERN", "target": "ANTI_MICRO", "label": "rejects", "properties": {} },
+
+    { "source": "LTM_NODE", "target": "DEC_LANG", "label": "recommends", "properties": { "quote": "Full-stack TypeScript when frontend is React — same language across entire stack" } },
+    { "source": "CON_NAGARRO", "target": "DEC_LANG", "label": "constrains", "properties": { "quote": "16-week fixed-price — runtime type errors carry schedule risk" } },
+    { "source": "DEC_LANG", "target": "TECH_NESTJS", "label": "selects", "properties": {} },
+    { "source": "DEC_LANG", "target": "TECH_NEXTJS", "label": "selects", "properties": {} },
+    { "source": "DEC_LANG", "target": "TECH_PRISMA", "label": "selects", "properties": {} },
+
+    { "source": "LTM_NODE", "target": "TECH_NESTJS", "label": "recommends", "properties": { "quote": "NestJS for teams needing structured governance over 7+ integrations" } },
+    { "source": "LTM_NODE", "target": "ANTI_EXPRESS", "label": "warns", "properties": { "quote": "Express without structure is anti-pattern for complex codebases" } },
+    { "source": "PP5", "target": "TECH_NESTJS", "label": "drives", "properties": { "quote": "Bidirectional integrations (7+) justify NestJS governance overhead" } },
+    { "source": "QP3", "target": "TECH_NESTJS", "label": "drives", "properties": { "quote": "Comprehensive docs — NestJS native OpenAPI/Swagger generation" } },
+
+    { "source": "NFR3", "target": "TECH_FASTIFY", "label": "drives", "properties": { "quote": "Fast (p95 <500ms) — Fastify 2-3x throughput over Express" } },
+
+    { "source": "LTM_REACT", "target": "TECH_NEXTJS", "label": "recommends", "properties": { "quote": "Choose when SSR/SSG for SEO matters for consumer-facing products (PP-7=2-4)" } },
+    { "source": "PP1", "target": "TECH_NEXTJS", "label": "drives", "properties": { "quote": "General Consumer → SSR for mentor profile SEO indexability" } },
+    { "source": "PP7", "target": "TECH_NEXTJS", "label": "drives", "properties": { "quote": "Professional Services PP-7=3 → SSR for mentor discovery pages" } },
+    { "source": "LTM_REACT", "target": "TECH_NEXTJS", "label": "anti-pattern-avoidance", "properties": { "quote": "Admin portal: avoid SSR for purely client-side SPAs (no SEO)" } },
+
+    { "source": "PP1", "target": "TECH_TAILWIND", "label": "drives", "properties": { "quote": "General Consumer → polished, accessible UI with responsive layouts" } },
+    { "source": "PP2", "target": "TECH_TAILWIND", "label": "drives", "properties": { "quote": "Multi-Channel Responsive → utility-first responsive styling" } },
+    { "source": "QP6", "target": "TECH_TAILWIND", "label": "drives", "properties": { "quote": "Basic Accessibility (QP-6=2) met by shadcn/ui Radix ARIA primitives" } },
+
+    { "source": "PP5", "target": "TECH_TANSTACK_Q", "label": "drives", "properties": { "quote": "Bidirectional integrations need real-time-ish data freshness" } },
+
+    { "source": "NFR2", "target": "TECH_STRIPEJS", "label": "drives", "properties": { "quote": "Business Grade + PCI DSS → card data handled entirely by Stripe client SDK" } },
+    { "source": "NFR5", "target": "TECH_STRIPEJS", "label": "drives", "properties": { "quote": "Standard Compliance → PCI DSS tokenisation via Stripe.js" } },
+
+    { "source": "PP3", "target": "TECH_TANSTACK_T", "label": "drives", "properties": { "quote": "Multi-Sided Platform → admin portal has complex tabular data" } },
+
+    { "source": "NFR7", "target": "TECH_PRISMA", "label": "drives", "properties": { "quote": "Sensitive data — type-safe queries reduce SQL injection risk" } },
+
+    { "source": "LTM_MQ", "target": "DEC_ASYNC", "label": "recommends", "properties": { "quote": "Redis Streams/BullMQ built into Redis — appropriate for MVP scale <10K users" } },
+    { "source": "LTM_MQ", "target": "ANTI_KAFKA", "label": "warns", "properties": { "quote": "Full Kafka NOT warranted at MVP scale — adds operational complexity" } },
+    { "source": "LTM_EVT", "target": "DEC_ASYNC", "label": "recommends", "properties": { "quote": "Webhook delivery, notifications, async workflows" } },
+    { "source": "DEC_ASYNC", "target": "TECH_BULLMQ", "label": "selects", "properties": {} },
+    { "source": "DEC_ASYNC", "target": "ANTI_KAFKA", "label": "rejects", "properties": {} },
+
+    { "source": "RES_OQ5", "target": "DEC_CONFIG", "label": "drives", "properties": { "quote": "Config changes apply to NEW sessions only" } },
+    { "source": "DEC_CONFIG", "target": "TECH_PG", "label": "requires", "properties": { "quote": "Config version captured per session record in PostgreSQL" } },
+
+    { "source": "NFR3", "target": "DEC_STATELESS", "label": "drives", "properties": { "quote": "Fast → stateless enables horizontal scaling without session affinity" } },
+    { "source": "NFR6", "target": "DEC_STATELESS", "label": "drives", "properties": { "quote": "Growth-Oriented → horizontal ECS task scaling without state migration" } },
+    { "source": "DEC_STATELESS", "target": "TECH_KEYCLOAK", "label": "requires", "properties": { "quote": "JWT issuance and JWKS validation endpoint" } },
+    { "source": "DEC_STATELESS", "target": "TECH_PASSPORT", "label": "requires", "properties": {} },
+
+    { "source": "LTM_REL", "target": "TECH_PG", "label": "recommends", "properties": { "quote": "Financial operations, ACID guarantees mandate PostgreSQL" } },
+    { "source": "NFR4", "target": "TECH_PG", "label": "drives", "properties": { "quote": "Standard Availability → RDS Multi-AZ automatic failover <60s" } },
+
+    { "source": "LTM_KV", "target": "TECH_REDIS", "label": "recommends", "properties": { "quote": "Session caching, rate limiting, real-time counters, search result caching" } },
+
+    { "source": "LTM_SEARCH", "target": "TECH_OPENSEARCH", "label": "recommends", "properties": { "quote": "When content volume exceeds DB full-text search for e-commerce/content discovery" } },
+    { "source": "LTM_SEARCH", "target": "ANTI_SELFES", "label": "warns", "properties": { "quote": "Elasticsearch for small teams without DevOps capacity — operationally complex" } },
+    { "source": "DEC_MANAGED", "target": "TECH_OPENSEARCH", "label": "selects", "properties": { "quote": "AWS managed eliminates self-hosted operational burden" } },
+    { "source": "DEC_MANAGED", "target": "ANTI_SELFES", "label": "rejects", "properties": {} },
+
+    { "source": "RES_OQ7", "target": "TECH_S3", "label": "drives", "properties": { "quote": "3-day TTL via S3 lifecycle rules for recordings" } },
+    { "source": "NFR7", "target": "TECH_S3", "label": "drives", "properties": { "quote": "Sensitive — SSE-S3 encryption, IAM policy for admin-only signed URLs" } },
+
+    { "source": "RES_CB2", "target": "DEC_DUALSTRIPE", "label": "drives", "properties": { "quote": "India regulations require separate Stripe India entity" } },
+    { "source": "RES_I04", "target": "TECH_STRIPE", "label": "drives", "properties": { "quote": "Stripe confirmed as payment provider" } },
+    { "source": "DEC_DUALSTRIPE", "target": "TECH_STRIPE", "label": "selects", "properties": { "quote": "CurrencyRouter: INR→Stripe India, USD/CHF/EUR→Stripe Global" } },
+    { "source": "RES_CB3", "target": "TECH_STRIPE", "label": "constrains", "properties": { "quote": "Stripe Connect handled in E4, not E1" } },
+
+    { "source": "RES_CB1", "target": "DEC_DELETION", "label": "drives", "properties": { "quote": "GDPR consent + deletion cascade across 6 stores" } },
+    { "source": "RES_OQ6", "target": "DEC_DELETION", "label": "drives", "properties": { "quote": "GDPR-equivalent controls for TPDP at MVP" } },
+    { "source": "NFR5", "target": "DEC_DELETION", "label": "drives", "properties": { "quote": "Standard Compliance → GDPR data minimisation" } },
+    { "source": "NFR7", "target": "DEC_DELETION", "label": "drives", "properties": { "quote": "Sensitive → multi-store deletion with audit trail" } },
+
+    { "source": "RES_CB1", "target": "TECH_ZOOM", "label": "constrains", "properties": { "quote": "Per-session consent gate before Zoom recording activates" } },
+
+    { "source": "LTM_SEC", "target": "TECH_KEYCLOAK", "label": "recommends", "properties": { "quote": "KeyCloak for centralised IAM with MFA, RBAC, JWT" } },
+    { "source": "NFR2", "target": "TECH_KEYCLOAK", "label": "drives", "properties": { "quote": "Business Grade security → centralised IAM with MFA capability" } },
+    { "source": "PP3", "target": "TECH_KEYCLOAK", "label": "drives", "properties": { "quote": "Multi-Sided Platform → strict RBAC for 3 personas" } },
+
+    { "source": "LTM_VERCEL", "target": "TECH_NEXTJS", "label": "recommends", "properties": { "quote": "Native Next.js deployment with CDN, preview deploys" } },
+    { "source": "LTM_VERCEL", "target": "ANTI_VERCEL_BE", "label": "warns", "properties": { "quote": "Avoid for backend-heavy: long-running processes, workers, cron jobs" } },
+
+    { "source": "LTM_CONT", "target": "TECH_ECS", "label": "recommends", "properties": { "quote": "ECS Fargate removes EC2 management — pay per task, auto-scaling, IAM task roles" } },
+    { "source": "LTM_CONT", "target": "ANTI_K8S", "label": "warns", "properties": { "quote": "Kubernetes anti-pattern for teams <5 engineers on MVP budgets" } },
+    { "source": "CON_BUDGET", "target": "TECH_ECS", "label": "constrains", "properties": { "quote": "EUR125K budget → no K8s operational overhead" } },
+    { "source": "CON_BUDGET", "target": "DEC_MANAGED", "label": "constrains", "properties": { "quote": "Small team cannot sustain self-managed infrastructure" } },
+    { "source": "ANTI_VERCEL_BE", "target": "TECH_ECS", "label": "alternative_to", "properties": { "quote": "Backend needs persistent processes → ECS Fargate" } },
+
+    { "source": "LTM_AWS", "target": "TECH_APIGW", "label": "recommends", "properties": { "quote": "AWS API Gateway pairs naturally with ECS Fargate" } },
+
+    { "source": "LTM_CICD", "target": "TECH_GHA", "label": "recommends", "properties": { "quote": "GitHub Actions: integrated with GitHub, marketplace, generous free tier" } },
+    { "source": "QP4", "target": "TECH_GHA", "label": "drives", "properties": { "quote": "Continuous Delivery → automated pipelines for all environments" } },
+
+    { "source": "LTM_SEC", "target": "TECH_CODEQL", "label": "recommends", "properties": { "quote": "CodeQL GitHub-native + Dependabot for QP-7 level 3" } },
+    { "source": "QP7", "target": "TECH_CODEQL", "label": "drives", "properties": { "quote": "SAST + Dependencies → CodeQL + secret scanning in CI" } },
+    { "source": "QP2", "target": "TECH_CODEQL", "label": "drives", "properties": { "quote": "Enforced Standards → ESLint + Prettier + pre-commit hooks" } },
+    { "source": "QP7", "target": "TECH_DEPENDABOT", "label": "drives", "properties": { "quote": "SAST + Dependencies → automated dependency vulnerability scanning" } },
+
+    { "source": "LTM_SEC", "target": "TECH_SECRETS", "label": "recommends", "properties": { "quote": "AWS Secrets Manager if AWS-hosted backend" } },
+    { "source": "NFR2", "target": "TECH_SECRETS", "label": "drives", "properties": { "quote": "Business Grade → no credentials in source code" } },
+
+    { "source": "LTM_OBS", "target": "TECH_CW", "label": "recommends", "properties": { "quote": "For AWS-hosted: CloudWatch + X-Ray — cloud-native, no additional infrastructure" } },
+    { "source": "QP5", "target": "TECH_CW", "label": "drives", "properties": { "quote": "Monitored → centralized logging, monitoring, tracing, alerting" } },
+    { "source": "NFR1", "target": "TECH_CW", "label": "drives", "properties": { "quote": "Balanced Risk → monitoring, alerting, incident response needed" } },
+
+    { "source": "QP4", "target": "TECH_IAC", "label": "drives", "properties": { "quote": "Continuous Delivery → reproducible environments via declarative IaC" } },
+
+    { "source": "RES_MOBILE", "target": "TECH_NEXTJS", "label": "constrains", "properties": { "quote": "Web-only MVP — no React Native, no mobile SDK decisions" } },
+    { "source": "RES_MOBILE", "target": "TECH_FCM", "label": "constrains", "properties": { "quote": "FCM web push only — no native mobile push in MVP" } },
+
+    { "source": "DEC_MANAGED", "target": "TECH_PG", "label": "selects", "properties": { "quote": "AWS RDS managed PostgreSQL" } },
+    { "source": "DEC_MANAGED", "target": "TECH_REDIS", "label": "selects", "properties": { "quote": "AWS ElastiCache managed Redis" } },
+    { "source": "DEC_MANAGED", "target": "TECH_CW", "label": "selects", "properties": { "quote": "CloudWatch cloud-native — no self-hosted Grafana" } },
+
+    { "source": "NFR4", "target": "DEC_MANAGED", "label": "drives", "properties": { "quote": "99.5% uptime → managed services with Multi-AZ, automated backups" } },
+
+    { "source": "TECH_REDIS", "target": "TECH_BULLMQ", "label": "enables", "properties": { "quote": "BullMQ uses Redis as backing store — no separate broker" } },
+    { "source": "TECH_KEYCLOAK", "target": "TECH_PASSPORT", "label": "enables", "properties": { "quote": "passport-keycloak-bearer validates JWTs against JWKS endpoint" } },
+    { "source": "TECH_KEYCLOAK", "target": "TECH_APIGW", "label": "enables", "properties": { "quote": "Lambda Authorizer validates JWT signatures against KeyCloak JWKS" } }
+  ]
+}

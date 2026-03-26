@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Felly Club — Architecture Decision Graph</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; overflow: hidden; }
+  #controls { position: fixed; top: 0; left: 0; right: 0; z-index: 10; background: rgba(10,10,15,0.95); border-bottom: 1px solid #2a2a3a; padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  #controls h1 { font-size: 15px; font-weight: 600; color: #a0a0ff; white-space: nowrap; }
+  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { padding: 4px 10px; border-radius: 4px; border: 1px solid #3a3a4a; background: transparent; color: #999; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+  .filter-btn:hover { border-color: #6a6aaa; color: #ccc; }
+  .filter-btn.active { background: var(--clr, #4a4a8a); border-color: var(--clr, #6a6aff); color: #fff; }
+  .sep { width: 1px; height: 24px; background: #2a2a3a; }
+  #tooltip { position: fixed; padding: 10px 14px; background: rgba(20,20,30,0.96); border: 1px solid #3a3a5a; border-radius: 6px; font-size: 12px; line-height: 1.5; max-width: 380px; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  #tooltip .tt-label { font-weight: 600; color: #fff; margin-bottom: 4px; }
+  #tooltip .tt-type { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 6px; }
+  #tooltip .tt-body { color: #bbb; }
+  #tooltip .tt-quote { font-style: italic; color: #8a8acc; margin-top: 6px; border-left: 2px solid #4a4a8a; padding-left: 8px; }
+  #legend { position: fixed; bottom: 16px; left: 16px; z-index: 10; background: rgba(10,10,15,0.9); border: 1px solid #2a2a3a; border-radius: 8px; padding: 12px 16px; font-size: 11px; }
+  #legend h3 { font-size: 11px; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-line { width: 20px; height: 0; border-top: 2px solid; }
+  #stats { position: fixed; bottom: 16px; right: 16px; z-index: 10; background: rgba(10,10,15,0.9); border: 1px solid #2a2a3a; border-radius: 8px; padding: 12px 16px; font-size: 11px; color: #888; }
+  svg { display: block; }
+  .link { fill: none; stroke-opacity: 0.3; }
+  .link:hover { stroke-opacity: 0.8; }
+  .node circle { stroke-width: 2px; cursor: pointer; transition: r 0.2s; }
+  .node text { font-size: 9px; fill: #aaa; pointer-events: none; }
+  .node.dimmed circle { opacity: 0.1; }
+  .node.dimmed text { opacity: 0.1; }
+  .link.dimmed { stroke-opacity: 0.03; }
+  .node.highlighted circle { stroke-width: 3px; filter: drop-shadow(0 0 6px var(--glow)); }
+  .link.highlighted { stroke-opacity: 0.9; stroke-width: 2.5px; }
+  marker { fill: #666; }
+</style>
+</head>
+<body>
+<div id="controls">
+  <h1>Felly Club Architecture Decision Graph</h1>
+  <div class="sep"></div>
+  <div class="filter-group" id="filters"></div>
+</div>
+<div id="tooltip"></div>
+<div id="legend">
+  <h3>Node Types</h3>
+  <div class="legend-item"><div class="legend-dot" style="background:#6a8cff"></div> Profile Dimension</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffb347"></div> LTM Knowledge</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff6b9d"></div> Pre-Lock Resolution</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c792ea"></div> Constraint</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#82f5a8"></div> Decision</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5bc0eb"></div> Technology</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff4444;opacity:0.7"></div> Rejected Alternative</div>
+  <h3 style="margin-top:10px">Edge Types</h3>
+  <div class="legend-item"><div class="legend-line" style="border-color:#82f5a8"></div> drives / selects</div>
+  <div class="legend-item"><div class="legend-line" style="border-color:#ffb347"></div> recommends</div>
+  <div class="legend-item"><div class="legend-line" style="border-color:#ff4444"></div> warns / rejects</div>
+  <div class="legend-item"><div class="legend-line" style="border-color:#c792ea"></div> constrains</div>
+  <div class="legend-item"><div class="legend-line" style="border-color:#5bc0eb"></div> enables / requires</div>
+</div>
+<div id="stats"></div>
+
+<script>
+const GRAPH_DATA = {"nodes": [{"id": "PP1", "label": "PP-1: User Sophistication = 4", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp1_user_sophistication", "level": 4, "label_text": "General Consumer"}}, {"id": "PP2", "label": "PP-2: UX Maturity = 3", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp2_ux_maturity", "level": 3, "label_text": "Multi-Channel Responsive"}}, {"id": "PP3", "label": "PP-3: Persona Complexity = 5", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp3_persona_complexity", "level": 5, "label_text": "Multi-Sided Platform"}}, {"id": "PP4", "label": "PP-4: Geographic Scope = 3", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp4_geographic_scope", "level": 3, "label_text": "Multi-Country"}}, {"id": "PP5", "label": "PP-5: Integration Density = 3", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp5_integration_density", "level": 3, "label_text": "Bidirectional"}}, {"id": "PP6", "label": "PP-6: Delivery Ambition = 3", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp6_delivery_ambition", "level": 3, "label_text": "Market-Ready v1"}}, {"id": "PP7", "label": "PP-7: Industry Vertical = 3", "type": "profile", "group": "product_profile", "properties": {"dimension": "pp7_industry_vertical", "level": 3, "label_text": "Professional Services"}}, {"id": "NFR1", "label": "NFR-1: Risk = 3", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr1_risk", "level": 3, "label_text": "Balanced Risk"}}, {"id": "NFR2", "label": "NFR-2: Security = 3", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr2_security", "level": 3, "label_text": "Business Grade"}}, {"id": "NFR3", "label": "NFR-3: Performance = 3", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr3_performance", "level": 3, "label_text": "Fast"}}, {"id": "NFR4", "label": "NFR-4: Availability = 3", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr4_availability", "level": 3, "label_text": "Standard"}}, {"id": "NFR5", "label": "NFR-5: Compliance = 3", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr5_compliance", "level": 3, "label_text": "Standard"}}, {"id": "NFR6", "label": "NFR-6: Scalability = 3", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr6_scalability", "level": 3, "label_text": "Growth-Oriented"}}, {"id": "NFR7", "label": "NFR-7: Data Sensitivity = 4", "type": "profile", "group": "nfr_profile", "properties": {"dimension": "nfr7_data_sensitivity", "level": 4, "label_text": "Sensitive"}}, {"id": "QP1", "label": "QP-1: Testing Depth = 3", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp1_testing_depth", "level": 3, "label_text": "Layered Testing"}}, {"id": "QP2", "label": "QP-2: Code Quality = 3", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp2_code_quality", "level": 3, "label_text": "Enforced Standards"}}, {"id": "QP3", "label": "QP-3: Documentation = 3", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp3_documentation", "level": 3, "label_text": "Comprehensive"}}, {"id": "QP4", "label": "QP-4: CI/CD Maturity = 3", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp4_ci_cd_maturity", "level": 3, "label_text": "Continuous Delivery"}}, {"id": "QP5", "label": "QP-5: Observability = 3", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp5_observability", "level": 3, "label_text": "Monitored"}}, {"id": "QP6", "label": "QP-6: Accessibility = 2", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp6_accessibility", "level": 2, "label_text": "Basic"}}, {"id": "QP7", "label": "QP-7: Security Testing = 3", "type": "profile", "group": "quality_profile", "properties": {"dimension": "qp7_security_testing", "level": 3, "label_text": "SAST + Dependencies"}}, {"id": "LTM_EVO", "label": "evolutionary-scaling.md", "type": "ltm", "group": "ltm_patterns", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/patterns/evolutionary-scaling.md", "category": "patterns"}}, {"id": "LTM_MOD", "label": "modular-monolith.md", "type": "ltm", "group": "ltm_patterns", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/patterns/modular-monolith.md", "category": "patterns"}}, {"id": "LTM_EVT", "label": "event-driven.md", "type": "ltm", "group": "ltm_patterns", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/patterns/event-driven.md", "category": "patterns"}}, {"id": "LTM_REACT", "label": "frontend-react-nextjs.md", "type": "ltm", "group": "ltm_stacks", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/stacks/frontend-react-nextjs.md", "category": "stacks"}}, {"id": "LTM_NODE", "label": "backend-nodejs.md", "type": "ltm", "group": "ltm_stacks", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/stacks/backend-nodejs.md", "category": "stacks"}}, {"id": "LTM_REL", "label": "relational.md", "type": "ltm", "group": "ltm_data", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/data/relational.md", "category": "data"}}, {"id": "LTM_KV", "label": "nosql-keyvalue.md", "type": "ltm", "group": "ltm_data", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/data/nosql-keyvalue.md", "category": "data"}}, {"id": "LTM_SEARCH", "label": "search-engines.md", "type": "ltm", "group": "ltm_data", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/data/search-engines.md", "category": "data"}}, {"id": "LTM_MQ", "label": "messaging-queues.md", "type": "ltm", "group": "ltm_data", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/data/messaging-queues.md", "category": "data"}}, {"id": "LTM_VERCEL", "label": "vercel.md", "type": "ltm", "group": "ltm_platforms", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/platforms/vercel.md", "category": "platforms"}}, {"id": "LTM_AWS", "label": "aws.md", "type": "ltm", "group": "ltm_platforms", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/platforms/aws.md", "category": "platforms"}}, {"id": "LTM_CICD", "label": "ci-cd.md", "type": "ltm", "group": "ltm_operations", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/operations/ci-cd.md", "category": "operations"}}, {"id": "LTM_OBS", "label": "observability.md", "type": "ltm", "group": "ltm_operations", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/operations/observability.md", "category": "operations"}}, {"id": "LTM_SEC", "label": "security-infrastructure.md", "type": "ltm", "group": "ltm_operations", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/operations/security-infrastructure.md", "category": "operations"}}, {"id": "LTM_CONT", "label": "containerization.md", "type": "ltm", "group": "ltm_operations", "properties": {"path": "~/.meridian/core/memory/knowledge/architecture/operations/containerization.md", "category": "operations"}}, {"id": "RES_CB1", "label": "CB-1: GDPR per-session consent", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "Per-session explicit consent for recordings"}}, {"id": "RES_CB2", "label": "CB-2: Dual Stripe accounts", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "Separate Stripe India (INR) + Global (USD/CHF/EUR)"}}, {"id": "RES_CB3", "label": "CB-3: Stripe Connect in E4", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "Keep Connect out of E1, handle in E4"}}, {"id": "RES_MOBILE", "label": "Mobile removed from MVP", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "Web-only delivery"}}, {"id": "RES_OQ5", "label": "OQ-5: Config at booking time", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "Changes apply to new sessions only"}}, {"id": "RES_OQ6", "label": "OQ-6: GDPR-equiv for TPDP", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "No additional India-specific requirements at MVP"}}, {"id": "RES_OQ7", "label": "OQ-7: Dispute within 3-day window", "type": "resolution", "group": "pre_lock", "properties": {"source": "roadmap pre-lock", "resolution": "Disclaimer, no TTL extension"}}, {"id": "RES_I04", "label": "I-04: Stripe confirmed", "type": "resolution", "group": "pre_lock", "properties": {"source": "product pre-lock", "resolution": "Stripe as payment provider"}}, {"id": "CON_BUDGET", "label": "Budget: EUR125K / 16 weeks", "type": "constraint", "group": "constraints", "properties": {"source": "product.yaml delivery_context"}}, {"id": "CON_GREENFIELD", "label": "Greenfield codebase", "type": "constraint", "group": "constraints", "properties": {"source": "context-report.md codebase scan"}}, {"id": "CON_NAGARRO", "label": "External delivery: Nagarro", "type": "constraint", "group": "constraints", "properties": {"source": "product.yaml delivery_context"}}, {"id": "DEC_PATTERN", "label": "DECISION: API-First Modular Monolith", "type": "decision", "group": "architecture_pattern", "properties": {"principle": "TP1", "alternatives_rejected": ["microservices", "server-rendered monolith"]}}, {"id": "DEC_LANG", "label": "DECISION: TypeScript Full-Stack", "type": "decision", "group": "language", "properties": {"principle": "TP2"}}, {"id": "DEC_STATELESS", "label": "DECISION: Stateless JWT API Layer", "type": "decision", "group": "api_design", "properties": {"principle": "TP3"}}, {"id": "DEC_ASYNC", "label": "DECISION: BullMQ Async Side Effects", "type": "decision", "group": "messaging", "properties": {"principle": "TP4", "alternatives_rejected": ["Kafka", "RabbitMQ"]}}, {"id": "DEC_CONFIG", "label": "DECISION: Config Captured at Booking", "type": "decision", "group": "business_logic", "properties": {"principle": "TP5"}}, {"id": "DEC_DELETION", "label": "DECISION: Multi-Store Deletion Orchestrator", "type": "decision", "group": "compliance", "properties": {"principle": "TP6"}}, {"id": "DEC_MANAGED", "label": "DECISION: Managed Services Over Self-Hosted", "type": "decision", "group": "infrastructure", "properties": {"principle": "TP7"}}, {"id": "DEC_DUALSTRIPE", "label": "DECISION: Dual Stripe Account Routing", "type": "decision", "group": "payments", "properties": {"principle": "TP8"}}, {"id": "TECH_NEXTJS", "label": "Next.js 15 (App Router)", "type": "technology", "group": "frontend", "properties": {"category": "framework", "deployment": "Vercel"}}, {"id": "TECH_TAILWIND", "label": "Tailwind CSS 3 + shadcn/ui", "type": "technology", "group": "frontend", "properties": {"category": "ui_toolkit"}}, {"id": "TECH_TANSTACK_Q", "label": "TanStack Query 5", "type": "technology", "group": "frontend", "properties": {"category": "state_management"}}, {"id": "TECH_STRIPEJS", "label": "Stripe.js + react-stripe-js", "type": "technology", "group": "frontend", "properties": {"category": "payment_ui"}}, {"id": "TECH_TANSTACK_T", "label": "TanStack Table 8 + Recharts 2", "type": "technology", "group": "frontend", "properties": {"category": "admin_data"}}, {"id": "TECH_NESTJS", "label": "NestJS 10 (Node 20 LTS, TS 5)", "type": "technology", "group": "backend", "properties": {"category": "framework"}}, {"id": "TECH_FASTIFY", "label": "Fastify 4 (NestJS adapter)", "type": "technology", "group": "backend", "properties": {"category": "http_adapter"}}, {"id": "TECH_PRISMA", "label": "Prisma ORM 5", "type": "technology", "group": "backend", "properties": {"category": "orm"}}, {"id": "TECH_BULLMQ", "label": "BullMQ 5 + ioredis 5", "type": "technology", "group": "backend", "properties": {"category": "job_queue"}}, {"id": "TECH_XSTATE", "label": "XState 5", "type": "technology", "group": "backend", "properties": {"category": "state_machine"}}, {"id": "TECH_PASSPORT", "label": "Passport.js + passport-keycloak-bearer", "type": "technology", "group": "backend", "properties": {"category": "auth"}}, {"id": "TECH_PG", "label": "PostgreSQL 16 (RDS Multi-AZ)", "type": "technology", "group": "data", "properties": {"category": "primary_db"}}, {"id": "TECH_REDIS", "label": "Redis 7 (ElastiCache)", "type": "technology", "group": "data", "properties": {"category": "cache"}}, {"id": "TECH_OPENSEARCH", "label": "AWS OpenSearch 2.11", "type": "technology", "group": "data", "properties": {"category": "search"}}, {"id": "TECH_S3", "label": "AWS S3 (lifecycle rules)", "type": "technology", "group": "data", "properties": {"category": "object_storage"}}, {"id": "TECH_KEYCLOAK", "label": "KeyCloak 24 (ECS Fargate)", "type": "technology", "group": "platform", "properties": {"category": "iam"}}, {"id": "TECH_STRIPE", "label": "Stripe (India + Global + Connect)", "type": "technology", "group": "platform", "properties": {"category": "payments"}}, {"id": "TECH_SENDGRID", "label": "Twilio SendGrid", "type": "technology", "group": "platform", "properties": {"category": "email"}}, {"id": "TECH_FCM", "label": "FCM (web push only)", "type": "technology", "group": "platform", "properties": {"category": "push"}}, {"id": "TECH_STRAPI", "label": "Strapi 5 (ECS Fargate)", "type": "technology", "group": "platform", "properties": {"category": "cms"}}, {"id": "TECH_ZOOM", "label": "Zoom REST API + Webhooks", "type": "technology", "group": "platform", "properties": {"category": "video"}}, {"id": "TECH_ECS", "label": "AWS ECS Fargate", "type": "technology", "group": "infrastructure", "properties": {"category": "container_runtime"}}, {"id": "TECH_APIGW", "label": "AWS API Gateway (HTTP API)", "type": "technology", "group": "infrastructure", "properties": {"category": "api_gateway"}}, {"id": "TECH_GHA", "label": "GitHub Actions", "type": "technology", "group": "operations", "properties": {"category": "ci_cd"}}, {"id": "TECH_CODEQL", "label": "CodeQL + ESLint 9 + Prettier 3", "type": "technology", "group": "operations", "properties": {"category": "sast"}}, {"id": "TECH_DEPENDABOT", "label": "Dependabot + npm audit", "type": "technology", "group": "operations", "properties": {"category": "dependency_scanning"}}, {"id": "TECH_SECRETS", "label": "AWS Secrets Manager", "type": "technology", "group": "operations", "properties": {"category": "secrets"}}, {"id": "TECH_CW", "label": "CloudWatch + X-Ray + Pino", "type": "technology", "group": "operations", "properties": {"category": "observability"}}, {"id": "TECH_IAC", "label": "CloudFormation / Terraform", "type": "technology", "group": "operations", "properties": {"category": "iac"}}, {"id": "ANTI_MICRO", "label": "REJECTED: Microservices", "type": "anti_pattern", "group": "rejected", "properties": {"reason": "Too expensive and slow for EUR125K/16-week fixed budget"}}, {"id": "ANTI_SELFES", "label": "REJECTED: Self-hosted Elasticsearch", "type": "anti_pattern", "group": "rejected", "properties": {"reason": "LTM warns operationally complex for small teams"}}, {"id": "ANTI_K8S", "label": "REJECTED: Kubernetes", "type": "anti_pattern", "group": "rejected", "properties": {"reason": "LTM anti-pattern for teams <5 on MVP budgets"}}, {"id": "ANTI_VERCEL_BE", "label": "REJECTED: Backend on Vercel", "type": "anti_pattern", "group": "rejected", "properties": {"reason": "LTM: avoid for long-running processes, workers, cron jobs"}}, {"id": "ANTI_KAFKA", "label": "REJECTED: Kafka/RabbitMQ", "type": "anti_pattern", "group": "rejected", "properties": {"reason": "LTM: not warranted at MVP scale <10K users"}}, {"id": "ANTI_EXPRESS", "label": "REJECTED: Express without structure", "type": "anti_pattern", "group": "rejected", "properties": {"reason": "LTM anti-pattern for 7+ integration complexity"}}], "edges": [{"source": "PP6", "target": "DEC_PATTERN", "label": "drives", "properties": {"quote": "Market-Ready v1 \u2192 modular monolith maximizes velocity"}}, {"source": "PP3", "target": "DEC_PATTERN", "label": "drives", "properties": {"quote": "Multi-Sided Platform \u2192 API-First (2 frontends need API from day one)"}}, {"source": "CON_BUDGET", "target": "DEC_PATTERN", "label": "constrains", "properties": {"quote": "EUR125K/16 weeks rules out microservices"}}, {"source": "LTM_EVO", "target": "DEC_PATTERN", "label": "recommends", "properties": {"quote": "Phase 2 API-First required when multiple frontend clients exist from day one"}}, {"source": "LTM_MOD", "target": "DEC_PATTERN", "label": "recommends", "properties": {"quote": "greenfield, small team, PP-6=3 \u2192 modular monolith"}}, {"source": "DEC_PATTERN", "target": "TECH_NESTJS", "label": "selects", "properties": {}}, {"source": "DEC_PATTERN", "target": "ANTI_MICRO", "label": "rejects", "properties": {}}, {"source": "LTM_NODE", "target": "DEC_LANG", "label": "recommends", "properties": {"quote": "Full-stack TypeScript when frontend is React \u2014 same language across entire stack"}}, {"source": "CON_NAGARRO", "target": "DEC_LANG", "label": "constrains", "properties": {"quote": "16-week fixed-price \u2014 runtime type errors carry schedule risk"}}, {"source": "DEC_LANG", "target": "TECH_NESTJS", "label": "selects", "properties": {}}, {"source": "DEC_LANG", "target": "TECH_NEXTJS", "label": "selects", "properties": {}}, {"source": "DEC_LANG", "target": "TECH_PRISMA", "label": "selects", "properties": {}}, {"source": "LTM_NODE", "target": "TECH_NESTJS", "label": "recommends", "properties": {"quote": "NestJS for teams needing structured governance over 7+ integrations"}}, {"source": "LTM_NODE", "target": "ANTI_EXPRESS", "label": "warns", "properties": {"quote": "Express without structure is anti-pattern for complex codebases"}}, {"source": "PP5", "target": "TECH_NESTJS", "label": "drives", "properties": {"quote": "Bidirectional integrations (7+) justify NestJS governance overhead"}}, {"source": "QP3", "target": "TECH_NESTJS", "label": "drives", "properties": {"quote": "Comprehensive docs \u2014 NestJS native OpenAPI/Swagger generation"}}, {"source": "NFR3", "target": "TECH_FASTIFY", "label": "drives", "properties": {"quote": "Fast (p95 <500ms) \u2014 Fastify 2-3x throughput over Express"}}, {"source": "LTM_REACT", "target": "TECH_NEXTJS", "label": "recommends", "properties": {"quote": "Choose when SSR/SSG for SEO matters for consumer-facing products (PP-7=2-4)"}}, {"source": "PP1", "target": "TECH_NEXTJS", "label": "drives", "properties": {"quote": "General Consumer \u2192 SSR for mentor profile SEO indexability"}}, {"source": "PP7", "target": "TECH_NEXTJS", "label": "drives", "properties": {"quote": "Professional Services PP-7=3 \u2192 SSR for mentor discovery pages"}}, {"source": "LTM_REACT", "target": "TECH_NEXTJS", "label": "anti-pattern-avoidance", "properties": {"quote": "Admin portal: avoid SSR for purely client-side SPAs (no SEO)"}}, {"source": "PP1", "target": "TECH_TAILWIND", "label": "drives", "properties": {"quote": "General Consumer \u2192 polished, accessible UI with responsive layouts"}}, {"source": "PP2", "target": "TECH_TAILWIND", "label": "drives", "properties": {"quote": "Multi-Channel Responsive \u2192 utility-first responsive styling"}}, {"source": "QP6", "target": "TECH_TAILWIND", "label": "drives", "properties": {"quote": "Basic Accessibility (QP-6=2) met by shadcn/ui Radix ARIA primitives"}}, {"source": "PP5", "target": "TECH_TANSTACK_Q", "label": "drives", "properties": {"quote": "Bidirectional integrations need real-time-ish data freshness"}}, {"source": "NFR2", "target": "TECH_STRIPEJS", "label": "drives", "properties": {"quote": "Business Grade + PCI DSS \u2192 card data handled entirely by Stripe client SDK"}}, {"source": "NFR5", "target": "TECH_STRIPEJS", "label": "drives", "properties": {"quote": "Standard Compliance \u2192 PCI DSS tokenisation via Stripe.js"}}, {"source": "PP3", "target": "TECH_TANSTACK_T", "label": "drives", "properties": {"quote": "Multi-Sided Platform \u2192 admin portal has complex tabular data"}}, {"source": "NFR7", "target": "TECH_PRISMA", "label": "drives", "properties": {"quote": "Sensitive data \u2014 type-safe queries reduce SQL injection risk"}}, {"source": "LTM_MQ", "target": "DEC_ASYNC", "label": "recommends", "properties": {"quote": "Redis Streams/BullMQ built into Redis \u2014 appropriate for MVP scale <10K users"}}, {"source": "LTM_MQ", "target": "ANTI_KAFKA", "label": "warns", "properties": {"quote": "Full Kafka NOT warranted at MVP scale \u2014 adds operational complexity"}}, {"source": "LTM_EVT", "target": "DEC_ASYNC", "label": "recommends", "properties": {"quote": "Webhook delivery, notifications, async workflows"}}, {"source": "DEC_ASYNC", "target": "TECH_BULLMQ", "label": "selects", "properties": {}}, {"source": "DEC_ASYNC", "target": "ANTI_KAFKA", "label": "rejects", "properties": {}}, {"source": "RES_OQ5", "target": "DEC_CONFIG", "label": "drives", "properties": {"quote": "Config changes apply to NEW sessions only"}}, {"source": "DEC_CONFIG", "target": "TECH_PG", "label": "requires", "properties": {"quote": "Config version captured per session record in PostgreSQL"}}, {"source": "NFR3", "target": "DEC_STATELESS", "label": "drives", "properties": {"quote": "Fast \u2192 stateless enables horizontal scaling without session affinity"}}, {"source": "NFR6", "target": "DEC_STATELESS", "label": "drives", "properties": {"quote": "Growth-Oriented \u2192 horizontal ECS task scaling without state migration"}}, {"source": "DEC_STATELESS", "target": "TECH_KEYCLOAK", "label": "requires", "properties": {"quote": "JWT issuance and JWKS validation endpoint"}}, {"source": "DEC_STATELESS", "target": "TECH_PASSPORT", "label": "requires", "properties": {}}, {"source": "LTM_REL", "target": "TECH_PG", "label": "recommends", "properties": {"quote": "Financial operations, ACID guarantees mandate PostgreSQL"}}, {"source": "NFR4", "target": "TECH_PG", "label": "drives", "properties": {"quote": "Standard Availability \u2192 RDS Multi-AZ automatic failover <60s"}}, {"source": "LTM_KV", "target": "TECH_REDIS", "label": "recommends", "properties": {"quote": "Session caching, rate limiting, real-time counters, search result caching"}}, {"source": "LTM_SEARCH", "target": "TECH_OPENSEARCH", "label": "recommends", "properties": {"quote": "When content volume exceeds DB full-text search for e-commerce/content discovery"}}, {"source": "LTM_SEARCH", "target": "ANTI_SELFES", "label": "warns", "properties": {"quote": "Elasticsearch for small teams without DevOps capacity \u2014 operationally complex"}}, {"source": "DEC_MANAGED", "target": "TECH_OPENSEARCH", "label": "selects", "properties": {"quote": "AWS managed eliminates self-hosted operational burden"}}, {"source": "DEC_MANAGED", "target": "ANTI_SELFES", "label": "rejects", "properties": {}}, {"source": "RES_OQ7", "target": "TECH_S3", "label": "drives", "properties": {"quote": "3-day TTL via S3 lifecycle rules for recordings"}}, {"source": "NFR7", "target": "TECH_S3", "label": "drives", "properties": {"quote": "Sensitive \u2014 SSE-S3 encryption, IAM policy for admin-only signed URLs"}}, {"source": "RES_CB2", "target": "DEC_DUALSTRIPE", "label": "drives", "properties": {"quote": "India regulations require separate Stripe India entity"}}, {"source": "RES_I04", "target": "TECH_STRIPE", "label": "drives", "properties": {"quote": "Stripe confirmed as payment provider"}}, {"source": "DEC_DUALSTRIPE", "target": "TECH_STRIPE", "label": "selects", "properties": {"quote": "CurrencyRouter: INR\u2192Stripe India, USD/CHF/EUR\u2192Stripe Global"}}, {"source": "RES_CB3", "target": "TECH_STRIPE", "label": "constrains", "properties": {"quote": "Stripe Connect handled in E4, not E1"}}, {"source": "RES_CB1", "target": "DEC_DELETION", "label": "drives", "properties": {"quote": "GDPR consent + deletion cascade across 6 stores"}}, {"source": "RES_OQ6", "target": "DEC_DELETION", "label": "drives", "properties": {"quote": "GDPR-equivalent controls for TPDP at MVP"}}, {"source": "NFR5", "target": "DEC_DELETION", "label": "drives", "properties": {"quote": "Standard Compliance \u2192 GDPR data minimisation"}}, {"source": "NFR7", "target": "DEC_DELETION", "label": "drives", "properties": {"quote": "Sensitive \u2192 multi-store deletion with audit trail"}}, {"source": "RES_CB1", "target": "TECH_ZOOM", "label": "constrains", "properties": {"quote": "Per-session consent gate before Zoom recording activates"}}, {"source": "LTM_SEC", "target": "TECH_KEYCLOAK", "label": "recommends", "properties": {"quote": "KeyCloak for centralised IAM with MFA, RBAC, JWT"}}, {"source": "NFR2", "target": "TECH_KEYCLOAK", "label": "drives", "properties": {"quote": "Business Grade security \u2192 centralised IAM with MFA capability"}}, {"source": "PP3", "target": "TECH_KEYCLOAK", "label": "drives", "properties": {"quote": "Multi-Sided Platform \u2192 strict RBAC for 3 personas"}}, {"source": "LTM_VERCEL", "target": "TECH_NEXTJS", "label": "recommends", "properties": {"quote": "Native Next.js deployment with CDN, preview deploys"}}, {"source": "LTM_VERCEL", "target": "ANTI_VERCEL_BE", "label": "warns", "properties": {"quote": "Avoid for backend-heavy: long-running processes, workers, cron jobs"}}, {"source": "LTM_CONT", "target": "TECH_ECS", "label": "recommends", "properties": {"quote": "ECS Fargate removes EC2 management \u2014 pay per task, auto-scaling, IAM task roles"}}, {"source": "LTM_CONT", "target": "ANTI_K8S", "label": "warns", "properties": {"quote": "Kubernetes anti-pattern for teams <5 engineers on MVP budgets"}}, {"source": "CON_BUDGET", "target": "TECH_ECS", "label": "constrains", "properties": {"quote": "EUR125K budget \u2192 no K8s operational overhead"}}, {"source": "CON_BUDGET", "target": "DEC_MANAGED", "label": "constrains", "properties": {"quote": "Small team cannot sustain self-managed infrastructure"}}, {"source": "ANTI_VERCEL_BE", "target": "TECH_ECS", "label": "alternative_to", "properties": {"quote": "Backend needs persistent processes \u2192 ECS Fargate"}}, {"source": "LTM_AWS", "target": "TECH_APIGW", "label": "recommends", "properties": {"quote": "AWS API Gateway pairs naturally with ECS Fargate"}}, {"source": "LTM_CICD", "target": "TECH_GHA", "label": "recommends", "properties": {"quote": "GitHub Actions: integrated with GitHub, marketplace, generous free tier"}}, {"source": "QP4", "target": "TECH_GHA", "label": "drives", "properties": {"quote": "Continuous Delivery \u2192 automated pipelines for all environments"}}, {"source": "LTM_SEC", "target": "TECH_CODEQL", "label": "recommends", "properties": {"quote": "CodeQL GitHub-native + Dependabot for QP-7 level 3"}}, {"source": "QP7", "target": "TECH_CODEQL", "label": "drives", "properties": {"quote": "SAST + Dependencies \u2192 CodeQL + secret scanning in CI"}}, {"source": "QP2", "target": "TECH_CODEQL", "label": "drives", "properties": {"quote": "Enforced Standards \u2192 ESLint + Prettier + pre-commit hooks"}}, {"source": "QP7", "target": "TECH_DEPENDABOT", "label": "drives", "properties": {"quote": "SAST + Dependencies \u2192 automated dependency vulnerability scanning"}}, {"source": "LTM_SEC", "target": "TECH_SECRETS", "label": "recommends", "properties": {"quote": "AWS Secrets Manager if AWS-hosted backend"}}, {"source": "NFR2", "target": "TECH_SECRETS", "label": "drives", "properties": {"quote": "Business Grade \u2192 no credentials in source code"}}, {"source": "LTM_OBS", "target": "TECH_CW", "label": "recommends", "properties": {"quote": "For AWS-hosted: CloudWatch + X-Ray \u2014 cloud-native, no additional infrastructure"}}, {"source": "QP5", "target": "TECH_CW", "label": "drives", "properties": {"quote": "Monitored \u2192 centralized logging, monitoring, tracing, alerting"}}, {"source": "NFR1", "target": "TECH_CW", "label": "drives", "properties": {"quote": "Balanced Risk \u2192 monitoring, alerting, incident response needed"}}, {"source": "QP4", "target": "TECH_IAC", "label": "drives", "properties": {"quote": "Continuous Delivery \u2192 reproducible environments via declarative IaC"}}, {"source": "RES_MOBILE", "target": "TECH_NEXTJS", "label": "constrains", "properties": {"quote": "Web-only MVP \u2014 no React Native, no mobile SDK decisions"}}, {"source": "RES_MOBILE", "target": "TECH_FCM", "label": "constrains", "properties": {"quote": "FCM web push only \u2014 no native mobile push in MVP"}}, {"source": "DEC_MANAGED", "target": "TECH_PG", "label": "selects", "properties": {"quote": "AWS RDS managed PostgreSQL"}}, {"source": "DEC_MANAGED", "target": "TECH_REDIS", "label": "selects", "properties": {"quote": "AWS ElastiCache managed Redis"}}, {"source": "DEC_MANAGED", "target": "TECH_CW", "label": "selects", "properties": {"quote": "CloudWatch cloud-native \u2014 no self-hosted Grafana"}}, {"source": "NFR4", "target": "DEC_MANAGED", "label": "drives", "properties": {"quote": "99.5% uptime \u2192 managed services with Multi-AZ, automated backups"}}, {"source": "TECH_REDIS", "target": "TECH_BULLMQ", "label": "enables", "properties": {"quote": "BullMQ uses Redis as backing store \u2014 no separate broker"}}, {"source": "TECH_KEYCLOAK", "target": "TECH_PASSPORT", "label": "enables", "properties": {"quote": "passport-keycloak-bearer validates JWTs against JWKS endpoint"}}, {"source": "TECH_KEYCLOAK", "target": "TECH_APIGW", "label": "enables", "properties": {"quote": "Lambda Authorizer validates JWT signatures against KeyCloak JWKS"}}]};
+
+const TYPE_COLORS = {
+  profile: '#6a8cff', ltm: '#ffb347', resolution: '#ff6b9d',
+  constraint: '#c792ea', decision: '#82f5a8', technology: '#5bc0eb', anti_pattern: '#ff4444'
+};
+const TYPE_RADIUS = {
+  profile: 7, ltm: 9, resolution: 8, constraint: 8, decision: 14, technology: 10, anti_pattern: 6
+};
+const EDGE_COLORS = {
+  drives: '#82f5a8', selects: '#82f5a8', recommends: '#ffb347', warns: '#ff4444',
+  rejects: '#ff4444', constrains: '#c792ea', requires: '#5bc0eb', enables: '#5bc0eb',
+  'anti-pattern-avoidance': '#ffb347', alternative_to: '#5bc0eb'
+};
+const FILTER_TYPES = [
+  { key: 'profile', label: 'Profiles', color: TYPE_COLORS.profile },
+  { key: 'ltm', label: 'LTM Knowledge', color: TYPE_COLORS.ltm },
+  { key: 'resolution', label: 'Resolutions', color: TYPE_COLORS.resolution },
+  { key: 'constraint', label: 'Constraints', color: TYPE_COLORS.constraint },
+  { key: 'decision', label: 'Decisions', color: TYPE_COLORS.decision },
+  { key: 'technology', label: 'Technologies', color: TYPE_COLORS.technology },
+  { key: 'anti_pattern', label: 'Rejected', color: TYPE_COLORS.anti_pattern }
+];
+
+const activeFilters = new Set(FILTER_TYPES.map(f => f.key));
+const filtersEl = document.getElementById('filters');
+FILTER_TYPES.forEach(f => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn active';
+  btn.style.setProperty('--clr', f.color);
+  btn.textContent = f.label;
+  btn.dataset.key = f.key;
+  btn.onclick = () => {
+    if (activeFilters.has(f.key)) { activeFilters.delete(f.key); btn.classList.remove('active'); }
+    else { activeFilters.add(f.key); btn.classList.add('active'); }
+    updateVisibility();
+  };
+  filtersEl.appendChild(btn);
+});
+
+const width = window.innerWidth;
+const height = window.innerHeight;
+const nodeMap = {};
+GRAPH_DATA.nodes.forEach(n => nodeMap[n.id] = n);
+
+const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+svg.setAttribute('width', width);
+svg.setAttribute('height', height);
+document.body.appendChild(svg);
+
+const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+svg.appendChild(defs);
+const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+marker.setAttribute('id', 'arrow');
+marker.setAttribute('viewBox', '0 -4 8 8');
+marker.setAttribute('refX', 20);
+marker.setAttribute('markerWidth', 6);
+marker.setAttribute('markerHeight', 6);
+marker.setAttribute('orient', 'auto');
+const markerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+markerPath.setAttribute('d', 'M0,-4L8,0L0,4');
+markerPath.setAttribute('fill', '#555');
+marker.appendChild(markerPath);
+defs.appendChild(marker);
+
+const gMain = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+svg.appendChild(gMain);
+const gLinks = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+const gNodes = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+gMain.appendChild(gLinks);
+gMain.appendChild(gNodes);
+
+let transform = { x: 0, y: 0, k: 1 };
+let dragging = false, dragStart = null, panStart = null;
+let dragNode = null;
+
+svg.addEventListener('mousedown', e => {
+  if (e.target === svg || e.target === gMain || e.target === gLinks) {
+    panStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
+  }
+});
+svg.addEventListener('mousemove', e => {
+  if (panStart && !dragNode) {
+    transform.x = e.clientX - panStart.x;
+    transform.y = e.clientY - panStart.y;
+    gMain.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.k})`);
+  }
+});
+svg.addEventListener('mouseup', () => { panStart = null; });
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const s = e.deltaY > 0 ? 0.92 : 1.08;
+  const newK = Math.max(0.15, Math.min(5, transform.k * s));
+  const mx = e.clientX, my = e.clientY;
+  transform.x = mx - (mx - transform.x) * (newK / transform.k);
+  transform.y = my - (my - transform.y) * (newK / transform.k);
+  transform.k = newK;
+  gMain.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.k})`);
+}, { passive: false });
+
+const nodes = GRAPH_DATA.nodes.map(n => ({
+  ...n, x: width/2 + (Math.random()-0.5)*600, y: height/2 + (Math.random()-0.5)*400,
+  vx: 0, vy: 0, r: TYPE_RADIUS[n.type] || 8
+}));
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+const links = GRAPH_DATA.edges.filter(e => nodeById[e.source] && nodeById[e.target]).map(e => ({
+  ...e, sourceNode: nodeById[e.source], targetNode: nodeById[e.target]
+}));
+
+const linkEls = [];
+links.forEach(l => {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.classList.add('link');
+  line.setAttribute('stroke', EDGE_COLORS[l.label] || '#555');
+  line.setAttribute('marker-end', 'url(#arrow)');
+  line.dataset.source = l.source;
+  line.dataset.target = l.target;
+  line.dataset.label = l.label;
+  gLinks.appendChild(line);
+  l.el = line;
+  linkEls.push(l);
+});
+
+const nodeEls = [];
+nodes.forEach(n => {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.classList.add('node');
+  g.dataset.id = n.id;
+  g.dataset.type = n.type;
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('r', n.r);
+  circle.setAttribute('fill', TYPE_COLORS[n.type] || '#888');
+  circle.setAttribute('stroke', TYPE_COLORS[n.type] || '#888');
+  circle.setAttribute('fill-opacity', n.type === 'decision' ? 0.25 : 0.15);
+  circle.style.setProperty('--glow', TYPE_COLORS[n.type]);
+  g.appendChild(circle);
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('dx', n.r + 4);
+  text.setAttribute('dy', 3);
+  const shortLabel = n.label.length > 35 ? n.label.substring(0, 33) + '...' : n.label;
+  text.textContent = shortLabel;
+  text.setAttribute('font-size', n.type === 'decision' ? '10px' : '8px');
+  text.setAttribute('fill', n.type === 'decision' ? '#fff' : '#aaa');
+  g.appendChild(text);
+  gNodes.appendChild(g);
+  n.el = g;
+  n.circleEl = circle;
+  nodeEls.push(n);
+
+  let ndx = 0, ndy = 0;
+  g.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    dragNode = n;
+    n.fx = n.x; n.fy = n.y;
+    ndx = n.x - (e.clientX - transform.x) / transform.k;
+    ndy = n.y - (e.clientY - transform.y) / transform.k;
+  });
+  svg.addEventListener('mousemove', e => {
+    if (dragNode === n) {
+      n.fx = (e.clientX - transform.x) / transform.k + ndx;
+      n.fy = (e.clientY - transform.y) / transform.k + ndy;
+      n.x = n.fx; n.y = n.fy;
+    }
+  });
+  svg.addEventListener('mouseup', () => {
+    if (dragNode === n) { delete n.fx; delete n.fy; dragNode = null; }
+  });
+
+  g.addEventListener('mouseenter', e => {
+    highlightConnected(n.id);
+    const tt = document.getElementById('tooltip');
+    let html = `<div class="tt-label">${n.label}</div>`;
+    html += `<div class="tt-type">${n.type} ${n.group ? '/ ' + n.group : ''}</div>`;
+    if (n.properties) {
+      const p = n.properties;
+      if (p.level !== undefined) html += `<div class="tt-body">Level: ${p.level} — ${p.label_text || ''}</div>`;
+      if (p.path) html += `<div class="tt-body">${p.path}</div>`;
+      if (p.resolution) html += `<div class="tt-body">${p.resolution}</div>`;
+      if (p.reason) html += `<div class="tt-body">${p.reason}</div>`;
+      if (p.alternatives_rejected) html += `<div class="tt-body">Rejected: ${p.alternatives_rejected.join(', ')}</div>`;
+    }
+    const connected = links.filter(l => l.source === n.id || l.target === n.id);
+    if (connected.length > 0) {
+      html += `<div class="tt-body" style="margin-top:6px;color:#888">${connected.length} connection${connected.length>1?'s':''}</div>`;
+      const quotes = connected.filter(l => l.properties && l.properties.quote).slice(0, 2);
+      quotes.forEach(l => { html += `<div class="tt-quote">"${l.properties.quote}"</div>`; });
+    }
+    tt.innerHTML = html;
+    tt.style.opacity = 1;
+    tt.style.left = Math.min(e.clientX + 16, width - 400) + 'px';
+    tt.style.top = Math.min(e.clientY + 16, height - 200) + 'px';
+  });
+  g.addEventListener('mouseleave', () => {
+    clearHighlight();
+    document.getElementById('tooltip').style.opacity = 0;
+  });
+});
+
+function highlightConnected(nodeId) {
+  const connNodes = new Set([nodeId]);
+  links.forEach(l => {
+    if (l.source === nodeId) connNodes.add(l.target);
+    if (l.target === nodeId) connNodes.add(l.source);
+  });
+  nodes.forEach(n => {
+    n.el.classList.toggle('dimmed', !connNodes.has(n.id));
+    n.el.classList.toggle('highlighted', connNodes.has(n.id));
+  });
+  linkEls.forEach(l => {
+    const conn = l.source === nodeId || l.target === nodeId;
+    l.el.classList.toggle('dimmed', !conn);
+    l.el.classList.toggle('highlighted', conn);
+  });
+}
+function clearHighlight() {
+  nodes.forEach(n => { n.el.classList.remove('dimmed', 'highlighted'); });
+  linkEls.forEach(l => { l.el.classList.remove('dimmed', 'highlighted'); });
+}
+
+function updateVisibility() {
+  nodes.forEach(n => { n.el.style.display = activeFilters.has(n.type) ? '' : 'none'; });
+  linkEls.forEach(l => {
+    const sn = nodeById[l.source], tn = nodeById[l.target];
+    l.el.style.display = (activeFilters.has(sn.type) && activeFilters.has(tn.type)) ? '' : 'none';
+  });
+}
+
+// force simulation
+const alpha = { value: 1, decay: 0.0015, min: 0.001 };
+const centerX = width / 2, centerY = height / 2;
+
+function tick() {
+  if (alpha.value < alpha.min) { requestAnimationFrame(tick); return; }
+  alpha.value *= (1 - alpha.decay);
+
+  // center gravity
+  nodes.forEach(n => {
+    if (n.fx !== undefined) { n.x = n.fx; n.y = n.fy; return; }
+    n.vx += (centerX - n.x) * 0.0003;
+    n.vy += (centerY - n.y) * 0.0003;
+  });
+
+  // group clustering
+  const groupCenters = {};
+  const groupMap = { product_profile: {x:-250,y:-180}, nfr_profile: {x:-250,y:0}, quality_profile: {x:-250,y:180},
+    ltm_patterns: {x:250,y:-250}, ltm_stacks: {x:350,y:-120}, ltm_data: {x:350,y:40}, ltm_platforms: {x:350,y:160}, ltm_operations: {x:350,y:280},
+    pre_lock: {x:-100,y:300}, constraints: {x:-100,y:-300},
+    architecture_pattern: {x:0,y:-60}, language: {x:-50,y:0}, api_design: {x:50,y:0}, messaging: {x:0,y:60}, business_logic: {x:-50,y:60}, compliance: {x:50,y:60}, infrastructure: {x:0,y:120}, payments: {x:50,y:120},
+    frontend: {x:150,y:-180}, backend: {x:0,y:0}, data: {x:0,y:180}, platform: {x:150,y:180}, operations: {x:-150,y:180}, rejected: {x:200,y:300}
+  };
+  nodes.forEach(n => {
+    if (n.fx !== undefined) return;
+    const gc = groupMap[n.group];
+    if (gc) {
+      n.vx += (centerX + gc.x - n.x) * 0.003;
+      n.vy += (centerY + gc.y - n.y) * 0.003;
+    }
+  });
+
+  // link spring
+  links.forEach(l => {
+    const s = l.sourceNode, t = l.targetNode;
+    const dx = t.x - s.x, dy = t.y - s.y;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const ideal = 100;
+    const f = (dist - ideal) * 0.0008;
+    const fx = dx / dist * f, fy = dy / dist * f;
+    if (s.fx === undefined) { s.vx += fx; s.vy += fy; }
+    if (t.fx === undefined) { t.vx -= fx; t.vy -= fy; }
+  });
+
+  // repulsion
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i], b = nodes[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist2 = dx*dx + dy*dy || 1;
+      if (dist2 > 90000) continue;
+      const f = 800 / dist2;
+      const fx = dx * f, fy = dy * f;
+      if (a.fx === undefined) { a.vx -= fx; a.vy -= fy; }
+      if (b.fx === undefined) { b.vx += fx; b.vy += fy; }
+    }
+  }
+
+  // integrate
+  nodes.forEach(n => {
+    if (n.fx !== undefined) return;
+    n.vx *= 0.85; n.vy *= 0.85;
+    n.x += n.vx; n.y += n.vy;
+  });
+
+  // render
+  nodes.forEach(n => {
+    n.el.setAttribute('transform', `translate(${n.x},${n.y})`);
+  });
+  linkEls.forEach(l => {
+    const s = l.sourceNode, t = l.targetNode;
+    l.el.setAttribute('x1', s.x); l.el.setAttribute('y1', s.y);
+    l.el.setAttribute('x2', t.x); l.el.setAttribute('y2', t.y);
+  });
+
+  requestAnimationFrame(tick);
+}
+
+// kick alpha on interaction
+svg.addEventListener('mousedown', () => { alpha.value = Math.max(alpha.value, 0.3); });
+
+document.getElementById('stats').innerHTML = `${nodes.length} nodes &middot; ${links.length} edges`;
+transform.x = 0; transform.y = 0; transform.k = 1;
+gMain.setAttribute('transform', `translate(0,0) scale(1)`);
+tick();
+</script>
+</body>
+</html>

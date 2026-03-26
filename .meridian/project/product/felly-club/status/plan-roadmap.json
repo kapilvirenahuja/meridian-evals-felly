@@ -13,6 +13,6 @@
     "pre-lock-resolution": { "status": "completed", "completed_at": "2026-03-26T14:00:00+0530" },
     "produce-roadmap": { "status": "completed", "completed_at": "2026-03-26T14:10:00+0530" },
     "validate-roadmap": { "status": "completed", "completed_at": "2026-03-26T14:15:00+0530" },
-    "report": { "status": "in_progress", "started_at": "2026-03-26T14:15:00+0530" }
+    "report": { "status": "completed", "completed_at": "2026-03-26T14:18:00+0530" }
   }
 }

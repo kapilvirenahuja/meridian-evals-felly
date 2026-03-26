@@ -1,0 +1,19 @@
+{
+  "recipe": "prepare-architecture",
+  "slug": "felly-club",
+  "started_at": "2026-03-26T14:20:00+0530",
+  "product_yaml_path": ".meridian/project/product/felly-club/product.yaml",
+  "tasks": {
+    "read-context": { "status": "completed", "completed_at": "2026-03-26T14:20:00+0530" },
+    "scan-codebase-ltm": { "status": "completed", "completed_at": "2026-03-26T14:45:00+0530" },
+    "draft-architecture": { "status": "completed", "completed_at": "2026-03-26T14:30:00+0530" },
+    "draft-quality-standards": { "status": "completed", "completed_at": "2026-03-26T14:35:00+0530" },
+    "generate-brief": { "status": "completed", "completed_at": "2026-03-26T14:40:00+0530" },
+    "brief-review": { "status": "in_progress", "started_at": "2026-03-26T14:40:00+0530" },
+    "pre-lock-resolution": { "status": "pending" },
+    "validate-architecture": { "status": "pending" },
+    "lock": { "status": "pending" },
+    "scenario-evals": { "status": "pending" },
+    "evidence-report": { "status": "pending" }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "slug": "felly-club",
+  "status": "DRAFT",
+  "generated_at": "2026-03-26T14:45:00+0530",
+  "dimensions": {
+    "Testing (QP-1)": {
+      "level": 3,
+      "label": "Layered Testing",
+      "strategy": "Layered testing with unit tests for all business logic, integration tests for NestJS module interactions and API controllers, and e2e tests for the critical user journeys: session booking-to-payment flow, mentor discovery, admin dispute resolution, and GDPR deletion. CI runs unit and integration tests on every PR. E2e tests run against the staging environment post-deploy. Code coverage tracked via Jest built-in reporter with an 80% target for PaymentModule, SessionModule, and ComplianceModule, and a 70% overall project target.",
+      "frameworks": ["Jest 29.x — unit and integration tests for all NestJS backend modules", "React Testing Library 14.x — unit tests for Next.js React components (mentee web app, admin portal)", "Playwright 1.4x — e2e browser automation for critical mentee and admin flows", "Supertest 6.x — HTTP-level integration tests for NestJS controller and guard layers"],
+      "coverage_target": "70% overall; 80% for PaymentModule, SessionModule, and ComplianceModule",
+      "test_types": ["unit", "integration", "e2e"],
+      "automation": "GitHub Actions pipeline runs Jest unit and integration tests on every PR as a required status check — PR merge is blocked on test failure. Playwright e2e tests run against the staging environment post-deploy. Jest coverage report generated with --coverage flag; jest-coverage-comment action posts a coverage diff summary on each PR. Coverage thresholds enforced in jest.config.ts — build fails if global threshold or module-level threshold is breached."
+    },
+    "Code Quality (QP-2)": {
+      "level": 3,
+      "label": "Enforced Standards",
+      "linter": "ESLint 9.x with @typescript-eslint/eslint-plugin (strict mode). Active rules: @typescript-eslint/no-explicit-any (error), @typescript-eslint/no-unused-vars (error), no-console (warn — replaced by Pino logger), prefer-const (error), eqeqeq (error), import/no-cycle (error — enforces NestJS module boundary discipline). Husky pre-commit hook runs lint-staged (eslint --fix on staged TypeScript files) before every commit.",
+      "formatter": "Prettier 3.x enforced across all TypeScript, JSON, and YAML files via .prettierrc: printWidth 100, singleQuote true, trailingComma es5, semi true, tabWidth 2, arrowParens always. Husky pre-commit hook runs lint-staged (prettier --write on staged files). Formatting diff check runs in CI (prettier --check) — PR merge blocked if formatting violations found.",
+      "static_analysis": "CodeQL (GitHub Advanced Security) — JavaScript/TypeScript security query suite runs on every PR and main branch push. Results surfaced in GitHub Security tab. Critical and high severity CodeQL findings block PR merge. Medium severity findings require manual dismissal with written justification before merge.",
+      "review_process": "Minimum 1 reviewer required for all PRs. Minimum 2 reviewers required for changes to PaymentModule, ComplianceModule, AuthModule, and any database migration file. PR review checklist: (1) tests added/updated, (2) OpenAPI decorators added for new endpoints, (3) no hardcoded secrets, (4) error handling complete, (5) audit log entry for financial operations, (6) GDPR-sensitive fields redacted from Pino logger, (7) Prisma migration file reviewed for irreversibility.",
+      "conventions": "NestJS module boundaries enforced — no cross-module direct Prisma imports; use injected service classes only. Prisma transactions required for all writes spanning multiple tables. DTOs required for all API request and response shapes. No raw SQL queries — Prisma ORM only (Prisma.$queryRaw permitted only for analytics read-only queries with explicit review). Financial amounts stored as integer cents (no floating point) in PostgreSQL.",
+      "design_patterns": ["Repository pattern via Prisma service injection — no direct PrismaClient in controllers or resolvers", "Factory pattern for XState session state machine instantiation in SessionModule", "Strategy pattern for Stripe currency routing — CurrencyRouter service selects Stripe India vs Stripe Global client", "Observer / event-driven pattern via BullMQ — service methods enqueue jobs; workers handle side effects asynchronously", "DTO validation via class-validator decorators on all NestJS controller request inputs (ValidationPipe globally applied)", "Saga pattern for GDPR DeletionOrchestrator — each deletion step recorded in deletion_log before execution; idempotent retry"]
+    },
+    "Documentation (QP-3)": {
+      "level": 3,
+      "label": "Comprehensive",
+      "api_docs": "OpenAPI 3.1 specification auto-generated via @nestjs/swagger decorators on all NestJS controllers. Every endpoint annotated with @ApiOperation (summary + description), @ApiResponse (all response codes), @ApiBody (request DTO schema), and @ApiBearerAuth (authenticated endpoints). Swagger UI served at /api/docs in dev and staging environments (disabled in production). API spec exported as openapi.json during GitHub Actions CI build.",
+      "architecture_docs": "Architecture Decision Records (ADRs) in docs/adr/ using Michael Nygard template: Context, Decision, Status, Consequences. ADR required for: any technology selection, database schema design decision, significant refactoring, and any departure from the architecture.yaml patterns. System context diagram (C4 Level 1) and container diagram (C4 Level 2) maintained in docs/architecture/ as Mermaid diagrams.",
+      "runbooks": "Operational runbooks in docs/runbooks/ required: (1) database-migration-rollback.md, (2) stripe-webhook-reprocessing.md, (3) bullmq-dead-letter-queue.md, (4) keycloak-account-compromise.md, (5) gdpr-deletion-request.md, (6) recording-emergency-deletion.md, (7) ecs-task-scaling.md.",
+      "onboarding": "Developer onboarding guide in docs/onboarding.md covering: (1) Local development via Docker Compose, (2) Environment variable configuration, (3) NestJS module structure and dependency injection conventions, (4) Prisma workflow, (5) KeyCloak realm import for local auth, (6) Stripe test mode configuration, (7) Feature branch workflow. Target: new developer running full local stack and submitting first PR within 1 day."
+    },
+    "CI/CD (QP-4)": {
+      "level": 3,
+      "label": "Continuous Delivery",
+      "pipeline": "GitHub Actions — multi-stage pipeline: lint (ESLint + Prettier check) → typecheck (tsc --noEmit) → test (Jest unit + integration, coverage threshold enforced) → security (CodeQL analysis, npm audit --audit-level=high) → build (Docker image build and push to Amazon ECR) → deploy (ECS service update). Each stage is a separate GitHub Actions job with explicit dependencies.",
+      "environments": ["dev — deploys automatically on every PR merge to main branch; uses AWS dev infrastructure (separate RDS and ECS cluster); Vercel preview deployments auto-created for each PR branch", "staging — deploys automatically on git tag push matching v* pattern; used for QA, integration testing, and client demos; Playwright e2e suite runs post-deploy", "production — deploys via manual approval gate in GitHub Actions environment protection rules; requires sign-off from engineering lead; deployment notifications sent to Slack"],
+      "deployment_strategy": "Backend-api and background-workers: blue-green deployment via ECS service update with minimum healthy percent 100% and maximum percent 200%. Database migrations (Prisma migrate deploy) run as an ECS task override (one-off task) before the service update starts — migrations must be backward-compatible with the running old version. Frontends (mentee-web-app and admin-portal): Vercel atomic deployments — instant switch with instant rollback.",
+      "infrastructure_as_code": "AWS CloudFormation — declarative stacks for: VPC and networking, ECS clusters and services, RDS PostgreSQL instances, ElastiCache Redis, OpenSearch Service, S3 buckets and lifecycle policies, API Gateway HTTP API and Lambda Authorizer, IAM roles and policies, CloudWatch Alarms, and SNS topics. IaC stored in infra/cloudformation/ directory with one stack per service group."
+    },
+    "Observability (QP-5)": {
+      "level": 3,
+      "label": "Monitored",
+      "logging": "Structured JSON logging via Pino 9.x integrated into NestJS via nestjs-pino (pino-http middleware). All log entries include: timestamp, level, service (NestJS module name), requestId (UUID correlation ID), userId (JWT sub claim — hashed for PII compliance), sessionId, duration_ms, status_code, and error. GDPR-sensitive fields (email, name, phone, IP address) redacted via Pino redactPaths. Financial operation logs tagged with financial:true for 7-year retention. Log level: ERROR and WARN always shipped; INFO in production; DEBUG in dev and staging only.",
+      "monitoring": "AWS CloudWatch Metrics dashboards for: (1) API Health Dashboard — API Gateway request count, p50/p95/p99 latency per endpoint, 4xx rate, 5xx rate, ECS task CPU and memory. (2) Session Operations Dashboard — session_created_count, session_completed_count, session_cancelled_count, session_disputed_count. (3) Payment Operations Dashboard — payment_success_count and payment_failure_count per currency (INR, USD, CHF, EUR), payout_processed_count, refund_processed_count, Stripe webhook delivery failure rate. (4) Infrastructure Dashboard — RDS DatabaseConnections, ElastiCache CacheHitRate, OpenSearch ClusterStatus, BullMQ queue depth.",
+      "alerting": "AWS CloudWatch Alarms → SNS topic → PagerDuty on-call escalation for: (1) API Gateway p95 latency > 500ms sustained 5 consecutive minutes, (2) 5xx error rate > 1% over 5-minute window, (3) RDS CPU utilization > 80% for 10 consecutive minutes, (4) ECS backend-api running task count below minimum (2), (5) BullMQ failed job count > 10 in any 10-minute window, (6) KeyCloak ECS task count below 2, (7) PAYMENT_FAILURE severity ERROR (immediate alert), (8) OpenSearch cluster status yellow or red.",
+      "tracing": "AWS X-Ray distributed tracing for full request path: API Gateway → NestJS backend-api → RDS/ElastiCache/OpenSearch/S3/Stripe/Zoom external calls. aws-xray-sdk-node integrated into NestJS via a global HTTP interceptor. Sampling rules: 5% of normal traffic sampled; 100% of requests resulting in 5xx errors sampled."
+    },
+    "Accessibility (QP-6)": {
+      "level": 2,
+      "label": "Basic",
+      "standard": "none — no WCAG compliance target in MVP; browser and mobile version compatibility only",
+      "testing": "No automated accessibility CI testing at QP-2 level. Manual verification checklist applied during PR review for UI changes: (1) Semantic HTML structure, (2) Alt text for mentor profile images, (3) Form inputs have associated labels, (4) Keyboard navigation functional for primary booking flow, (5) Color contrast for primary text on background. shadcn/ui components (Dialog, DropdownMenu, Select, Popover) are built on Radix UI primitives which provide ARIA roles, keyboard interaction, and focus trapping by default.",
+      "audit_cadence": "none"
+    },
+    "Security Testing (QP-7)": {
+      "level": 3,
+      "label": "SAST + Dependencies",
+      "dependency_scanning": "GitHub Dependabot configured for npm across all packages (mentee-web-app, admin-portal, backend-api, background-workers). Security advisory PRs generated immediately on CVE publication. Engineering team SLA: security PRs reviewed and merged within 48 hours of creation; critical CVEs within 24 hours. npm audit run in GitHub Actions CI pipeline on every PR — build fails on high or critical severity vulnerabilities (--audit-level=high flag).",
+      "sast": "CodeQL (GitHub Advanced Security) with the JavaScript/TypeScript security-extended query suite. Runs on every PR and on main branch push. Critical and high severity findings block PR merge (required status check configured in branch protection rules). Medium severity findings require the PR author to add a written dismissal justification before merge.",
+      "dast": null,
+      "pen_testing": "none",
+      "secret_scanning": "GitHub Secret Scanning (Advanced Security) enabled for all repositories — detects committed API keys, Stripe keys, Zoom credentials, SendGrid API keys, Firebase service account JSON, and AWS credentials. Alerts route to repository admins with immediate remediation required (rotate and revoke the leaked secret within 4 hours). Pre-commit hooks via Husky run detect-secrets on every commit. Stripe and Zoom API key rotation target: 90 days."
+    }
+  },
+  "debt_baseline": [
+    {
+      "area": "QP-1 Testing",
+      "current_state": "Not yet measured",
+      "target_state": "Level 3 (Layered Testing) — 70% overall coverage, 80% for PaymentModule/SessionModule/ComplianceModule",
+      "gap": "Pending implementation"
+    },
+    {
+      "area": "QP-2 Code Quality",
+      "current_state": "Not yet measured",
+      "target_state": "Level 3 (Enforced Standards) — ESLint + Prettier + CodeQL + PR review checklist",
+      "gap": "Pending implementation"
+    },
+    {
+      "area": "QP-3 Documentation",
+      "current_state": "Not yet measured",
+      "target_state": "Level 3 (Comprehensive) — OpenAPI specs, ADRs, 7 runbooks, onboarding guide",
+      "gap": "Pending implementation"
+    },
+    {
+      "area": "QP-4 CI/CD",
+      "current_state": "Not yet measured",
+      "target_state": "Level 3 (Continuous Delivery) — GitHub Actions multi-stage pipeline, 3 environments",
+      "gap": "Pending implementation"
+    },
+    {
+      "area": "QP-5 Observability",
+      "current_state": "Not yet measured",
+      "target_state": "Level 3 (Monitored) — CloudWatch dashboards, PagerDuty alerting, X-Ray tracing",
+      "gap": "Pending implementation"
+    },
+    {
+      "area": "QP-6 Accessibility",
+      "current_state": "Not yet measured",
+      "target_state": "Level 2 (Basic) — Semantic HTML, keyboard navigation, shadcn/ui ARIA",
+      "gap": "Pending implementation"
+    },
+    {
+      "area": "QP-7 Security Testing",
+      "current_state": "Not yet measured",
+      "target_state": "Level 3 (SAST + Dependencies) — CodeQL + Dependabot + secret scanning",
+      "gap": "Pending implementation"
+    }
+  ]
+}
