@@ -1,0 +1,1480 @@
+ 
+ 
+ 
+ 
+FELLY CLUB
+Mentorship Platform
+Business Requirements Document
+Document Version
+v1.1
+Date
+February 2026
+Prepared by
+Nagarro
+Prepared for
+Felly Club
+Status
+Draft – For Review (Includes Gap Analysis)
+Confidentiality
+Confidential & Proprietary
+ 
+ 
+CONFIDENTIAL — Any use of this material without specific permission of Nagarro is strictly prohibited.
+
+1. Executive Summary
+Felly Club is a curated, tech-enabled mentorship marketplace designed to connect ambitious individuals (mentees) with accomplished, domain-verified mentors across Sport, Entrepreneurship, Business, and Entertainment. The platform enables mentees to discover, book, and attend one-on-one video mentorship sessions, while giving mentors a structured channel to monetize their expertise.
+Nagarro has been engaged to design and deliver the end-to-end digital platform — web application, mobile application, and administration portal — under a fixed-price engagement of €125,000. Delivery follows an agile model across eight sprints (approximately 16 weeks).
+ 
+Key Metrics at a Glance
+Parameter
+Detail
+Project Name
+Felly Club – Mentorship Platform
+Engagement Model
+Fixed Price | Agile Delivery (8 Sprints)
+Delivery Partner
+Nagarro
+Timeline
+~16 Weeks (W1–W16)
+Project Cost
+€ 125,000 (exclusive of taxes)
+MVP Delivery Channels
+Web App (Next.js), iOS & Android (React Native), Admin Portal
+Target Geographies
+India, Switzerland, USA, Germany
+Core User Personas
+Mentee, Mentor, Platform Admin
+Primary Expertise Categories
+Sport, Entrepreneurship, Business, Entertainment
+Supported Session Durations
+30 minutes / 60 minutes
+Platform Commission
+10–20% per transaction
+ 
+
+2. Business Context & Problem Statement
+2.1 Vision
+"To establish Felly Club as the premier tech-enabled mentorship ecosystem, empowering individuals to connect with accomplished mentors, gain personalized guidance, and accelerate progress in their chosen fields. By leveraging advanced analytics and fostering trust, the platform delivers meaningful mentor–mentee experiences and builds a scalable community that supports long-term personal and professional growth."
+Share  |  Connect  |  Grow
+2.2 Problem Statement
+The global mentorship landscape is fragmented and opaque. Aspiring individuals struggle to identify credible, accessible mentors, while accomplished professionals lack a structured, trustworthy channel to offer guidance. Key pain points include:
+	•	No standardised discovery mechanism for domain-specific mentors
+	•	Absence of transparent pricing, availability, and quality indicators
+	•	High friction in scheduling, payment, and session delivery
+	•	Limited accountability and dispute resolution mechanisms
+	•	No data-driven insights for either mentors or mentees
+ 
+2.3 Business Objectives
+#
+Objective
+Success Metric
+BO-01
+Build a trusted, curated mentor marketplace
+Admin-verified mentor profiles; verified badge on listings
+BO-02
+Deliver seamless session booking & delivery
+End-to-end booking-to-video-call workflow within platform
+BO-03
+Establish transparent and fair pricing
+Mentor pricing within platform-defined min/max bands; 10–20% commission
+BO-04
+Ensure platform trust and quality assurance
+Ratings < 3★ auto-flagged; dispute resolution via session recordings
+BO-05
+Drive mentee acquisition through referrals
+Referral program with rewards upon referred mentee completing first session
+BO-06
+Enable platform financial operations
+Automated payment capture, escrow, payout, and refund processing
+BO-07
+Provide actionable analytics to all user types
+Dashboards for mentor earnings, mentee activity, and admin KPIs
+BO-08
+Ensure regulatory and security compliance
+GDPR (EU), TPDP (India), PCI DSS compliance in MVP
+ 
+
+3. Stakeholders
+3.1 Internal Stakeholders (Felly Club)
+Role
+Responsibility
+Involvement
+Project Sponsor
+Strategic ownership, final approvals, funding
+High
+Product Manager
+Requirements ownership, backlog prioritisation, UAT sign-off
+High
+Platform Admin
+Day-to-day operations — mentor onboarding, content, disputes, payouts
+High
+ 
+3.2 External Stakeholders
+Persona
+Description
+Primary Interaction
+Mentee
+Individuals seeking guidance in Sport, Entrepreneurship, Business, or Entertainment
+Discover mentors, book & attend sessions, pay, review
+Mentor
+Accomplished professionals onboarded by admin with verified expertise
+Manage availability, accept requests, conduct sessions, receive payouts
+ 
+3.3 Delivery Team (Nagarro)
+Role
+Responsibility
+Delivery Manager
+Project governance, risk management, stakeholder communication
+Product Manager
+Requirements elaboration, sprint planning, backlog management
+Visual Designer
+UX/UI design, prototypes, design system
+Frontend Developers
+Web app (Next.js / React), React Native mobile app
+Backend Developers
+Node.js services, API layer, integrations
+Quality Analyst
+Test planning, functional & regression testing, UAT support
+DevOps Engineer
+CI/CD, containerisation, cloud infrastructure, monitoring
+ 
+
+4. Scope
+4.1 In Scope – MVP (Phase 1)
+The following functional areas are included in the MVP delivery:
+Epic
+Summary
+User Registration, Authentication & Profile Management
+Mentee self-registration; admin-driven mentor onboarding; admin user management; social & email login
+Mentor Discovery & Marketplace Navigation
+Mentor listing/browsing, advanced search & filtering, detailed profile view, rule-based personalised recommendations
+Session Request & Scheduling Management
+Full session request workflow, mentor acceptance/decline, slot selection, reminders, session execution via video
+Payment Processing & Revenue Management
+PayU integration (⚠ payment provider to be confirmed — see Gap Analysis), escrow, commission, refund, mentor payout & earnings management
+Quality Assurance & Trust Framework
+Ratings & reviews, dispute resolution with session recordings, quality monitoring, mentor verification, abuse reporting
+Business Intelligence & Performance Analytics
+Mentor performance dashboard, mentee activity dashboard, platform-level analytics & reporting
+Administrative Controls & Platform Operations
+Full admin portal: user, mentor, mentee, session, financial, and content management
+User Communication & Engagement
+Email (Twilio SendGrid) and in-app notification centre (SMS deferred to Phase 2 — marked MVP Phase = No in source)
+User Acquisition & Retention
+Referral programme with incentives, post-session engagement prompts
+Video Conferencing & Session Infrastructure
+Zoom/Google Meet integration, session recording (3-day retention), virtual session room
+Regulatory Compliance & Data Security
+GDPR, TPDP, PCI DSS, platform security
+System Configuration & Content Management
+Platform configuration (commission, pricing bands, cancellation policy), communication templates, help centre
+ 
+4.2 Out of Scope – MVP (Deferred to Phase 2)
+Feature Area
+Notes
+AI/ML Mentor Recommendations
+MVP uses simple rule-based matching; AI engine deferred
+Mentor Self-Registration Portal
+Admin-driven onboarding only in MVP
+Native iOS & Android Apps
+Delivered in Phase 2; MVP targets responsive web + React Native via Vercel
+In-Platform Messaging
+Email and in-app notifications only in MVP; chat deferred
+Bundle / Package Sessions
+Single session booking only in MVP
+Long-Term Mentorship Programs
+Workflow to be defined post-MVP
+Subscription & Membership Tiers
+Pay-per-session model only in MVP
+Corporate / Enterprise Accounts
+B2B offering deferred
+Group Mentoring Sessions
+One-on-one sessions only in MVP
+Community Forums
+Peer networking features deferred
+Advanced Support Ticket System / Live Chat
+FAQ/help centre only in MVP
+Multi-Language Support
+English-only in MVP
+Admin Mobile Access
+Admin portal is web-only
+Complex Referral Tiers
+Simple referral (flat reward) in MVP
+SMS Communication
+Optional/deferred in MVP
+Session Recording Playback for Users
+Recording stored for dispute resolution (admin-only access); user playback deferred
+ 
+
+5. Functional Requirements
+The following section details all MVP functional requirements organised by Epic. Each feature includes the target persona, a functional description, and key business rules embedded within the acceptance criteria.
+ 
+5.1  User Registration, Authentication & Profile Management
+Feature
+Persona
+Functional Description
+Mentee Registration & Profile Setup
+Mentee
+Email/social login, profile creation (interests, goals, expertise areas sought), profile picture upload, bio, email verification.
+Mentee Login & Account Management
+Mentee
+Standard & social login (Google, LinkedIn), forgot/reset password, session management, account settings.
+Mentor Onboarding (Admin-Driven)
+Admin
+Admin portal for mentor setup: profile creation, credentials, expertise categories, pricing within bands, availability calendar, bio, profile picture, introduction video.
+Mentor Login & Account Management
+Mentor
+Login with admin-provided credentials, password change, profile editing, availability management, pricing updates, session preferences.
+Admin User Management
+Admin
+Admin login/authentication, admin user creation, role assignment, password management, access control.
+ 
+5.2  Mentor Discovery & Marketplace Navigation
+Feature
+Persona
+Functional Description
+Mentor Listing & Browsing
+Mentee
+Display all verified mentors in grid/list view with mentor card (name, expertise, rating, price, response time), pagination/infinite scroll.
+Advanced Search & Filtering
+Mentee
+Search by name, expertise, keywords; filter by category (Sport, Entrepreneurship, Business, Entertainment), price range, rating, sessions completed, response time, geography (India, Switzerland, US, Germany); sort options.
+Mentor Profile View
+Mentee
+Detailed profile: bio, expertise, session pricing (30/60 min), response time, total sessions, rating & reviews, availability calendar, booking CTA.
+Personalised Mentor Recommendations
+Mentee
+Rule-based matching (string match: e.g. Sport = Sports) of mentee interests with mentor expertise; displayed on mentee dashboard.
+ 
+5.3  Session Request & Scheduling Management
+Feature
+Persona
+Functional Description
+Session Request Workflow
+Mentee
+Select mentor & duration (30/60 min), choose available slots, add message, confirm price, submit. Request live for 2 weeks.
+Mentor Request Management
+Mentor
+View/accept/decline pending requests. Expiry if not responded within 1 week. Mentor shares 6 hours of slots across different days within 1 week of acceptance.
+Session Scheduling & Calendar Integration
+Mentor
+Availability calendar setup, block/unblock slots, view upcoming sessions, reschedule, time-zone management.
+Slot Selection by Mentee
+Mentee
+Mentee selects from mentor-provided slots within 3 days. Full session fee already deducted. Notification to both parties on booking.
+Session Reminders & Notifications
+Mentee | Mentor
+Email/SMS confirmation on acceptance, 24-hour and 1-hour reminders, session link delivery, post-session follow-up.
+Session Execution & Delivery
+Mentee | Mentor
+Video call link generation (Zoom/Google Meet), join session button, session timer, recording initiation, session completion confirmation.
+Cancellation & Rescheduling Policy Enforcement
+Mentee | Mentor | Admin
+<12 hours: 100% charge (no-show). 12–24 hours: 50% refund after transaction fee. >24 hours: full refund. 3+ cancellations flagged for manual review.
+ 
+5.4  Payment Processing & Revenue Management
+Feature
+Persona
+Functional Description
+Payment Gateway Integration
+Mentee
+⚠ PAYMENT PROVIDER CONFLICT: TechStack Excel specifies Stripe; PDF proposal specifies PayU; Epics file references Stripe/Razorpay. A single provider must be confirmed before development. Functional requirements: multiple payment methods (cards, UPI, wallets), multi-currency (INR, USD, CHF, EUR), PCI DSS compliance.
+Transaction Management & Payment Capture
+Mentee | Admin
+Booking/platform fee (10%) + transaction fee (2–3%) charged on request. Remaining fee deducted on mentor acceptance. Escrow until session completion, auto-release post-session.
+Pricing & Commission Management
+Admin | Mentor
+Mentor-driven pricing within platform min/max bands. Duration-based pricing. Platform commission 10–20%. Currency conversion display.
+Refund Processing & Management
+Admin | Mentee
+Full refund for mentor no-show (minus transaction fee). No refund for mentee <12h cancellation. 50% refund for 12–24h. No refund if mentee doesn't select slot within 3 days.
+Mentor Payout & Earnings Management
+Mentor | Admin
+Earnings tracking, commission deduction, payout schedule, bank account/payment method setup, payout processing & history.
+ 
+5.5  Quality Assurance & Trust Framework
+Feature
+Persona
+Functional Description
+Ratings & Review System
+Mentee | Mentor
+Post-session 1–5 star rating with written review. Displayed on mentor profiles with averages. Review moderation queue for admin.
+Dispute Resolution & Session Recording
+Admin | Mentee | Mentor
+Session recordings stored for 3 days for dispute resolution. Admin-only access. Dispute submission workflow, recording playback, resolution tracking, deletion after 3 days/resolution.
+Quality Monitoring & Account Flagging
+Admin
+Rating <3★ flagged for manual review. 3+ cancellations trigger review. Profile pause/hide/suspension. Manual review queue.
+Mentor Verification & Credibility Assurance
+Admin
+Admin verification during onboarding, verified badge, LinkedIn/portfolio validation, proof-of-expertise documentation.
+Abuse Reporting & Safety Measures
+Mentee | Mentor | Admin
+Report mentor/mentee functionality (abuse, inappropriate behaviour, fraud), admin review and investigation, action management.
+ 
+5.6  Business Intelligence & Performance Analytics
+Feature
+Persona
+Functional Description
+Mentor Performance Dashboard
+Mentor
+⚠ DESCRIPTION MISSING IN SOURCE — The feature exists in MVP scope but the source file contains no functional definition (placeholder only). Suggested content: earnings summary, sessions completed, average rating, response time, cancellation rate, payout history. REQUIRES CLIENT SIGN-OFF before development.
+Mentee Activity Dashboard
+Mentee
+Upcoming/past sessions, pending requests/payments, total spend, reviews provided, recommended mentors, payment history, favourites, quick actions.
+Platform Analytics & Reporting
+Admin
+KPIs: active mentors/mentees, sessions (completed/cancelled/upcoming), platform revenue, avg session price, user growth, volume by expertise, time-period filtering, export functionality.
+ 
+5.7  Administrative Controls & Platform Operations
+Feature
+Persona
+Functional Description
+Admin Portal Access & User Management
+Admin
+Admin login, user management, role-based access control (RBAC), admin activity logging.
+Mentor Administration & Lifecycle Management
+Admin
+View/search/filter mentors, onboarding workflow, profile edit, pause/unpause, block/unblock, analytics, credentials management. Inactive mentors (no sessions in 3 months) manually managed and hidden.
+Mentee Administration & Account Management
+Admin
+View/search/filter mentees, view profiles, pause/unpause, block/unblock, activity tracking.
+Session Administration & Oversight
+Admin
+View all sessions (upcoming/past/cancelled), search/filter, cancel/reschedule manually, session details & history.
+Financial Operations & Refund Management
+Admin
+Manual refund issuance, view payment transactions, payment status tracking, failed payment resolution, payout approvals.
+Content & Category Administration
+Admin
+Manage expertise categories (MVP: Sport, Entrepreneurship, Business, Entertainment; Phase 2: Academia), category-mentor mapping, FAQ/help content updates.
+ 
+5.8  User Communication & Engagement
+Feature
+Persona
+Functional Description
+Email Communication System
+Mentee | Mentor | Admin
+Transactional emails via SendGrid: welcome, credentials, request received/accepted/declined, confirmation, reminders (24h/1h), cancellation, payment/refund confirmations, review reminders.
+In-Application Notification Centre
+Mentee | Mentor
+Real-time notification centre with badges/counts, mark as read/unread, preferences. Covers all key lifecycle events.
+SMS Communication
+Mentee | Mentor
+⚠ OUT OF SCOPE FOR MVP — Source file explicitly marks this feature as MVP Phase = No. SMS is deferred to Phase 2. Email notifications (Twilio SendGrid) cover all transactional communication in MVP.
+ 
+5.9  User Acquisition & Retention
+Feature
+Persona
+Functional Description
+Referral Programme & Incentive Management
+Mentee
+Generate/share referral link/code, track referrals, reward on referred mentee completing first session, referral history & earnings.
+Post-Session Engagement & Retention
+Mentee | Mentor
+Post-session feedback collection, next session booking prompt, long-term relationship prompt (Phase 2 workflow TBD).
+ 
+5.10  Video Conferencing & Session Infrastructure
+Feature
+Persona
+Functional Description
+Third-Party Video Integration
+Mentee | Mentor
+Zoom/Google Meet API integration, meeting link generation, calendar event creation, join session workflow, fallback mechanisms. External screen recording blocked for privacy.
+Session Recording & Storage
+Admin | Mentee | Mentor
+Auto-recording on session start (legal/dispute purposes), secure encrypted storage, admin-only access, auto-deletion after 3 days.
+Virtual Session Room Management
+Mentee | Mentor
+Session timer, end session functionality, quality feedback, technical issue reporting, participant presence tracking.
+ 
+5.11  Regulatory Compliance & Data Security
+Feature
+Persona
+Functional Description
+Data Privacy & Protection Compliance
+Admin
+GDPR compliance (EU), TPDP compliance (India), cookie consent, privacy policy, T&C acceptance, data export, right to deletion.
+PCI DSS Compliance
+Admin
+PCI DSS-compliant payment data handling, tokenisation, fraud detection, SSL/TLS encryption.
+Platform Security & Access Control
+Admin
+Auth security, password encryption, session management, API security, rate limiting, DDoS protection, security audit logging.
+ 
+5.12  System Configuration & Content Management
+Feature
+Persona
+Functional Description
+Platform Configuration & Settings
+Admin
+Configure: commission rate (10–20%), pricing bands (min/max), session durations (30/60 min), cancellation policy, refund policy, geography settings.
+Communication Template Management
+Admin
+Email/SMS/notification template editor with versioning.
+Help Centre & Support Resources
+Mentee | Mentor | Admin
+FAQ section, help articles, contact support form. (Advanced ticket system/chat support deferred to Phase 2.)
+ 
+
+6. Non-Functional Requirements
+ID
+Category
+Requirement
+Target / Detail
+NFR-01
+Performance
+Page load time (web)
+< 3 seconds on standard broadband
+NFR-02
+Performance
+API response time
+< 500 ms for 95th percentile
+NFR-03
+Performance
+Video session latency
+Managed by Zoom/Google Meet SLAs
+NFR-04
+Scalability
+Concurrent users
+Platform must scale horizontally on Vercel / cloud infra
+NFR-05
+Availability
+Uptime target
+99.5% uptime (excluding scheduled maintenance)
+NFR-06
+Security
+Authentication
+Centralised IAM via KeyCloak; JWT-based API access
+NFR-07
+Security
+Data encryption
+AES-256 at rest; TLS 1.2+ in transit
+NFR-08
+Security
+Payment security
+PCI DSS Level 1 compliance via payment gateway tokenisation
+NFR-09
+Security
+Session recordings
+Encrypted storage, admin-only access, auto-purge after 3 days
+NFR-10
+Compliance
+Data privacy
+GDPR (EU users), TPDP (Indian users)
+NFR-11
+Compliance
+Right to deletion
+Data deletion request fulfilled per regulatory timelines
+NFR-12
+Accessibility
+Mobile compatibility
+Last 2 major versions of iOS and Android supported
+NFR-13
+Accessibility
+Browser compatibility
+Latest 2 versions of Chrome, Safari, Firefox, Edge
+NFR-14
+Localisation
+Currency
+INR, USD, CHF, EUR supported in MVP
+NFR-15
+Localisation
+Language
+English-only in MVP; multi-language in Phase 2
+NFR-16
+Observability
+Logging & monitoring
+Centralised logging, monitoring, tracing, alerting (cloud-native)
+NFR-17
+Maintainability
+CI/CD
+Automated pipelines via GitHub Actions; Docker containerisation
+NFR-18
+Data Retention
+Session recordings
+Auto-deleted after 3 days (or after dispute resolution)
+ 
+
+7. Technical Architecture & Technology Stack
+7.1 Architecture Overview
+The Felly Club platform follows a modular, cloud-native architecture with clear separation of concerns across the following layers:
+Layer
+Description
+Presentation Layer
+Next.js/React web app (Vercel-hosted) + React Native iOS/Android apps. Shared design system and API contracts ensure feature parity.
+Identity & Access Management
+KeyCloak for centralised authentication, role-based access, and social login. API Gateway enforces JWT validation, CORS, routing, and rate limiting.
+Headless CMS
+Strapi decouples content from presentation via REST/GraphQL APIs, enabling rapid content updates for FAQs, marketing pages, and dynamic in-app content.
+Service Layer
+Modular Node.js services handling: users, sessions, meetings, payments, search, reviews, and notifications. Designed for independent scalability.
+Data Layer
+PostgreSQL (transactional data), Redis (caching, session, search results), Blob Storage (media assets, session recordings).
+Third-Party Integrations
+Zoom (video sessions), PayU (payments), Twilio SendGrid (email/SMS), Firebase Cloud Messaging (push notifications), Google Analytics & Tag Manager.
+Cross-Cutting Concerns
+Centralised logging, monitoring, tracing, and alerting via cloud-native tooling. GitHub Actions CI/CD. Docker containerisation.
+ 
+7.2 Technology Stack Conflicts — Pending Resolution
+The following conflicts were identified across the three source files. These must be resolved by Felly Club before the architecture is finalised:
+#
+Layer
+TechStack Excel
+PDF Proposal
+Recommended Resolution
+I-01
+Mobile App
+Swift (iOS) + Kotlin (Android)
+React Native (cross-platform)
+React Native confirmed by RN Estimate sheet — TechStack Excel is outdated. Confirm React Native.
+I-02
+Backend Framework
+Next.js (listed as backend)
+Node JS
+Next.js is a frontend framework. Node.js is the backend runtime. Confirm Node.js for backend services.
+I-03
+API Gateway
+Azure / AWS API Gateway
+CloudFlare / Cloud-Platform Gateway
+Two different vendors. Confirm preferred API gateway before infrastructure setup.
+I-04
+Payment Provider
+Stripe
+PayU
+Three references across files (Stripe, PayU, Stripe/Razorpay). Confirm single provider for MVP.
+ 
+7.3 Confirmed Technology Stack
+Category
+Technology
+Rationale
+Frontend Framework
+Next.js / React JS
+SSR for SEO, React ecosystem, great developer experience
+Mobile App
+React Native (iOS & Android)
+Cross-platform with near-native performance; code reuse with web
+Backend Framework
+Node.js
+TypeScript for type safety; consistent JS stack front-to-back
+CMS
+Strapi (Headless)
+Flexible content modelling; REST/GraphQL APIs; admin workflows
+Identity & Access Management
+KeyCloak
+Centralised auth, social login, RBAC, JWT management
+API Gateway
+CloudFlare / Cloud-Platform API Gateway
+Rate limiting, JWT validation, CORS, routing, DDoS protection
+Database
+PostgreSQL
+ACID-compliant relational storage for transactions, sessions, reviews
+Cache
+Redis
+Session storage, rate limiting, search result caching
+Search
+Elasticsearch
+Mentor discovery and full-text search
+File Storage
+AWS S3 / Azure Blob Storage
+Profile images, documents, session recordings
+Payments
+PayU (+ Stripe/Razorpay)
+Global coverage; multi-currency; PCI DSS compliant
+Email & SMS
+Twilio SendGrid
+Transactional emails and SMS/OTP delivery
+Push Notifications
+Firebase Cloud Messaging (FCM)
+Cross-platform push notifications (iOS, Android, Web)
+Video Conferencing
+Zoom
+Meeting link generation, calendar integration, session recording
+Analytics
+Google Analytics & Tag Manager
+Usage tracking, engagement insights, event management
+Frontend Hosting
+Vercel
+Scalability, edge delivery, managed Next.js hosting
+Containerisation
+Docker Engine
+Consistent dev/staging/production environments
+Code Repository
+GitHub
+Version control, collaboration
+Container Registry
+GitHub Package Registry
+Docker image storage and versioning
+CI/CD
+GitHub Actions
+Automated build, test, and deployment pipelines
+Monitoring
+Cloud-specific Logging & Monitoring
+Centralised observability (future hardening)
+ 
+
+8. Project Execution Plan
+8.1 Delivery Approach
+The platform will be delivered using an Agile methodology across 8 two-week sprints (16 weeks total), with a sprint review and demo after each sprint with the Felly Club team.
+ 
+8.2 Project Phases & Milestones
+Phase
+Weeks
+Key Activities
+Deliverables
+Requirement & Design
+W1–W2
+Detailed requirements documentation, UI/UX design finalisation, development environment setup
+Signed-off requirements, UI designs
+Sprint 1 – Reusable Components & Setup
+W1–W2
+Design system, component library, project scaffold, CI/CD setup
+Shared component library, dev environment
+Sprint 2 – User Registration & Profiles
+W3–W4
+Mentee/mentor registration, authentication (KeyCloak), profile management
+Auth & profile modules
+Sprint 3 – Mentor Discovery
+W5–W6
+Mentor listing, search & filtering, profile view, recommendations
+Discovery & marketplace features
+Sprint 4 – Session Request & Scheduling
+W7–W8
+Session request workflow, mentor acceptance, slot selection, reminders
+Session management module
+Sprint 5 – Payment Processing
+W9–W10
+PayU integration, payment capture, escrow, refund, mentor payout
+Payment processing module
+Sprint 6 – Quality & Trust Framework
+W11–W12
+Ratings/reviews, dispute resolution, recordings, quality monitoring, verification
+Trust & safety module
+Sprint 7 – Video Conferencing, BI & Analytics
+W13–W14
+Zoom integration, session recording, dashboards, platform analytics
+Video & analytics module
+Sprint 8 – UAT & Go-Live
+W15–W16
+Bug fixes, performance testing, Web & Mobile production deployment, user engagement
+Web App, Mobile App – Production
+ 
+8.3 Team Composition
+Role
+Count
+Responsibility
+Delivery Manager
+1
+Project governance, risk, stakeholder management
+Product Manager
+1
+Requirements, backlog, sprint ceremonies
+Visual Designer
+1
+UX/UI design, prototypes, design system
+Frontend Developers
+TBD
+Next.js web app + React Native mobile app
+Backend Developers
+TBD
+Node.js services, API, integrations
+Quality Analyst
+1
+Test planning, QA, regression, UAT support
+DevOps Engineer
+1
+CI/CD, Docker, cloud infra, monitoring
+ 
+
+9. Assumptions & Dependencies
+9.1 Assumptions
+	•	The plan is based on current understanding of requirements. Any additional scope will be estimated separately.
+	•	Admin tasks will be handled via forms/admin scripts in MVP. Admin features will not be accessible via mobile app.
+	•	Payment refunds and statistics will be handled via the payment provider interface.
+	•	Personalization will be rule-based (string matching). No AI/ML recommendation engine proposed for MVP.
+	•	Last 2 major versions of Android and iOS will be supported.
+	•	Coding assistants will be used by the development team.
+	•	Any additional hardware/software licensing and third-party engagement costs will be procured by the client or billed on actuals.
+	•	Nagarro will provide laptops and software as per standard operating environment policy.
+ 
+9.2 Client Dependencies (Felly Club to Provide)
+Dependency
+Details
+Apple & Google Developer Accounts
+App Store and Google Play Store developer accounts for app submission
+Twilio Account
+For SMS delivery
+KeyCloak Tenant
+For authentication infrastructure
+PayU Account
+For payment processing
+Zoom Subscription
+Meeting platform subscription for live sessions
+Firebase Project
+For FCM push notifications
+Branding Assets
+Logos, colour palette, brand guidelines
+Textual Content & Media
+Mentor profiles, platform policies, FAQs, and related content
+Hosting Environment
+Cloud provider account, domain registration, SSL certificates
+ 
+
+10. Commercials
+10.1 Project Cost
+Project Cost (Fixed Price)
+€ 125,000 — Exclusive of applicable taxes
+ 
+10.2 Commercial Terms
+Term
+Detail
+Engagement Model
+Fixed Price
+Working Hours
+8 hours/day, Monday–Friday (5-day week)
+Delivery Mode
+Remote delivery
+Additional Scope
+Any additional requirements or scope changes will be estimated and priced separately
+Delays from Client
+Extensions or delays attributable to Felly Club will be billed as per actual efforts
+Third-Party Costs
+Hardware, software, and third-party licensing costs not included in project cost
+ 
+
+11. Risks & Constraints
+11.1 Key Risks
+ID
+Risk
+Likelihood
+Impact
+Mitigation
+R-01
+Scope creep from additional requirements post-sign-off
+Medium
+High
+Formal change request process; additional scope estimated and priced separately
+R-02
+Delays in client providing dependencies (accounts, branding, content)
+Medium
+High
+Dependency checklist shared early; mock data used in interim
+R-03
+Third-party API changes or downtime (Zoom, PayU, Firebase)
+Low
+High
+Abstraction layer for integrations; fallback mechanisms in design
+R-04
+Payment compliance risk (PCI DSS, multi-currency)
+Low
+High
+Use PCI-compliant gateway tokenisation; no raw card data handled by platform
+R-05
+Data privacy violations (GDPR/TPDP)
+Low
+High
+Privacy by design; data minimisation; right-to-deletion workflows
+R-06
+Mobile app store review delays for iOS/Android
+Medium
+Medium
+Early store account setup; factor review timelines into sprint 8 planning
+R-07
+Video recording storage and privacy concerns
+Low
+High
+Admin-only access; encrypted storage; strict 3-day auto-deletion policy
+R-08
+Mentor supply constraints in early phases
+Medium
+Medium
+Admin-curated onboarding; platform quality over quantity in MVP
+ 
+11.2 Constraints
+	•	Budget is fixed at €125,000. Any scope additions require formal approval and re-estimation.
+	•	Delivery timeline is approximately 16 weeks from project kick-off.
+	•	Admin portal is web-only in MVP (no mobile access).
+	•	Personalization is rule-based only (no AI/ML in MVP).
+	•	Platform supports English-only in MVP.
+	•	Session recordings accessible only to admin (no user playback in MVP).
+ 
+
+12. Gap Analysis & Open Issues
+This section documents all gaps, inconsistencies, and missing information identified across the three source files (PDF Proposal, TechStack Excel, Epics & Features Excel). Items are categorised by severity and must be resolved before the BRD is formally signed off.
+ 
+Highlight Legend
+Critical — Technology conflicts between source files
+High — Missing definitions or artefacts
+Medium — Source file errors / duplications
+Informational — Data gaps / not captured in original BRD
+⚠ Inline warning — item requires client sign-off
+ 
+12.1 Critical — Technology Conflicts Between Source Files
+The following contradictions exist between source documents. Felly Club must provide a single confirmed answer for each before development begins.
+ID
+Topic
+TechStack Excel Says
+PDF Proposal Says
+Epics File Says
+Action Required
+I-01
+Mobile Technology
+Swift (iOS) + Kotlin (Android) — native apps
+React Native — cross-platform
+— (not mentioned)
+Confirm React Native as the agreed approach (supported by RN Estimate sheet)
+I-02
+Backend Framework
+Next.js (listed under Backend Services)
+Node JS
+— (not mentioned)
+Confirm Node.js. Next.js is a frontend framework; the two are not interchangeable
+I-03
+API Gateway
+Azure / AWS API Gateway
+CloudFlare / Cloud-Platform API Gateway
+— (not mentioned)
+Confirm a single API gateway vendor before infrastructure is provisioned
+I-04
+Payment Provider
+Stripe
+PayU
+Stripe / Razorpay
+Confirm a single payment provider for MVP. Three different names across three files.
+I-05
+Email Provider
+SendGrid
+Twilio SendGrid
+— (not mentioned)
+Minor — same product. Standardise naming to Twilio SendGrid across all documents
+ 
+12.2 High — Missing Functional Definitions
+These items are in scope for MVP but have no functional definition in any source file. Development cannot proceed without answers.
+ID
+Feature / Area
+Gap Description
+Owner
+Status
+G-01
+Mentor Performance Dashboard (BI & Analytics epic)
+Feature is in MVP scope but the description field in the source Excel contains only a placeholder character (` ` ). No KPIs, metrics, or layout defined.
+Felly Club PM
+OPEN
+G-02
+Mentor Pricing Bands
+"Within platform-defined min/max bands" is referenced in 3 features but the actual minimum and maximum price values (per 30 min / 60 min session) are never specified in any source file.
+Felly Club PM
+OPEN
+G-03
+Referral Reward Value
+Referral programme is fully described in terms of workflow, but the actual reward amount (cash credit, discount %, or other incentive) is undefined in all source files.
+Felly Club PM
+OPEN
+G-04
+Payment Flow Timing — Conflict
+Transaction Management feature says remaining fee is deducted when the mentor accepts; Slot Selection feature says full fee is already deducted when the mentee selects a slot. These two statements are contradictory. Exact deduction triggers must be clarified.
+Felly Club PM
+OPEN
+G-05
+Rating Flagging Scope
+Quality Monitoring states: "Rating threshold < 3 stars gets flagged." It is not clear whether this applies to a single session rating or the mentor's overall average rating. These produce different system behaviours.
+Felly Club PM
+OPEN
+G-06
+Mentor Inactivity Trigger
+Admin Lifecycle Management says mentors with "no call in 3 months OR no responses/interactions" are manually managed and hidden. It is unclear whether both conditions must be met or either one is sufficient.
+Felly Club PM
+OPEN
+G-07
+Long-Term Mentorship Workflow
+Post-session engagement feature explicitly states: "Long-term mentor/mentee workflow to be decided in Phase 2." This is referenced in MVP but undefined. Impact on MVP must be scoped.
+Felly Club PM
+OPEN
+ 
+12.3 High — Missing Requirement Artefacts
+The following standard BRD artefacts were not provided in any source file.
+ID
+Artefact
+Gap Description
+Action Required
+G-08
+Acceptance Criteria
+Source files were described as containing acceptance criteria, but the Epics Excel only contains feature-level descriptions. No formal acceptance criteria (Given/When/Then or equivalent) exist for any of the 49 MVP features.
+Define AC for all 49 MVP features before UAT planning begins
+G-09
+User Stories
+Features are described at feature level. No user story format ("As a [persona], I want [X], so that [Y]") exists in any source file.
+Write user stories per feature before sprint planning
+G-10
+UI Mockups / Screen List
+PDF pages 8–11 contain UI mockup images that cannot be extracted as text. No screen inventory, user flow diagram, or wireframe descriptions are documented in any text-based artefact.
+Provide mockup file or screen list to Nagarro for design alignment
+ 
+12.4 Medium — Source File Errors & Duplications
+These are errors within the source files themselves that should be corrected.
+ID
+File
+Location
+Error
+Correction
+E-01
+PDF Proposal
+Page 6 — Business Intelligence scope slide
+"Mentor Performance Dashboard" is listed twice in the same bullet list.
+Remove one instance. The feature appears once in the Epics file.
+E-02
+PDF Proposal
+Page 7 — Administrative Controls scope slide
+"Session Reminders & Notifications" is listed under Administrative Controls. This feature belongs to Session Request & Scheduling Management.
+Move to correct epic. Likely a copy-paste error in the presentation.
+ 
+12.5 Informational — Data in Source Files Not Captured in Original BRD
+These items were present in source files but were not included in the initial BRD draft. They are now addressed in Appendices A and B.
+ID
+Source
+What Was Missing
+Resolution
+M-01
+TechStack Excel — RN Estimate sheet
+Full effort breakdown: Mobile = 60 PD, Web + Services + Integrations = 139 PD, DevOps = 10 PD, Total ≈ 199.5 person-days
+Added in Appendix A
+M-02
+TechStack Excel — Components Mapping sheet
+Page-level component map for 8 screens with S/M/L effort sizing
+Added in Appendix A
+M-03
+Epics Excel — Phase 2 sheet
+48 Phase 2 features with High / Medium / Low priorities
+Added in Appendix B
+M-04
+Epics Excel — MVP Features sheet
+SMS Communication is explicitly marked MVP Phase = No (the only feature marked No), but was included in in-scope section of original BRD
+Corrected: SMS moved to out-of-scope in Section 4.2 and flagged in Section 5
+M-05
+TechStack Excel — Tech Stack sheet
+Elasticsearch for mentor discovery search was in the TechStack Excel but absent from PDF architecture narrative
+Confirmed in Section 7.3 tech stack table; role in search architecture to be clarified at design stage
+ 
+12.6 Open Issues Summary
+ID
+Issue
+Severity
+Owner
+Target Resolution
+I-01
+Confirm mobile technology: React Native vs Swift/Kotlin
+Critical
+Felly Club
+Before Sprint 1
+I-02
+Confirm backend framework: Node.js vs Next.js
+Critical
+Felly Club + Nagarro
+Before Sprint 1
+I-03
+Confirm API gateway vendor
+Critical
+Felly Club + Nagarro
+Before Sprint 1
+I-04
+Confirm single payment provider for MVP
+Critical
+Felly Club
+Before Sprint 1
+G-01
+Define Mentor Performance Dashboard KPIs and layout
+High
+Felly Club PM
+Before Sprint 7
+G-02
+Define mentor pricing band values (min/max per duration)
+High
+Felly Club
+Before Sprint 5
+G-03
+Define referral reward type and value
+High
+Felly Club
+Before Sprint 4
+G-04
+Clarify exact payment deduction timing (request vs acceptance vs slot selection)
+High
+Felly Club PM
+Before Sprint 5
+G-05
+Clarify rating flagging: single session or average rating
+High
+Felly Club PM
+Before Sprint 6
+G-06
+Clarify mentor inactivity trigger: both conditions or either condition
+High
+Felly Club PM
+Before Sprint 3
+G-08
+Create acceptance criteria for all 49 MVP features
+High
+Felly Club PM + Nagarro
+Before UAT
+G-09
+Write user stories for all 49 MVP features
+High
+Nagarro PM
+Before Sprint 2
+G-10
+Share UI mockup files or screen inventory
+High
+Felly Club
+Before Sprint 2
+E-01
+Fix duplicate Mentor Performance Dashboard in PDF scope slide
+Medium
+Felly Club
+On next document revision
+E-02
+Fix misplaced Session Reminders entry in PDF Admin Controls slide
+Medium
+Felly Club
+On next document revision
+ 
+
+Appendix A: Effort Estimate Summary
+The following effort estimates are sourced from the TechStack Excel workbook (sheets: "RN App MVP Estimate" and "Components Mapping"). These are indicative estimates and should be validated against the fixed-price engagement of €125,000.
+ 
+A.1 Overall Workstream Summary
+Workstream
+Estimated Effort (Person-Days)
+Web App + Backend Services + Integrations
+139 PD
+Mobile App (React Native)
+60 PD
+DevOps & Infrastructure
+10 PD
+Total (90% Confidence)
+≈ 199.5 PD
+ 
+A.2 React Native Mobile App — Feature Breakdown
+Feature Group
+Feature
+Min (PD)
+Max (PD)
+Notes
+General
+Project Setup
+3
+5
+Project scaffolding, GitHub Actions, test structure, library integrations
+General
+Release & Store Submission
+1
+3
+App Store / Google Play management, release prep, review fixes
+General
+Logging & Analytics Setup
+1
+2
+GA, Firebase SDK integration, bounce rates, crash monitoring
+General
+Navigation Structure
+2
+3
+—
+General
+Theming
+2
+3
+—
+Auth
+Login / Register / Logout
+4
+6
+Includes social login
+Auth
+Forgot Password / Email Verification
+2
+3
+—
+Auth
+Session Persistence
+1
+2
+Persist user session locally
+Onboarding
+Interest Selection
+2
+4
+User selects interests from available options
+Onboarding
+User Permissions Request
+1
+2
+Location, push, preferences — contextual during onboarding
+Mentor Discovery
+Mentor List
+3
+4
+Includes filters, search, sort
+Mentor Discovery
+Mentor Detail
+2
+4
+Name, country, title, bio, topics, session details, languages, rating
+Scheduling
+Available Mentor Sessions
+2
+4
+List of available mentor sessions
+Scheduling
+Slot Selection
+4
+6
+Calendar view with available slots; timezone / calendar complexities
+Payment
+Webview Integration & Flow Handling
+2
+3
+Show webview, update booking view post-dismiss, corner cases
+Booking Management
+Cancel Booked Session
+2
+4
+Cancellation rules, confirmation, refund display
+Booking Management
+Reschedule Booked Session
+2
+4
+Rescheduling rules, confirmation, success screen
+Profile
+User Profile / Edit Profile
+2
+3
+—
+Profile
+User Settings
+2
+3
+Notification toggles, preferences
+Notifications
+Push Notification Setup
+1
+3
+Standard setup without custom notification types
+Notifications
+Notification Deep Linking
+2
+4
+~2 deep link types: specific booking, specific mentor
+Analytics
+Analytics Library Integration
+1
+2
+GA / Firebase SDK, default behavioural data
+Analytics
+Custom Event Tracking
+1
+2
+Favourite clicks, search queries, detail page views
+
+Raw Total
+45
+79
+—
+
+90% Confidence Total
+56.8
+64.2
+—
+
+Total PDs (with buffer, docs, unit tests)
+57
+64
+Includes 10% buffer, 3% docs, 3% unit tests
+ 
+A.3 Integrations Effort Breakdown (Web / Services)
+Integration
+Estimated Effort (PD)
+Payment Gateway
+5
+KeyCloak (IAM)
+3
+Email Notifications (SendGrid)
+2
+SMS Notifications
+2
+Push Notifications (FCM)
+2
+Analytics (GA / Firebase)
+5
+Database Setup
+3
+Zoom API & Webhooks
+3
+Logging & Domain Setup
+3
+Strapi CMS Setup
+5
+Total Integrations
+33
+ 
+A.4 Web Component Sizing (Components Mapping Sheet)
+Components are sized using T-shirt sizing mapped to engineering days: S = 1 day, M = 1.5 days, L = 2 days.
+Screen / Page
+Key Components Mapped
+Homepage
+Header (L), Footer (L), Hero Banner (M), Hero Carousel (M), Image (S), Video/YouTube (S), Testimonials (M), App Store Ratings (M), Logo (S), Breadcrumb (S), FAQ Accordion (S), Teaser Variations (2×S)
+Login
+KeyCloak Integration (M), Social Login (M)
+User Registration
+Registration Form (M)
+Profile Page
+Profile Image (S), Interests (S), About Me (S), Available Slots (M), Achievements (M)
+Session Booking
+Slots Available (S), Meeting Link Generation (M)
+Checkout Page (Web)
+Payment Breakout (M), Checkout Page (M), Order Confirmation (M)
+Meeting Link Page
+Join Meeting CTA (S), Embedded Link (S)
+Ratings & Review Page
+Rate Mentor (S), Rate Mentee (S), Feedback Form (S), Complaint Form (S)
+Total Dev Estimate
+46 PD (Web components + Services: 50 PD)
+ 
+
+Appendix B: Phase 2 Feature Roadmap
+The following 48 features are defined for Phase 2 delivery, sourced from the Epics & Features Excel (Phase 2 Features sheet). Each feature is tagged with a priority (High / Medium / Low) as defined in the source file. Detailed requirements will be elaborated in a separate Phase 2 BRD.
+ 
+AI & Machine Learning Capabilities
+Feature
+Priority
+Description
+AI-Powered Mentor Recommendations
+High
+Advanced AI-based recommendation engine replacing simple string matching with ML-driven mentor-mentee matching.
+AI-Based Request Filtering for Mentors
+Medium
+AI assistance to help mentors filter and prioritise incoming session requests.
+Predictive Analytics for Session Success
+Medium
+ML models to predict session success, identify at-risk relationships, and recommend optimal pricing.
+Smart Availability Suggestions
+Medium
+AI-powered suggestions for optimal availability slots based on historical demand and booking patterns.
+ 
+Mentor Self-Service & Onboarding
+Feature
+Priority
+Description
+Mentor Self-Registration Portal
+High
+Public-facing apply-to-be-a-mentor portal for independent applications without admin intervention.
+Mentor Application Workflow
+High
+Full application: expertise demo, LinkedIn/portfolio verification, video intro, availability, pricing proposal.
+Automated Verification & Vetting
+High
+Semi-automated mentor verification with LinkedIn/GitHub validation; automated screening + manual final approval.
+Mentor Waitlist Management
+Medium
+Waitlist for mentor applicants when category capacity is reached; automated communications and priority queue.
+Mentor Profile Enhancement Tools
+Medium
+Self-service tools for certifications, external testimonials, media features, and publication links.
+ 
+Mobile Application Development
+Feature
+Priority
+Description
+Native iOS Application
+High
+Full-featured native iOS app with push notifications, booking, payments, and offline capabilities.
+Native Android Application
+High
+Full-featured native Android app with push notifications, booking, payments, and offline capabilities.
+Push Notification System
+High
+Native mobile push notifications for requests, session reminders, cancellations, and payment events.
+Mobile-Optimised Video Experience
+Medium
+Enhanced mobile video with bandwidth management, mobile-specific UI, and background mode handling.
+ 
+Advanced Session Management
+Feature
+Priority
+Description
+Bundle Session Packages
+High
+Multi-session bundles (3, 5, 10 sessions) at discounted rates with expiration policies.
+Long-Term Mentorship Programs
+High
+Structured 3–12 month mentor-mentee programs with milestone tracking and progress dashboards.
+Priority / Expedited Requests
+Medium
+Premium expedited requests with faster mentor response SLAs and limited urgent slot access.
+Free Introductory Sessions
+Medium
+Mentor-controlled free or discounted 15–30 minute intro sessions to build rapport.
+Session Templates & Agendas
+Medium
+Pre-defined session templates and agenda builders; mentees can view agenda before booking.
+ 
+Quality & Trust Enhancements
+Feature
+Priority
+Description
+Automated Quality Flagging
+High
+Automatic flagging for ratings < 3 stars with instant admin alerts and automated mentor/mentee notification.
+Automated Mentor Inactivity Management
+High
+Auto-detect and hide inactive mentors; automated nudge emails before hiding; reactivation workflow.
+Advanced Dispute Resolution System
+Medium
+Enhanced dispute resolution with categorisation, escalation levels, mediation workflows, and evidence submission.
+Mentor Performance Scoring
+Medium
+Comprehensive scoring (response time, completion rate, ratings, cancellations, retention) affecting search ranking.
+Mentee Reliability Scoring
+Medium
+Track mentee reliability (no-show history, cancellation patterns) for mentor filtering and platform health.
+ 
+Analytics & Insights
+Feature
+Priority
+Description
+Advanced Analytics Dashboards
+High
+Cohort analysis, retention metrics, revenue forecasting, LTV, churn prediction, custom report builder.
+Mentee Progress Tracking Against Goals
+High
+Goal-setting framework with milestone tracking, progress visualisation, and mentor feedback integration.
+Mentor Business Intelligence
+Medium
+Earnings forecasting, booking trends, peak demand analysis, competitive positioning, and growth recommendations.
+Platform Performance Benchmarking
+Low
+Industry benchmarking dashboard comparing platform metrics against market standards.
+ 
+Growth & Monetisation
+Feature
+Priority
+Description
+Subscription & Membership Tiers
+High
+Monthly/annual tiers (Basic, Pro, Premium) with discounted sessions, priority booking, exclusive mentor access.
+Complex Referral Reward Structures
+Medium
+Tiered rewards (e.g. 3/5 referrals for higher bonus), team referrals, gamification elements.
+Promotional Campaigns & Discounts
+Medium
+Platform-wide or targeted promotions with first-session discounts, seasonal offers, and coupon codes.
+Mentor Revenue Optimisation Tools
+Low
+Dynamic pricing suggestions, demand-based pricing, and revenue optimisation recommendations.
+ 
+Communication & Collaboration
+Feature
+Priority
+Description
+In-Platform Messaging System
+High
+Secure in-app messaging for pre/post-session communication; message history, file sharing, chat moderation.
+Session Notes & Follow-up System
+Medium
+Shared session notes: post-session summaries, action items, resources; mentee reflections and follow-through tracking.
+Video Message Introductions
+Medium
+Mentors send personalised video intro messages to mentees post-booking to build pre-session rapport.
+Community Forums & Groups
+Low
+Platform community with forums, discussion groups by expertise, and peer networking among mentees.
+ 
+Platform Expansion
+Feature
+Priority
+Description
+Multi-Language Support
+High
+Platform localisation for Hindi, Spanish, German, French; translated UI, communications, and content.
+Corporate / Enterprise Accounts
+High
+B2B offering with bulk licenses, HR admin dashboards, employee management, budget controls, and reporting.
+Additional Expertise Categories
+Medium
+Expand to Academia (research, academic careers) and additional niche categories based on demand analysis.
+Group Mentoring Sessions
+Medium
+Group sessions (2–10 mentees) with adjusted pricing and collaborative learning features.
+ 
+Support & Operations
+Feature
+Priority
+Description
+Advanced Support Ticket System
+High
+Full ticketing with categorisation, priority levels, SLA tracking, canned responses, and agent assignment.
+Live Chat Support
+Medium
+Real-time chat with AI chatbot for common queries and human handoff for complex issues.
+Knowledge Base & Self-Service
+Medium
+Comprehensive self-service knowledge base with video tutorials, FAQ database, and troubleshooting guides.
+Automated Admin Workflows
+Medium
+Automation for scheduled reports, refund approvals under thresholds, bulk operations, and workflow triggers.
+ 
+Advanced Features
+Feature
+Priority
+Description
+Calendar Integration & Sync
+Medium
+Deep integration with Google Calendar, Outlook, and Apple Calendar for automatic session blocking and availability sync.
+Mentor Certification Programs
+Low
+Platform-specific mentor certification with training modules, best practices, and certified mentor badges.
+Session Recording Playback for Users
+Low
+Optional user access to session recordings (with consent) for personal review; extended retention beyond 3 days.
+API & Integrations Marketplace
+Low
+Public API and marketplace for third-party integrations (calendar apps, CRM, scheduling tools).
+ 
+
+13. Glossary
+Term
+Definition
+BRD
+Business Requirements Document — formal specification of business needs
+Mentee
+A user who registers on Felly Club to seek mentorship
+Mentor
+An accomplished professional onboarded by admin to provide sessions
+Admin
+Felly Club platform administrator managing users, content, and operations
+MVP
+Minimum Viable Product — the first fully functional release
+Epic
+A large body of work that can be broken down into features/user stories
+IAM
+Identity and Access Management — e.g., KeyCloak
+CMS
+Content Management System — e.g., Strapi
+PCI DSS
+Payment Card Industry Data Security Standard
+GDPR
+General Data Protection Regulation (EU)
+TPDP
+The (Indian) Personal Data Protection — data privacy regulation for India
+FCM
+Firebase Cloud Messaging — push notification service
+SSR
+Server-Side Rendering — technique for web performance/SEO
+RBAC
+Role-Based Access Control
+Escrow
+Temporary payment hold until session completion, then auto-released
+SLA
+Service Level Agreement
+CI/CD
+Continuous Integration / Continuous Deployment
+ 

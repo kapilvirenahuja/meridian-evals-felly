@@ -1,0 +1,24 @@
+pre_lock_resolutions:
+  slug: "felly-club"
+  resolved_at: "2026-03-26T13:25:00+0530"
+  items:
+    - id: 1
+      type: "warning"
+      item: "Two assumptions reference undefined business parameters (G-02 pricing bands, G-03 referral rewards)"
+      resolution: "Make these configurable platform parameters. No decision needed at vision stage — values will be set via admin configuration."
+    - id: 2
+      type: "warning"
+      item: "Four critical unresolved decision points (I-01 through I-04)"
+      resolution: "I-01 mobile tech: not needed at vision stage. I-02 backend framework: to be decided as part of architecture. I-03 API gateway: needed but vendor selection is part of architecture. I-04 payment provider: Stripe confirmed."
+    - id: 3
+      type: "warning"
+      item: "Some strategic_goals success_metric values are feature-functional rather than numeric KPIs"
+      resolution: "Acceptable — detailed success_metrics section provides quantifiable targets. No change needed."
+    - id: 4
+      type: "placeholder"
+      item: "assumptions[11] — exact band values not yet specified"
+      resolution: "Make configurable. Pricing bands are admin-configurable platform parameters, not vision-level decisions."
+    - id: 5
+      type: "placeholder"
+      item: "assumptions[12] — referral reward type and value not yet defined"
+      resolution: "Not needed at this point. Referral reward details are implementation-level configuration."

@@ -1,0 +1,368 @@
+{
+  "slug": "felly-club",
+  "name": "Felly Club",
+  "tagline": "Share | Connect | Grow",
+  "status": "DRAFT",
+  "generated_at": "2026-03-26T00:00:00.000Z",
+  "vision": "To establish Felly Club as the premier tech-enabled mentorship ecosystem, empowering individuals to connect with accomplished mentors, gain personalized guidance, and accelerate progress in their chosen fields. By leveraging advanced analytics and fostering trust, the platform delivers meaningful mentor\u2013mentee experiences and builds a scalable community that supports long-term personal and professional growth.",
+  "problem": "The global mentorship landscape is fragmented and opaque \u2014 aspiring individuals across Sport, Entrepreneurship, Business, and Entertainment struggle to identify credible, accessible mentors through standardised discovery mechanisms, while accomplished professionals lack a structured, trustworthy channel to monetize their expertise with transparent pricing, scheduling, and quality assurance.",
+  "value_proposition": "Felly Club is the first cross-domain, admin-curated mentorship marketplace spanning Sport, Entrepreneurship, Business, and Entertainment \u2014 verticals that established competitors (MentorCruise, GrowthMentor, ADPList) do not serve. Unlike transactional platforms (Clarity.fm, Cameo) or free models with inconsistent quality (ADPList), Felly Club delivers a full session lifecycle \u2014 from mentor discovery and domain-verified trust signals through escrow-backed booking, integrated video delivery, post-session ratings, and admin-mediated dispute resolution with session recordings.\n\nFor mentees, this means a single platform to find credible, vetted mentors across niche domains with transparent pricing, multi-currency support (INR, USD, CHF, EUR), and structured scheduling \u2014 eliminating the fragmentation and opacity that defines the current landscape. For mentors, it provides a trustworthy monetisation channel with flexible pricing, automated payouts, and data-driven performance insights. For the platform, the admin-curated supply model ensures quality over quantity while the commission-based revenue model (10\u201320%) aligns platform success with mentor and mentee outcomes.",
+  "target_users": [
+    {
+      "persona": "Mentee \u2014 Ambitious Individual",
+      "goal": "Discover domain-verified mentors, book one-on-one video sessions, and receive personalized guidance to accelerate personal and professional growth",
+      "frustration": "No standardised discovery for domain-specific mentors; opaque pricing and quality indicators; high friction in scheduling, payment, and session delivery",
+      "context": "Individuals in India, Switzerland, USA, and Germany seeking mentorship in Sport, Entrepreneurship, Business, or Entertainment via web or mobile"
+    },
+    {
+      "persona": "Mentor \u2014 Accomplished Professional",
+      "goal": "Monetize expertise through structured one-on-one video mentorship sessions with flexible pricing and availability management",
+      "frustration": "No trustworthy platform to offer guidance at scale; lack of structured scheduling, payment collection, and reputation-building tools; no data-driven insights on session performance",
+      "context": "Domain-verified professionals onboarded by platform admin, managing availability calendars and accepting session requests across multiple time zones"
+    },
+    {
+      "persona": "Platform Admin \u2014 Operations Manager",
+      "goal": "Curate a high-quality mentor marketplace by managing onboarding, quality assurance, dispute resolution, financial operations, and platform analytics",
+      "frustration": "Manual processes for mentor verification, dispute handling, and payout management; no unified dashboard for platform-wide KPIs and operational oversight",
+      "context": "Felly Club operations team using web-based admin portal to manage all platform activities including user lifecycle, sessions, payments, and content"
+    }
+  ],
+  "competitors": [
+    {
+      "name": "MentorCruise",
+      "strengths": [
+        "Established subscription-based model with 1000+ vetted mentors",
+        "Strong in tech, business, and career development verticals",
+        "Structured long-term mentorship with ongoing chat and session support"
+      ],
+      "weaknesses": [
+        "Focused primarily on tech and business \u2014 no coverage for Sport or Entertainment",
+        "Subscription model limits casual or one-off session seekers",
+        "Limited multi-geography and multi-currency support"
+      ]
+    },
+    {
+      "name": "Clarity.fm",
+      "strengths": [
+        "Pay-per-minute model lowers entry barrier for quick consultations",
+        "Wide range of business and startup experts",
+        "Instant scheduling without complex booking workflows"
+      ],
+      "weaknesses": [
+        "No domain verification or curated quality assurance framework",
+        "Per-minute billing discourages deeper mentorship relationships",
+        "No session recording, dispute resolution, or trust mechanisms"
+      ]
+    },
+    {
+      "name": "GrowthMentor",
+      "strengths": [
+        "Vetted growth and marketing mentors with community-driven quality signals",
+        "Unlimited 1:1 calls under subscription plan",
+        "Active Slack community for peer networking"
+      ],
+      "weaknesses": [
+        "Narrow focus on growth marketing and product \u2014 no Sport or Entertainment",
+        "Subscription-only model with no pay-per-session option",
+        "Limited to English-speaking markets; no multi-currency support"
+      ]
+    },
+    {
+      "name": "ADPList",
+      "strengths": [
+        "Free mentorship platform with 20,000+ mentors in design and tech",
+        "Strong community engagement and accessibility",
+        "Low barrier to entry for mentees"
+      ],
+      "weaknesses": [
+        "Free model creates sustainability concerns and inconsistent mentor commitment",
+        "Focused on design and tech \u2014 no coverage for Sport, Business, or Entertainment",
+        "No payment infrastructure, escrow, or structured revenue model for mentors"
+      ]
+    },
+    {
+      "name": "Cameo (adjacent)",
+      "strengths": [
+        "Strong brand in celebrity and entertainment interactions",
+        "Large roster of public figures across sports and entertainment",
+        "Proven monetization of personal brand"
+      ],
+      "weaknesses": [
+        "Transactional, not mentorship \u2014 short video messages, not structured sessions",
+        "No scheduling, session management, or ongoing mentor-mentee relationships",
+        "No quality assurance, ratings-based matching, or dispute resolution"
+      ]
+    }
+  ],
+  "market_size": {
+    "tam": "~$1.53B (global mentoring software market, 2025) growing to ~$4.92B by 2035 at 12.4% CAGR",
+    "sam": "~$970M (mentorship marketplace and platform segment, 2026) \u2014 platforms enabling 1:1 paid mentorship sessions with booking, payment, and video infrastructure",
+    "som": "~$5\u201315M achievable within 3 years \u2014 targeting curated mentorship in Sport, Entrepreneurship, Business, and Entertainment across India, Switzerland, USA, and Germany",
+    "note": "Market sizing derived from Research Nester (2025) and Research & Markets (2026) reports on the global mentoring software market. SAM scoped to marketplace platforms (excluding enterprise mentoring software). SOM estimated based on target geography penetration (4 countries) and niche category focus (4 verticals) with admin-curated supply model constraining initial growth rate."
+  },
+  "differentiators": [
+    "Cross-domain coverage spanning Sport, Entrepreneurship, Business, and Entertainment \u2014 most competitors focus narrowly on tech and business verticals",
+    "Admin-curated, domain-verified mentor marketplace with verified badges, LinkedIn/portfolio validation, and proof-of-expertise documentation ensuring trust and quality",
+    "Full session lifecycle management \u2014 from discovery through booking, escrow payment, video session delivery, ratings, and dispute resolution with session recordings",
+    "Multi-geography and multi-currency support (INR, USD, CHF, EUR) targeting India, Switzerland, USA, and Germany from MVP launch"
+  ],
+  "risks": [
+    "Mentor supply constraints \u2014 admin-curated onboarding creates a quality-gated supply bottleneck; early marketplace liquidity depends on Felly Club\u2019s ability to attract accomplished professionals in 4 niche verticals",
+    "Marketplace cold-start problem \u2014 two-sided marketplace requires simultaneous mentor supply and mentee demand; achieving critical mass in each geography and category is the primary growth risk",
+    "Competitive pressure from free platforms (ADPList) and established subscription players (MentorCruise, GrowthMentor) who already have network effects and mentor ecosystems",
+    "Regulatory complexity \u2014 operating across 4 jurisdictions (EU/GDPR, India/TPDP, USA, Switzerland) with multi-currency payments requires significant compliance investment",
+    "Fixed-budget delivery risk \u2014 \u20ac125,000 budget for a full-stack marketplace (web, mobile, admin portal, video, payments, analytics) creates scope-quality tension across 16-week delivery timeline"
+  ],
+  "strategic_goals": [
+    {
+      "id": "SG-01",
+      "title": "Build a trusted, admin-curated mentor marketplace with domain verification and quality signals",
+      "metric": "100% of active mentors have admin-verified profiles with verified badges; mentor profiles display LinkedIn/portfolio validation and proof-of-expertise documentation",
+      "target": "Mentees, Mentors, Platform Admin"
+    },
+    {
+      "id": "SG-02",
+      "title": "Deliver seamless end-to-end session lifecycle from discovery through post-session engagement",
+      "metric": "End-to-end booking-to-video-session workflow operational within platform; session request, acceptance, slot selection, video delivery, and post-session review all functional",
+      "target": "Mentees, Mentors"
+    },
+    {
+      "id": "SG-03",
+      "title": "Establish transparent multi-currency financial operations with escrow-backed payments",
+      "metric": "Automated payment capture, escrow hold, commission deduction (10\u201320%), and mentor payout processing across INR, USD, CHF, and EUR",
+      "target": "Mentees, Mentors, Platform Admin"
+    },
+    {
+      "id": "SG-04",
+      "title": "Ensure platform trust through ratings, dispute resolution, and quality monitoring",
+      "metric": "Post-session rating system operational; ratings below 3 stars auto-flagged for admin review; dispute resolution supported by 3-day session recording retention with admin-only access",
+      "target": "Mentees, Mentors, Platform Admin"
+    },
+    {
+      "id": "SG-05",
+      "title": "Drive mentee acquisition through referral programme and deliver actionable analytics to all personas",
+      "metric": "Referral programme live with tracking and reward on first completed session; mentor earnings dashboard, mentee activity dashboard, and platform KPI dashboard operational",
+      "target": "Mentees, Mentors, Platform Admin"
+    },
+    {
+      "id": "SG-06",
+      "title": "Achieve regulatory and security compliance across all target geographies",
+      "metric": "GDPR (EU), TPDP (India), and PCI DSS compliance validated; cookie consent, data export, right-to-deletion workflows, and tokenised payment processing operational",
+      "target": "Platform Admin, Mentees, Mentors"
+    }
+  ],
+  "success_metrics": [
+    {
+      "strategic_goal_ref": "SG-01",
+      "metric": "Mentor verification rate",
+      "target": "100% of listed mentors are admin-verified with verified badge",
+      "measurement_method": "Admin portal audit \u2014 count of verified mentors divided by total listed mentors"
+    },
+    {
+      "strategic_goal_ref": "SG-01",
+      "metric": "Mentor profile completeness",
+      "target": "All active mentor profiles include bio, expertise category, pricing, availability, and at least one verification artefact",
+      "measurement_method": "Automated profile completeness check against required field list"
+    },
+    {
+      "strategic_goal_ref": "SG-02",
+      "metric": "Session completion rate",
+      "target": "85% or higher of accepted sessions completed without cancellation or no-show",
+      "measurement_method": "Platform analytics \u2014 completed sessions divided by accepted sessions over rolling 30-day window"
+    },
+    {
+      "strategic_goal_ref": "SG-02",
+      "metric": "Booking workflow completion",
+      "target": "End-to-end flow from request through acceptance, slot selection, to session delivery operational with under 3% drop-off at each stage",
+      "measurement_method": "Funnel analytics across session lifecycle stages"
+    },
+    {
+      "strategic_goal_ref": "SG-03",
+      "metric": "Payment processing success rate",
+      "target": "99% or higher of payment transactions processed successfully across all 4 currencies",
+      "measurement_method": "Payment gateway transaction logs \u2014 successful divided by attempted transactions"
+    },
+    {
+      "strategic_goal_ref": "SG-03",
+      "metric": "Mentor payout timeliness",
+      "target": "100% of earned payouts processed within defined payout schedule post-session completion",
+      "measurement_method": "Admin financial dashboard \u2014 payout processing date versus session completion date"
+    },
+    {
+      "strategic_goal_ref": "SG-04",
+      "metric": "Dispute resolution timeliness",
+      "target": "100% of submitted disputes reviewed by admin within 72 hours",
+      "measurement_method": "Admin dispute queue \u2014 time-to-first-review tracking"
+    },
+    {
+      "strategic_goal_ref": "SG-04",
+      "metric": "Quality flagging automation",
+      "target": "All ratings below 3 stars auto-flagged; all mentors with 3 or more cancellations auto-flagged",
+      "measurement_method": "Quality monitoring dashboard \u2014 auto-flagged items versus manual review queue"
+    },
+    {
+      "strategic_goal_ref": "SG-05",
+      "metric": "Referral programme activation",
+      "target": "Referral link generation and reward fulfilment operational at launch",
+      "measurement_method": "Referral tracking \u2014 generated links, referred sign-ups, first-session completions, rewards issued"
+    },
+    {
+      "strategic_goal_ref": "SG-05",
+      "metric": "Analytics dashboard coverage",
+      "target": "Mentor, mentee, and admin dashboards live with all BRD-defined KPIs",
+      "measurement_method": "Dashboard feature audit against BRD-defined KPI requirements"
+    },
+    {
+      "strategic_goal_ref": "SG-06",
+      "metric": "Regulatory compliance coverage",
+      "target": "GDPR consent management, TPDP compliance, PCI DSS tokenisation, and right-to-deletion workflows operational",
+      "measurement_method": "Compliance checklist audit \u2014 each regulatory requirement mapped to implemented feature"
+    }
+  ],
+  "assumptions": [
+    "Admin-driven mentor onboarding only in MVP; mentor self-registration deferred to Phase 2",
+    "Personalization is rule-based string matching; no AI/ML recommendation engine in MVP",
+    "Session recordings accessible only to admin for dispute resolution; user playback deferred to Phase 2",
+    "Admin portal is web-only; no mobile admin access in MVP",
+    "English-only in MVP; multi-language support deferred to Phase 2",
+    "Pay-per-session model only; subscriptions and bundles deferred to Phase 2",
+    "Payment provider needs confirmation \u2014 conflict between Stripe, PayU, and Razorpay in source documents (see decision_points I-04)",
+    "React Native confirmed for mobile development per RN Estimate sheet \u2014 pending formal sign-off on decision_points I-01",
+    "Node.js confirmed for backend services \u2014 Next.js reference in TechStack Excel is a frontend framework mislabel (see decision_points I-02)",
+    "MVP categories limited to Sport, Entrepreneurship, Business, and Entertainment; Academia deferred to Phase 2",
+    "Video conferencing via Zoom/Google Meet API integration; no proprietary video infrastructure",
+    "Mentor pricing within platform-defined min/max bands \u2014 exact band values not yet specified (open_items G-02)",
+    "Referral reward type and value not yet defined (open_items G-03) \u2014 programme workflow specified but incentive details pending"
+  ],
+  "out_of_scope": [
+    { "category": "Mentor self-registration", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP uses admin-driven onboarding only to maintain quality-gated supply" },
+    { "category": "AI/ML recommendation engine", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP uses simple rule-based matching (string match of mentee interests to mentor expertise)" },
+    { "category": "Session recording user playback", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP recordings stored for admin-only dispute resolution with 3-day auto-deletion" },
+    { "category": "Mobile admin access", "rationale": "BRD explicitly defers to Phase 2 \u2014 admin portal is web-only in MVP" },
+    { "category": "Multi-language support", "rationale": "BRD explicitly defers to Phase 2 \u2014 English-only in MVP" },
+    { "category": "Subscription and bundle pricing", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP supports pay-per-session model only; bundles, subscriptions, and membership tiers deferred" },
+    { "category": "Academia category", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP categories limited to Sport, Entrepreneurship, Business, and Entertainment" },
+    { "category": "Advanced analytics beyond MVP dashboards", "rationale": "BRD explicitly defers to Phase 2 \u2014 cohort analysis, retention metrics, revenue forecasting, LTV, churn prediction deferred" },
+    { "category": "In-platform messaging and chat", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP uses email and in-app notifications only" },
+    { "category": "Group mentoring sessions", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP supports one-on-one sessions only" },
+    { "category": "Corporate and enterprise accounts", "rationale": "BRD explicitly defers to Phase 2 \u2014 B2B offering with bulk licenses deferred" },
+    { "category": "Long-term mentorship programs", "rationale": "BRD explicitly defers to Phase 2 \u2014 workflow to be defined post-MVP" },
+    { "category": "Community forums", "rationale": "BRD explicitly defers to Phase 2 \u2014 peer networking features deferred" },
+    { "category": "Advanced support ticket system and live chat", "rationale": "BRD explicitly defers to Phase 2 \u2014 FAQ and help centre only in MVP" },
+    { "category": "SMS communication", "rationale": "BRD source file explicitly marks MVP Phase as No \u2014 email notifications cover all transactional communication in MVP" },
+    { "category": "Complex referral tiers", "rationale": "BRD explicitly defers to Phase 2 \u2014 MVP uses simple flat-reward referral only" }
+  ],
+  "profiles": {
+    "product_profile": [
+      {
+        "dimension": "PP1 \u2014 User Sophistication (General Consumer)",
+        "level": 4,
+        "rationale": "Primary user (mentee) is a general consumer seeking mentorship with expectations of intuitive, mobile-first UX, onboarding flows, and progressive disclosure. Mentors are professionals but interact through simplified session management. Admin uses a guided web portal."
+      },
+      {
+        "dimension": "PP2 \u2014 UX Maturity (Multi-Channel Responsive)",
+        "level": 3,
+        "rationale": "Platform delivers across three channels \u2014 responsive web app (Next.js/Vercel), mobile app (React Native iOS and Android), and admin portal (web). BRD Sprint 1 explicitly includes design system and component library creation. Accessibility at browser and mobile version compatibility level."
+      },
+      {
+        "dimension": "PP3 \u2014 Persona Complexity (Multi-Sided Platform)",
+        "level": 5,
+        "rationale": "Two-sided marketplace with three distinct personas (Mentee, Mentor, Admin) each having different journeys, incentives, dashboards, and feature access. Mentees discover and book; mentors manage availability and receive payouts; admin curates supply and resolves disputes. Maps directly to marketplace pattern (buyer, seller, ops)."
+      },
+      {
+        "dimension": "PP4 \u2014 Geographic Scope (Multi-Country)",
+        "level": 3,
+        "rationale": "Targets 4 countries from MVP launch (India, Switzerland, USA, Germany). Requires multi-currency support (INR, USD, CHF, EUR), GDPR compliance (EU), TPDP compliance (India), and timezone management for cross-border session scheduling."
+      },
+      {
+        "dimension": "PP5 \u2014 Integration Density (Bidirectional)",
+        "level": 3,
+        "rationale": "Consumes and coordinates 7+ external services: Zoom (video), PayU or Stripe (payments), KeyCloak (IAM), Twilio SendGrid (email), FCM (push), Strapi (CMS), Elasticsearch (search). Bidirectional flows for session recording callbacks, payment webhooks, and calendar events."
+      },
+      {
+        "dimension": "PP6 \u2014 Delivery Ambition (Market-Ready v1)",
+        "level": 3,
+        "rationale": "Full primary flows for all 3 personas, production-grade with error handling, analytics, and compliance. 16-week delivery targeting paying customers across 4 geographies. Not a POC or MVP stub \u2014 this is a market-launch product with real payment processing and regulatory compliance."
+      },
+      {
+        "dimension": "PP7 \u2014 Industry Vertical (Professional Services)",
+        "level": 3,
+        "rationale": "EdTech and mentorship marketplace in the professional services vertical. Moderate domain rules \u2014 session lifecycle management, mentor credentialing, professional standards for expertise verification. Not as heavily regulated as BFSI or healthcare but has PCI DSS (payments) and GDPR/TPDP (data privacy) obligations."
+      }
+    ],
+    "nfr_profile": [
+      {
+        "dimension": "NFR1 \u2014 Risk (Balanced Risk)",
+        "level": 3,
+        "rationale": "Customer-facing marketplace with real financial transactions (escrow, payouts, refunds). Failure impacts user experience, financial operations, and platform trust. PP-3 level 5 (multi-sided platform) means failure affects multiple stakeholder groups simultaneously. Monitoring, alerting, and incident response needed."
+      },
+      {
+        "dimension": "NFR2 \u2014 Security (Business Grade)",
+        "level": 3,
+        "rationale": "BRD specifies KeyCloak for centralised IAM with MFA capability, RBAC, JWT-based API access, AES-256 encryption at rest, TLS 1.2+ in transit, and PCI DSS compliance via gateway tokenisation. Matches Business Grade security posture. PP-7 level 3 does not trigger enterprise-grade requirements."
+      },
+      {
+        "dimension": "NFR3 \u2014 Performance (Fast)",
+        "level": 3,
+        "rationale": "BRD NFR-01 targets under 3 second page load; NFR-02 targets under 500ms API response at 95th percentile. Redis caching for session and search, Elasticsearch for mentor discovery. PP-6 level 3 (Market-Ready) confirms need for performance optimisation for competitive UX."
+      },
+      {
+        "dimension": "NFR4 \u2014 Availability (Standard)",
+        "level": 3,
+        "rationale": "BRD NFR-05 targets 99.5% uptime (excluding scheduled maintenance). Horizontal scaling on Vercel and cloud infrastructure. Blue-green deployments via GitHub Actions CI/CD. PP-4 level 3 (multi-country) confirms need for standard availability across timezones."
+      },
+      {
+        "dimension": "NFR5 \u2014 Compliance (Standard)",
+        "level": 3,
+        "rationale": "BRD explicitly requires GDPR (EU \u2014 Switzerland, Germany), TPDP (India), PCI DSS (payments), cookie consent, privacy policy, data export, and right-to-deletion. PP-4 level 3 (multi-country) triggers NFR-5 at least 2; actual BRD requirements push to level 3."
+      },
+      {
+        "dimension": "NFR6 \u2014 Scalability (Growth-Oriented)",
+        "level": 3,
+        "rationale": "BRD NFR-04 requires horizontal scaling. PP-3 level 5 (multi-sided platform) triggers NFR-6 at least 3. Initial target is thousands of users across 4 countries with 4 expertise categories. Designed for 10x growth with load balancing and read replicas."
+      },
+      {
+        "dimension": "NFR7 \u2014 Data Sensitivity (Sensitive)",
+        "level": 4,
+        "rationale": "Platform handles financial data (payment transactions, escrow balances, payout amounts), PII (names, emails, professional credentials), and session recordings (video content with admin-only access). PCI DSS tokenisation required. Field-level access control for recordings (admin-only). Encryption at rest mandatory per BRD NFR-07."
+      }
+    ],
+    "quality_profile": [
+      {
+        "dimension": "QP1 \u2014 Testing Depth (Layered Testing)",
+        "level": 3,
+        "rationale": "PP-6 level 3 (Market-Ready) triggers QP-1 at least 3. PP-3 level 5 (multi-sided platform with complex permissions) reinforces need for thorough testing. Multi-currency payments, session lifecycle, and dispute workflows require unit plus integration plus e2e for critical paths. CI runs tests on every PR."
+      },
+      {
+        "dimension": "QP2 \u2014 Code Quality (Enforced Standards)",
+        "level": 3,
+        "rationale": "PP-6 level 3 (Market-Ready) with a 16-week delivery by an external team (Nagarro) necessitates enforced standards \u2014 linter, formatter, pre-commit hooks, static analysis, PR review with checklist, documented coding conventions. Technical debt management critical given fixed-price engagement."
+      },
+      {
+        "dimension": "QP3 \u2014 Documentation (Comprehensive)",
+        "level": 3,
+        "rationale": "NFR-5 level 3 (Standard Compliance) triggers QP-3 at least 3. Multi-service architecture (7+ integrations) requires OpenAPI specs, architecture overview, ADRs, and runbooks. External delivery team handover requires comprehensive onboarding documentation."
+      },
+      {
+        "dimension": "QP4 \u2014 CI/CD Maturity (Continuous Delivery)",
+        "level": 3,
+        "rationale": "PP-6 level 3 (Market-Ready) and NFR-4 level 3 (Standard Availability) both trigger QP-4 at least 3. BRD explicitly specifies GitHub Actions CI/CD, Docker containerisation, and managed hosting on Vercel. Multiple environments (dev, staging, prod) with automated database migrations."
+      },
+      {
+        "dimension": "QP5 \u2014 Observability (Monitored)",
+        "level": 3,
+        "rationale": "NFR-4 level 3 (Standard Availability) triggers QP-5 at least 3. BRD NFR-16 specifies centralised logging, monitoring, tracing, and alerting via cloud-native tooling. Payment processing, session lifecycle, and cross-timezone scheduling require operational visibility dashboards."
+      },
+      {
+        "dimension": "QP6 \u2014 Accessibility (Basic)",
+        "level": 2,
+        "rationale": "BRD specifies browser compatibility (last 2 versions of Chrome, Safari, Firefox, Edge) and mobile compatibility (last 2 major iOS and Android versions) but does not mention WCAG compliance or formal accessibility standards. PP-1 level 4 (General Consumer) benefits from good accessibility but no regulatory mandate exists in the BRD."
+      },
+      {
+        "dimension": "QP7 \u2014 Security Testing (SAST + Dependencies)",
+        "level": 3,
+        "rationale": "NFR-2 level 3 (Business Grade) triggers QP-7 at least 3. NFR-5 level 3 (Standard Compliance) reinforces need for security scanning. PCI DSS compliance requires dependency auditing and secure coding practices. SAST in CI with secret scanning for API keys (Zoom, payment provider, SendGrid, Firebase)."
+      }
+    ]
+  }
+}
