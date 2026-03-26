@@ -1,0 +1,112 @@
+{
+  "slug": "felly-club",
+  "epic_id": "E1",
+  "epic_name": "User Identity & Profile Foundation",
+  "status": "DRAFT",
+  "generated_at": "2026-03-26T16:10:00+0530",
+  "identity": {
+    "what_it_is": "The shared identity layer that every subsequent Felly Club capability depends on. Creates three authenticated personas (mentee, mentor, admin), an admin-curated mentor onboarding pipeline with verification, and the profile infrastructure that carries trust signals throughout the platform.",
+    "what_it_is_not": "This is not the mentor discovery marketplace (E2), session booking system (E3), or payment processor (E4). It creates the verified users those systems operate on.",
+    "core_jobs": [
+      "Allow mentees to self-register and manage their profiles",
+      "Allow administrators to onboard, verify, and manage mentors",
+      "Enforce role-based access control across all three personas",
+      "Provide the verified identity foundation for all downstream features"
+    ],
+    "non_goals": [
+      "Mentor self-registration (deferred to Phase 2)",
+      "Multi-factor authentication beyond platform defaults",
+      "SSO/SAML enterprise integration",
+      "User analytics dashboards"
+    ]
+  },
+  "invariants": [
+    {"id": "INV-01", "description": "A mentor profile is never visible to mentees until an administrator has explicitly approved it"},
+    {"id": "INV-02", "description": "Every authenticated request is associated with exactly one role — Mentee, Mentor, or Admin — and a user cannot hold multiple roles simultaneously"},
+    {"id": "INV-03", "description": "A verified badge is only assigned by an administrator after reviewing verification artefacts — it can never be self-assigned"},
+    {"id": "INV-04", "description": "Email addresses are unique across all user accounts — no two users can register with the same email"},
+    {"id": "INV-05", "description": "A user's password is never stored in readable form and is never included in any API response, log entry, or notification"}
+  ],
+  "scope": {
+    "in_scope": [
+      "Mentee self-registration via email and password",
+      "Mentee self-registration via social login (Google, Apple)",
+      "Email verification for new registrations",
+      "Authenticated login for all three personas",
+      "Password reset and recovery via email link",
+      "Admin-driven mentor onboarding with bio, expertise category, pricing, availability, verification artefacts",
+      "Admin verification review queue with approve/reject actions",
+      "Verified badge assignment upon admin approval",
+      "Mentee profile: view and edit name, email, interests, goals, avatar",
+      "Mentor profile: view and edit bio, expertise categories, pricing, availability, photo",
+      "Admin user list with status filters",
+      "Role-based access control enforcing Mentee, Mentor, and Admin boundaries",
+      "Session token management with automatic expiry and refresh",
+      "Profile completeness indicators",
+      "Mentor profile status lifecycle: Draft → Pending Verification → Verified / Rejected"
+    ],
+    "out_of_scope": [
+      "Mentor self-registration (Phase 2)",
+      "MFA beyond platform defaults",
+      "SSO/SAML enterprise integration",
+      "Bulk user import or directory sync",
+      "User analytics dashboards or detailed audit trail",
+      "Social login providers beyond Google and Apple",
+      "Profile photo advanced editing (cropping, filters)",
+      "Mentor search or discovery (E2)",
+      "Session booking (E3)",
+      "Payment processing (E4)"
+    ]
+  },
+  "features": [
+    {
+      "id": "F1.1",
+      "name": "Mentee Registration",
+      "description": "A new visitor can create a mentee account using either email-and-password or social login (Google, Apple). After registration, the mentee receives an email verification link. Upon verification, the mentee lands on their dashboard with prompts to complete their profile.",
+      "priority": "P1",
+      "mvp": true
+    },
+    {
+      "id": "F1.2",
+      "name": "User Authentication",
+      "description": "All three personas can log in using their credentials. The system issues a short-lived session token upon successful authentication and supports automatic token refresh. Failed login attempts are rate-limited.",
+      "priority": "P1",
+      "mvp": true
+    },
+    {
+      "id": "F1.3",
+      "name": "Password Reset & Recovery",
+      "description": "A user who has forgotten their password can request a reset link via email. The link is time-limited and single-use. After setting a new password, all existing sessions are invalidated.",
+      "priority": "P1",
+      "mvp": true
+    },
+    {
+      "id": "F1.4",
+      "name": "Admin-Driven Mentor Onboarding",
+      "description": "Platform administrators create mentor profiles through a guided workflow capturing bio, expertise category, pricing, availability, profile photo, and verification artefacts. The mentor profile starts in Draft status and moves to Pending Verification when submitted.",
+      "priority": "P1",
+      "mvp": true
+    },
+    {
+      "id": "F1.5",
+      "name": "Mentor Verification & Badge Assignment",
+      "description": "Administrators review pending mentor profiles, inspect verification artefacts, and approve or reject each profile. Approved mentors receive a verified badge and login credentials. Rejected profiles can be re-submitted after corrections.",
+      "priority": "P1",
+      "mvp": true
+    },
+    {
+      "id": "F1.6",
+      "name": "Profile Management",
+      "description": "Mentees and mentors can view and edit their own profiles. Both see a profile completeness indicator showing which fields are filled and which are missing.",
+      "priority": "P1",
+      "mvp": true
+    },
+    {
+      "id": "F1.7",
+      "name": "Role-Based Access Control",
+      "description": "The platform enforces strict separation between the three personas. Every API endpoint and page is protected by role-based guards. Administrators have read-only visibility into mentee and mentor data for operational purposes.",
+      "priority": "P1",
+      "mvp": true
+    }
+  ]
+}

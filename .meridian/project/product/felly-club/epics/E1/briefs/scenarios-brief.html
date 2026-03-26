@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E1 Scenarios — Felly Club</title>
+<style>
+:root { --bg:#fafafa; --surface:#fff; --border:#e5e7eb; --text:#1a1a2e; --muted:#6b7280; --accent:#4f46e5; --green:#059669; --orange:#d97706; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.page{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+h1{font-size:24px;font-weight:700;margin-bottom:4px}
+.sub{font-size:14px;color:var(--muted);margin-bottom:24px}
+h2{font-size:18px;font-weight:600;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px}
+th{text-align:left;padding:8px;background:rgba(79,70,229,0.04);border-bottom:2px solid var(--border);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+code{font-size:11px;background:rgba(79,70,229,0.06);padding:1px 4px;border-radius:3px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.stat-num{font-size:28px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--muted)}
+.auto-automated{color:var(--green);font-weight:600;font-size:11px}
+.auto-hybrid{color:var(--orange);font-weight:600;font-size:11px}
+.auto-manual{color:#dc2626;font-weight:600;font-size:11px}
+</style></head><body>
+<div class="page">
+<h1>E1: Verification Scenarios</h1>
+<p class="sub">37 scenarios covering 30 behaviors + 5 invariants</p>
+<div class="stats">
+<div class="stat"><div class="stat-num">37</div><div class="stat-label">Scenarios</div></div>
+<div class="stat"><div class="stat-num">30</div><div class="stat-label">Behaviors Covered</div></div>
+<div class="stat"><div class="stat-num">5</div><div class="stat-label">Invariants Covered</div></div>
+<div class="stat"><div class="stat-num">32</div><div class="stat-label">Automated</div></div>
+<div class="stat"><div class="stat-num">5</div><div class="stat-label">Hybrid</div></div>
+</div>
+<h2>All Scenarios</h2>
+<table><tr><th>ID</th><th>Feature</th><th>Ref</th><th>Description</th><th>Pass Criteria</th><th>Type</th></tr><tr>
+      <td><code>SC-E1-001</code></td>
+      <td>F1.1</td>
+      <td>B1.1.1</td>
+      <td>Verify that submitting a valid email and password creates an unverified mentee account and triggers a verification email</td>
+      <td>Account exists with unverified status; verification email is received at the provided address within a reasonable time window.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-002</code></td>
+      <td>F1.1</td>
+      <td>B1.1.2</td>
+      <td>Verify that clicking a valid verification link within its validity period marks the account as verified and redirects to the mentee dashboard</td>
+      <td>Account status is verified after link click; user lands on mentee dashboard; link is invalidated after use.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-003</code></td>
+      <td>F1.1</td>
+      <td>B1.1.3</td>
+      <td>Verify that social login via Google creates a verified mentee account and redirects to the mentee dashboard</td>
+      <td>Mentee account exists with verified status; email matches provider email; user lands on mentee dashboard.
+</td>
+      <td><span class="auto-hybrid">hybrid</span></td>
+    </tr><tr>
+      <td><code>SC-E1-004</code></td>
+      <td>F1.1</td>
+      <td>B1.1.3</td>
+      <td>Verify that social login via Apple creates a verified mentee account and redirects to the mentee dashboard</td>
+      <td>Mentee account exists with verified status; email matches Apple provider email; user lands on mentee dashboard.
+</td>
+      <td><span class="auto-hybrid">hybrid</span></td>
+    </tr><tr>
+      <td><code>SC-E1-005</code></td>
+      <td>F1.1</td>
+      <td>B1.1.4</td>
+      <td>Verify that registration with an already-used email is rejected with an appropriate error message</td>
+      <td>No duplicate account is created; user sees a clear error message about the email being taken; existing account is unaffected.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-006</code></td>
+      <td>F1.1</td>
+      <td>B1.1.5</td>
+      <td>Verify that a password not meeting minimum strength requirements is rejected with a specific validation message</td>
+      <td>Account is not created; validation message clearly states the unmet requirements; user can correct and resubmit.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-007</code></td>
+      <td>F1.2</td>
+      <td>B1.2.1</td>
+      <td>Verify that a verified user with correct credentials is authenticated, issued a session token, and redirected to their role-appropriate dashboard</td>
+      <td>Valid session token is issued; user lands on the dashboard matching their role; tested for all three persona types.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-008</code></td>
+      <td>F1.2</td>
+      <td>B1.2.2</td>
+      <td>Verify that incorrect credentials produce a generic error that does not reveal whether the email exists</td>
+      <td>Login fails; error message is identical for non-existent email and wrong password cases; no session token is issued.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-009</code></td>
+      <td>F1.2</td>
+      <td>B1.2.3</td>
+      <td>Verify that more than 10 failed login attempts from the same IP within 15 minutes triggers rate limiting</td>
+      <td>Attempts 1–10 return normal authentication errors; attempt 11+ returns a rate-limit error; block lifts after the time window.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-010</code></td>
+      <td>F1.2</td>
+      <td>B1.2.4</td>
+      <td>Verify that a session token nearing expiry is automatically refreshed without requiring re-authentication</td>
+      <td>User continues without interruption; a new valid session token is issued; the old token is replaced or invalidated.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-011</code></td>
+      <td>F1.2</td>
+      <td>B1.2.5</td>
+      <td>Verify that logging out invalidates the current session token and refresh token</td>
+      <td>Subsequent requests with the old session token are rejected; refresh token cannot be used to obtain a new session; user must re-authenticate to access protected resources.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-012</code></td>
+      <td>F1.3</td>
+      <td>B1.3.1</td>
+      <td>Verify that requesting a password reset with a registered email sends a time-limited reset link</td>
+      <td>Reset email is received; link is functional; link expires after 60 minutes.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-013</code></td>
+      <td>F1.3</td>
+      <td>B1.3.1</td>
+      <td>Verify that requesting a password reset with an unregistered email shows the same success message as a registered email</td>
+      <td>Success message is shown; no reset email is sent to the unregistered address; response timing does not differ significantly from the registered case.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-014</code></td>
+      <td>F1.3</td>
+      <td>B1.3.2</td>
+      <td>Verify that using a valid reset link with a compliant new password updates the password and invalidates all sessions</td>
+      <td>New password works for login; old password is rejected; all pre-existing sessions are no longer valid; user sees confirmation on the login page.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-015</code></td>
+      <td>F1.3</td>
+      <td>B1.3.3</td>
+      <td>Verify that clicking an expired or already-used reset link displays an error and prompts for a new link</td>
+      <td>Error message is shown; no password change occurs; user is guided to request a fresh link.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-016</code></td>
+      <td>F1.4</td>
+      <td>B1.4.1</td>
+      <td>Verify that an admin completing all required mentor onboarding fields creates a profile in Pending Verification status</td>
+      <td>Mentor profile exists with Pending Verification status; all required fields (name, email, bio, expertise category, pricing tier, availability slot, verification artefact) are persisted; profile appears in the review queue.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-017</code></td>
+      <td>F1.4</td>
+      <td>B1.4.2</td>
+      <td>Verify that an admin can save a partially completed mentor profile as Draft and resume later</td>
+      <td>Profile is saved in Draft status; partial data is preserved; admin can reopen and continue editing; profile does not appear in the verification queue.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-018</code></td>
+      <td>F1.4</td>
+      <td>B1.4.3</td>
+      <td>Verify that verification artefacts uploaded during mentor onboarding are stored and visible only to administrators</td>
+      <td>Artefact is persisted and linked to the correct mentor profile; admin can view the artefact; non-admin users cannot access the artefact.
+</td>
+      <td><span class="auto-hybrid">hybrid</span></td>
+    </tr><tr>
+      <td><code>SC-E1-019</code></td>
+      <td>F1.4</td>
+      <td>B1.4.4</td>
+      <td>Verify that submitting a mentor profile for verification generates login credentials that are held until approval</td>
+      <td>Credentials are generated; mentor cannot log in before approval; credentials are delivered only after admin approval (tested in SC-E1-022).
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-020</code></td>
+      <td>F1.5</td>
+      <td>B1.5.1</td>
+      <td>Verify that the admin verification queue displays all Pending Verification profiles sorted by submission date</td>
+      <td>All pending profiles are listed; sort order is oldest submission first; each entry shows name, expertise category, and artefact count; no non-pending profiles appear.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-021</code></td>
+      <td>F1.5</td>
+      <td>B1.5.2</td>
+      <td>Verify that admin approval of a pending mentor changes status to Verified, assigns the badge, and delivers credentials</td>
+      <td>Mentor status is Verified; verified badge is present on the profile; credential email is received by the mentor; mentor can log in with delivered credentials.
+</td>
+      <td><span class="auto-hybrid">hybrid</span></td>
+    </tr><tr>
+      <td><code>SC-E1-022</code></td>
+      <td>F1.5</td>
+      <td>B1.5.3</td>
+      <td>Verify that admin rejection of a pending mentor records the reason and notifies the onboarding admin</td>
+      <td>Mentor status is Rejected; rejection reason is persisted and viewable; notification is sent to the onboarding admin; profile can still be edited.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-023</code></td>
+      <td>F1.5</td>
+      <td>B1.5.4</td>
+      <td>Verify that a rejected mentor profile can be edited and re-submitted to the end of the verification queue</td>
+      <td>Profile status changes from Rejected to Pending Verification; profile appears at the end of the queue (after other pending profiles); edits are persisted.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-024</code></td>
+      <td>F1.6</td>
+      <td>B1.6.1</td>
+      <td>Verify that a mentee viewing their profile sees all fields and a completeness indicator</td>
+      <td>All profile fields are displayed; completeness percentage reflects the actual state of optional fields; empty fields are clearly indicated.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-025</code></td>
+      <td>F1.6</td>
+      <td>B1.6.2</td>
+      <td>Verify that a mentee can edit their profile, save changes, and see the completeness indicator update</td>
+      <td>Changes are saved; profile reflects new values on reload; completeness indicator adjusts correctly after adding or removing optional field values.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-026</code></td>
+      <td>F1.6</td>
+      <td>B1.6.3</td>
+      <td>Verify that a mentor viewing their profile sees all fields including verification status and completeness</td>
+      <td>All mentor-specific fields are shown; verification status (Draft/Pending/Verified/Rejected) is displayed; completeness indicator is present and accurate.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-027</code></td>
+      <td>F1.6</td>
+      <td>B1.6.4</td>
+      <td>Verify that a mentor can edit pricing and availability with changes effective for future sessions only</td>
+      <td>Updated pricing and availability are saved and visible on the profile; validation rejects invalid input (e.g. negative pricing); pricing change is flagged as future-only.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-028</code></td>
+      <td>F1.6</td>
+      <td>B1.6.5</td>
+      <td>Verify that a user cannot view or edit another user's private profile fields</td>
+      <td>Request is denied with an authorization error; no private data is returned in the response; tested for mentee-to-mentee, mentor-to-mentor, and cross-role attempts.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-029</code></td>
+      <td>F1.7</td>
+      <td>B1.7.1</td>
+      <td>Verify that a mentee attempting to access admin-only functions receives a forbidden error</td>
+      <td>Request is denied; forbidden error is returned; no admin data is exposed; tested against multiple admin-only endpoints.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-030</code></td>
+      <td>F1.7</td>
+      <td>B1.7.2</td>
+      <td>Verify that a mentor cannot access another mentor's private data</td>
+      <td>Request is denied; forbidden error is returned; no private data from the other mentor is included in the response.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-031</code></td>
+      <td>F1.7</td>
+      <td>B1.7.3</td>
+      <td>Verify that an administrator can view all users with their status, registration date, and profile completeness</td>
+      <td>All user accounts appear in the list; status filters work correctly; registration dates and completeness percentages are accurate.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-032</code></td>
+      <td>F1.7</td>
+      <td>B1.7.4</td>
+      <td>Verify that an unauthenticated user accessing a protected page is redirected to login or receives an authentication error</td>
+      <td>Web request redirects to login page; API request returns authentication error with appropriate status; no protected data is leaked in the redirect or error response.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-033</code></td>
+      <td>F1.5</td>
+      <td>INV-01</td>
+      <td>Verify that a mentor profile in any non-approved status is never visible to mentees</td>
+      <td>Mentee search, browse, and direct-access requests return no data for unapproved mentors; only Verified mentors are visible; tested for each non-approved status.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-034</code></td>
+      <td>F1.7</td>
+      <td>INV-02</td>
+      <td>Verify that each authenticated request is associated with exactly one role and a user cannot hold multiple roles</td>
+      <td>Session carries exactly one role; attempts to assign a second role fail; cross-role access is denied even if manipulating session data.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-035</code></td>
+      <td>F1.5</td>
+      <td>INV-03</td>
+      <td>Verify that the verified badge can only be assigned by an administrator and cannot be self-assigned by a mentor</td>
+      <td>Admin approval assigns the badge successfully; direct mentor requests to set their own verified status are rejected; badge status cannot be modified through profile edit.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-036</code></td>
+      <td>F1.1</td>
+      <td>INV-04</td>
+      <td>Verify that email uniqueness is enforced across all user accounts regardless of role</td>
+      <td>Registration with an email already used by any role is rejected; admin mentor onboarding with a duplicate email is rejected; uniqueness is case-insensitive.
+</td>
+      <td><span class="auto-auto">automated</span></td>
+    </tr><tr>
+      <td><code>SC-E1-037</code></td>
+      <td>F1.2</td>
+      <td>INV-05</td>
+      <td>Verify that passwords are never stored in readable form and never appear in any response, log, or notification</td>
+      <td>Stored password value is a one-way hash, not plaintext; API responses for user profiles and authentication omit the password field entirely; log output contains no password values.
+</td>
+      <td><span class="auto-hybrid">hybrid</span></td>
+    </tr></table>
+<h2>Feature Gates</h2>
+<table><tr><th>Feature</th><th>Required Scenarios</th><th>Count</th></tr><tr><td><strong>F1.1</strong></td><td>SC-E1-001, SC-E1-002, SC-E1-003, SC-E1-004, SC-E1-005, SC-E1-006, SC-E1-036</td><td>7</td></tr><tr><td><strong>F1.2</strong></td><td>SC-E1-007, SC-E1-008, SC-E1-009, SC-E1-010, SC-E1-011, SC-E1-037</td><td>6</td></tr><tr><td><strong>F1.3</strong></td><td>SC-E1-012, SC-E1-013, SC-E1-014, SC-E1-015</td><td>4</td></tr><tr><td><strong>F1.4</strong></td><td>SC-E1-016, SC-E1-017, SC-E1-018, SC-E1-019</td><td>4</td></tr><tr><td><strong>F1.5</strong></td><td>SC-E1-020, SC-E1-021, SC-E1-022, SC-E1-023, SC-E1-033, SC-E1-035</td><td>6</td></tr><tr><td><strong>F1.6</strong></td><td>SC-E1-024, SC-E1-025, SC-E1-026, SC-E1-027, SC-E1-028</td><td>5</td></tr><tr><td><strong>F1.7</strong></td><td>SC-E1-029, SC-E1-030, SC-E1-031, SC-E1-032, SC-E1-034</td><td>5</td></tr></table>
+</div></body></html>

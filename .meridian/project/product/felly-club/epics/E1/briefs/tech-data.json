@@ -1,0 +1,3033 @@
+{
+  "project_structure": {
+    "root": "felly-club/",
+    "package_manager": "pnpm 9.x",
+    "workspace_config": "pnpm-workspace.yaml",
+    "node_version": "20 LTS",
+    "root_files": [
+      {
+        "path": "pnpm-workspace.yaml",
+        "purpose": "Declares packages/* as pnpm workspace packages",
+        "content_note": "packages:\n  - 'packages/*'\n"
+      },
+      {
+        "path": "package.json",
+        "purpose": "Root workspace package.json with shared dev scripts (lint, typecheck, test, build)"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "purpose": "Base TypeScript config extended by all packages \u2014 strict mode, decorators, paths",
+        "content_note": "{\n  \"compilerOptions\": {\n    \"strict\": true,\n    \"experimentalDecorators\": true,\n    \"emitDecoratorMetadata\": true,\n    \"moduleResolution\": \"bundler\",\n    \"target\": \"ES2022\",\n    \"lib\": [\"ES2022\"],\n    \"paths\": { \"@felly/shared-types\": [\"./packages/shared-types/src/index.ts\"] }\n  }\n}\n"
+      },
+      {
+        "path": "docker-compose.yml",
+        "purpose": "Local dev services: PostgreSQL 16 and Redis 7 (KeyCloak excluded \u2014 mock auth in E1)"
+      },
+      {
+        "path": ".env.local.example",
+        "purpose": "Template environment file \u2014 committed to git, never contains real secrets"
+      },
+      {
+        "path": ".prettierrc",
+        "purpose": "Prettier config: printWidth 100, singleQuote true, trailingComma es5, tabWidth 2"
+      },
+      {
+        "path": ".eslintrc.json",
+        "purpose": "Root ESLint config using @typescript-eslint/eslint-plugin strict mode"
+      },
+      {
+        "path": ".husky/pre-commit",
+        "purpose": "Runs lint-staged (ESLint + Prettier) on staged files before every commit"
+      },
+      {
+        "path": ".github/workflows/ci.yml",
+        "purpose": "GitHub Actions CI: lint \u2192 typecheck \u2192 test \u2192 build (all packages)"
+      },
+      {
+        "path": "infra/keycloak/realm-export.json",
+        "purpose": "KeyCloak realm config for E11 (stub file created in E1 for future reference)"
+      },
+      {
+        "path": "docs/adr/ADR-001-modular-monolith.md",
+        "purpose": "First ADR: decision to use NestJS modular monolith over microservices"
+      }
+    ],
+    "packages": [
+      {
+        "name": "packages/shared-types",
+        "type": "typescript-library",
+        "description": "Shared TypeScript interfaces and enums for API contracts used by all packages",
+        "directory_tree": "packages/shared-types/\n\u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 enums/\n\u2502   \u2502   \u251c\u2500\u2500 user-role.enum.ts          # UserRole: MENTEE | MENTOR | ADMIN\n\u2502   \u2502   \u251c\u2500\u2500 user-status.enum.ts        # UserStatus: PENDING_EMAIL_VERIFICATION | ACTIVE | SUSPENDED\n\u2502   \u2502   \u251c\u2500\u2500 mentor-status.enum.ts      # MentorProfileStatus: DRAFT | PENDING_VERIFICATION | VERIFIED | REJECTED\n\u2502   \u2502   \u251c\u2500\u2500 expertise-category.enum.ts # ExpertiseCategory: SPORT | ENTREPRENEURSHIP | BUSINESS | ENTERTAINMENT\n\u2502   \u2502   \u2514\u2500\u2500 artefact-type.enum.ts      # ArtefactType: LINKEDIN_URL | PORTFOLIO_URL | DOCUMENT\n\u2502   \u251c\u2500\u2500 types/\n\u2502   \u2502   \u251c\u2500\u2500 user.types.ts              # IUser, IMenteeProfile, IMentorProfile\n\u2502   \u2502   \u251c\u2500\u2500 auth.types.ts              # IAuthTokens, IJwtPayload, ILoginResponse\n\u2502   \u2502   \u251c\u2500\u2500 mentor.types.ts            # IPricingTier, IAvailabilitySlot, IVerificationArtefact\n\u2502   \u2502   \u2514\u2500\u2500 api-response.types.ts      # IPaginatedResponse<T>, IApiError\n\u2502   \u2514\u2500\u2500 index.ts                       # Re-exports all types and enums\n\u251c\u2500\u2500 tsconfig.json\n\u2514\u2500\u2500 package.json\n"
+      },
+      {
+        "name": "packages/backend-api",
+        "type": "nestjs",
+        "description": "NestJS 10 backend with Fastify adapter \u2014 AuthModule, UserModule, AdminModule for E1",
+        "directory_tree": "packages/backend-api/\n\u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 main.ts                            # Bootstrap: NestFactory with Fastify, ValidationPipe, global filters\n\u2502   \u251c\u2500\u2500 app.module.ts                      # Root module: imports PrismaModule, AuthModule, UserModule, AdminModule, HealthModule\n\u2502   \u251c\u2500\u2500 auth/\n\u2502   \u2502   \u251c\u2500\u2500 adapters/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 auth-adapter.interface.ts  # IAuthAdapter contract (swappable in E11)\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 mock-auth.adapter.ts       # MockAuthAdapter: JWT via jsonwebtoken, bcrypt passwords, PG storage\n\u2502   \u2502   \u251c\u2500\u2500 decorators/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 current-user.decorator.ts  # @CurrentUser(): extracts JwtPayload from request\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 roles.decorator.ts         # @Roles(UserRole.ADMIN): sets roles metadata\n\u2502   \u2502   \u251c\u2500\u2500 dto/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 register.dto.ts            # RegisterDto: email, password (+ optional role, defaults MENTEE)\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 login.dto.ts               # LoginDto: email, password\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 forgot-password.dto.ts     # ForgotPasswordDto: email\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 reset-password.dto.ts      # ResetPasswordDto: token, newPassword\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 refresh-token.dto.ts       # RefreshTokenDto: refreshToken\n\u2502   \u2502   \u251c\u2500\u2500 guards/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 jwt-auth.guard.ts          # JwtAuthGuard: validates Bearer JWT, sets request.user\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 roles.guard.ts             # RolesGuard: checks realm_access.roles vs @Roles()\n\u2502   \u2502   \u251c\u2500\u2500 interfaces/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 jwt-payload.interface.ts   # JwtPayload interface matching KeyCloak shape\n\u2502   \u2502   \u251c\u2500\u2500 auth.controller.ts             # Routes: register, login, logout, refresh, verify-email, forgot/reset-password, social\n\u2502   \u2502   \u251c\u2500\u2500 auth.service.ts                # Delegates to IAuthAdapter, handles user persistence\n\u2502   \u2502   \u2514\u2500\u2500 auth.module.ts                 # Provides MockAuthAdapter via AUTH_ADAPTER_TOKEN, exports JwtAuthGuard, RolesGuard\n\u2502   \u251c\u2500\u2500 user/\n\u2502   \u2502   \u251c\u2500\u2500 dto/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 update-mentee-profile.dto.ts  # UpdateMenteeProfileDto: firstName?, lastName?, interests?, goals?, avatarKey?\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 update-mentor-profile.dto.ts  # UpdateMentorProfileDto: bio?, pricingTiers?, availabilitySlots?, photoKey?\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 user-response.dto.ts          # UserResponseDto: serialized user with profile (no passwordHash)\n\u2502   \u2502   \u251c\u2500\u2500 user.controller.ts             # Routes: GET/PATCH /users/me, GET/PATCH /users/me/mentee-profile, GET/PATCH /users/me/mentor-profile\n\u2502   \u2502   \u251c\u2500\u2500 user.service.ts                # Business logic: profile updates, completeness calculation\n\u2502   \u2502   \u251c\u2500\u2500 user.repository.ts             # Prisma queries: findById, updateMenteeProfile, updateMentorProfile\n\u2502   \u2502   \u2514\u2500\u2500 user.module.ts                 # Imports PrismaModule, AuthModule; exports UserService\n\u2502   \u251c\u2500\u2500 admin/\n\u2502   \u2502   \u251c\u2500\u2500 dto/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 create-mentor.dto.ts       # CreateMentorDto: all required mentor onboarding fields\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 update-mentor.dto.ts       # UpdateMentorDto: partial mentor fields for draft editing\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 reject-mentor.dto.ts       # RejectMentorDto: reason (string, required)\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 mentor-response.dto.ts     # MentorResponseDto: mentor profile + artefacts (no sensitive data)\n\u2502   \u2502   \u251c\u2500\u2500 admin.controller.ts            # Routes: users list/detail, mentor CRUD, submit, verify-queue, approve/reject, artefacts\n\u2502   \u2502   \u251c\u2500\u2500 admin.service.ts               # Business logic: mentor onboarding workflow, verification state machine\n\u2502   \u2502   \u251c\u2500\u2500 admin.repository.ts            # Prisma queries: mentor profile CRUD, artefact CRUD, user listing\n\u2502   \u2502   \u2514\u2500\u2500 admin.module.ts                # Imports PrismaModule, AuthModule, UserModule\n\u2502   \u251c\u2500\u2500 prisma/\n\u2502   \u2502   \u251c\u2500\u2500 prisma.module.ts               # Global module, exports PrismaService\n\u2502   \u2502   \u2514\u2500\u2500 prisma.service.ts              # Extends PrismaClient, connects on ModuleInit, disconnects on ModuleDestroy\n\u2502   \u251c\u2500\u2500 common/\n\u2502   \u2502   \u251c\u2500\u2500 filters/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 http-exception.filter.ts   # Global filter: maps NestJS HttpExceptions to { statusCode, message, error, timestamp }\n\u2502   \u2502   \u251c\u2500\u2500 interceptors/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 logging.interceptor.ts     # Logs each request with method, path, duration_ms, status; uses nestjs-pino logger\n\u2502   \u2502   \u2514\u2500\u2500 constants.ts                   # AUTH_ADAPTER_TOKEN = Symbol('AUTH_ADAPTER_TOKEN')\n\u2502   \u2514\u2500\u2500 health/\n\u2502       \u2514\u2500\u2500 health.controller.ts           # GET /health \u2192 { status: \"ok\", timestamp, version }\n\u251c\u2500\u2500 prisma/\n\u2502   \u251c\u2500\u2500 schema.prisma                      # Full Prisma schema: all E1 entities + enums\n\u2502   \u2514\u2500\u2500 migrations/                        # Migration files generated by prisma migrate dev\n\u251c\u2500\u2500 test/\n\u2502   \u251c\u2500\u2500 auth/\n\u2502   \u2502   \u251c\u2500\u2500 auth.controller.spec.ts        # Unit tests for AuthController\n\u2502   \u2502   \u251c\u2500\u2500 auth.service.spec.ts           # Unit tests for AuthService + MockAuthAdapter\n\u2502   \u2502   \u2514\u2500\u2500 auth.e2e-spec.ts               # E2e: register \u2192 verify-email \u2192 login \u2192 logout flow\n\u2502   \u251c\u2500\u2500 user/\n\u2502   \u2502   \u251c\u2500\u2500 user.controller.spec.ts        # Unit tests for UserController\n\u2502   \u2502   \u2514\u2500\u2500 user.service.spec.ts           # Unit tests for profile update and completeness\n\u2502   \u2514\u2500\u2500 admin/\n\u2502       \u251c\u2500\u2500 admin.controller.spec.ts       # Unit tests for AdminController\n\u2502       \u251c\u2500\u2500 admin.service.spec.ts          # Unit tests for mentor onboarding state machine\n\u2502       \u2514\u2500\u2500 admin.e2e-spec.ts              # E2e: onboard mentor \u2192 submit \u2192 approve \u2192 credentials delivered\n\u251c\u2500\u2500 .env.local.example                     # Template with all required env vars and placeholder values\n\u251c\u2500\u2500 jest.config.ts                         # Jest config: ts-jest, coverage thresholds (80% auth/admin/user)\n\u251c\u2500\u2500 tsconfig.json                          # Extends tsconfig.base.json, adds rootDir src\n\u2514\u2500\u2500 package.json\n"
+      },
+      {
+        "name": "packages/mentee-web-app",
+        "type": "nextjs",
+        "description": "Next.js 15 mentee-facing app \u2014 registration, login, email verify, password reset, dashboard, profile management",
+        "directory_tree": "packages/mentee-web-app/\n\u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 app/\n\u2502   \u2502   \u251c\u2500\u2500 layout.tsx                     # Root layout: QueryProvider, fonts, global CSS\n\u2502   \u2502   \u251c\u2500\u2500 page.tsx                       # Root page: redirects authenticated \u2192 /dashboard, unauthenticated \u2192 /login\n\u2502   \u2502   \u251c\u2500\u2500 (auth)/                        # Route group: unauthenticated pages, centered-card layout, no nav\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 layout.tsx                 # Auth layout: full-height centered card, Felly Club logo\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 login/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx               # Login page: email/password form + social login buttons\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 register/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx               # Register page: email/password form + social login buttons\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 verify-email/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx               # Email verification: reads ?token= from URL, calls verify-email API\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 forgot-password/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx               # Forgot password: email form, shows success message\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 reset-password/\n\u2502   \u2502   \u2502       \u2514\u2500\u2500 page.tsx               # Reset password: reads ?token= from URL, new password form\n\u2502   \u2502   \u251c\u2500\u2500 (app)/                         # Route group: authenticated pages, nav + sidebar layout\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 layout.tsx                 # App layout: top nav + sidebar, wraps all authenticated pages\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 dashboard/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx               # Mentee dashboard: welcome message, profile completeness banner, quick actions\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 profile/\n\u2502   \u2502   \u2502       \u2514\u2500\u2500 page.tsx               # Mentee profile: edit form (name, avatar, interests, goals) + completeness indicator\n\u2502   \u2502   \u251c\u2500\u2500 error.tsx                      # Root error boundary\n\u2502   \u2502   \u2514\u2500\u2500 not-found.tsx\n\u2502   \u251c\u2500\u2500 components/\n\u2502   \u2502   \u251c\u2500\u2500 auth/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 LoginForm.tsx              # Controlled form: email + password, react-hook-form + zod\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 RegisterForm.tsx           # Controlled form: email + password + confirm, react-hook-form + zod\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 SocialLoginButtons.tsx     # Google + Apple login buttons, redirect to backend OAuth endpoints\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 ForgotPasswordForm.tsx     # Single email field form\n\u2502   \u2502   \u251c\u2500\u2500 profile/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 MenteeProfileForm.tsx      # Edit form for mentee profile fields\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 ProfileCompleteness.tsx    # Progress bar showing completeness percentage + missing fields list\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 AvatarUpload.tsx           # Avatar file picker with preview (uploads to /api/v1/users/me/avatar)\n\u2502   \u2502   \u251c\u2500\u2500 layout/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 AppNav.tsx                 # Top navigation with user menu + logout\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 AppSidebar.tsx             # Sidebar navigation links\n\u2502   \u2502   \u2514\u2500\u2500 ui/                            # Re-exported shadcn/ui components (Button, Input, Card, Dialog, etc.)\n\u2502   \u251c\u2500\u2500 hooks/\n\u2502   \u2502   \u251c\u2500\u2500 useAuth.ts                     # useAuth: reads auth state from localStorage, logout helper\n\u2502   \u2502   \u2514\u2500\u2500 useProfile.ts                  # useProfile: TanStack Query hook for GET/PATCH mentee profile\n\u2502   \u251c\u2500\u2500 lib/\n\u2502   \u2502   \u251c\u2500\u2500 api-client.ts                  # Axios instance with base URL + Bearer token interceptor\n\u2502   \u2502   \u251c\u2500\u2500 auth.ts                        # Token storage helpers: saveTokens, getAccessToken, clearTokens (localStorage)\n\u2502   \u2502   \u2514\u2500\u2500 query-client.ts                # TanStack QueryClient singleton\n\u2502   \u251c\u2500\u2500 providers/\n\u2502   \u2502   \u2514\u2500\u2500 QueryProvider.tsx              # 'use client' TanStack QueryClient provider wrapper\n\u2502   \u2514\u2500\u2500 middleware.ts                      # Next.js middleware: reads access token cookie/localStorage, redirects unauthenticated users from (app)/* to /login\n\u251c\u2500\u2500 public/\n\u2502   \u2514\u2500\u2500 felly-logo.svg\n\u251c\u2500\u2500 .env.local.example\n\u251c\u2500\u2500 next.config.ts                         # Next.js config: allowed image domains (S3 bucket), API rewrites if needed\n\u251c\u2500\u2500 tailwind.config.ts                     # Tailwind config: content paths, shadcn/ui theme extension\n\u251c\u2500\u2500 postcss.config.mjs\n\u251c\u2500\u2500 tsconfig.json\n\u2514\u2500\u2500 package.json\n"
+      },
+      {
+        "name": "packages/admin-portal",
+        "type": "nextjs",
+        "description": "Next.js 15 admin portal \u2014 CSR-dominant, mentor onboarding, verification queue, user management",
+        "directory_tree": "packages/admin-portal/\n\u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 app/\n\u2502   \u2502   \u251c\u2500\u2500 layout.tsx                     # Root layout: QueryProvider, fonts, global CSS\n\u2502   \u2502   \u251c\u2500\u2500 page.tsx                       # Root page: redirects authenticated admin \u2192 /portal/dashboard, else \u2192 /login\n\u2502   \u2502   \u251c\u2500\u2500 (auth)/                        # Route group: admin login only\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 layout.tsx                 # Auth layout: centered card\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 login/\n\u2502   \u2502   \u2502       \u2514\u2500\u2500 page.tsx               # Admin login: email/password only (no social login for admin)\n\u2502   \u2502   \u251c\u2500\u2500 (portal)/                      # Route group: all authenticated admin pages\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 layout.tsx                 # Portal layout: admin sidebar + top bar with admin user badge\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 dashboard/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx               # Admin dashboard: quick stats (total mentors, pending verification count, total mentees)\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 mentors/\n\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 page.tsx               # Mentor list with TanStack Table: filter by status, search by name\n\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 new/\n\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx           # New mentor onboarding: multi-step form (profile \u2192 pricing \u2192 availability \u2192 artefacts)\n\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 verify/\n\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 page.tsx           # Verification queue: list of PENDING_VERIFICATION mentors, approve/reject actions\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 [id]/\n\u2502   \u2502   \u2502   \u2502       \u2514\u2500\u2500 page.tsx           # Mentor detail: view/edit profile, artefacts, status history\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 users/\n\u2502   \u2502   \u2502       \u2514\u2500\u2500 page.tsx               # User list: all mentees and mentors with status filters\n\u2502   \u2502   \u2514\u2500\u2500 error.tsx\n\u2502   \u251c\u2500\u2500 components/\n\u2502   \u2502   \u251c\u2500\u2500 mentors/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 MentorOnboardingForm.tsx   # Multi-step wizard: step 1 (profile) \u2192 step 2 (pricing) \u2192 step 3 (availability) \u2192 step 4 (artefacts)\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 VerificationQueue.tsx      # TanStack Table of pending mentors with approve/reject buttons + rejection reason modal\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 MentorStatusBadge.tsx      # Colored badge for DRAFT | PENDING_VERIFICATION | VERIFIED | REJECTED\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 ArtefactUploader.tsx       # File/URL input for verification artefacts (LinkedIn URL, Portfolio URL, Document upload)\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 PricingTierEditor.tsx      # Dynamic form: add/remove pricing tiers (duration + prices in INR/USD/CHF/EUR)\n\u2502   \u2502   \u251c\u2500\u2500 users/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 UserListTable.tsx          # TanStack Table: all users, filter by role/status, sort by date\n\u2502   \u2502   \u251c\u2500\u2500 layout/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 AdminNav.tsx               # Top nav with admin user info + logout\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 AdminSidebar.tsx           # Sidebar: Dashboard, Mentors, Verification Queue, Users\n\u2502   \u2502   \u2514\u2500\u2500 ui/                            # Re-exported shadcn/ui components\n\u2502   \u251c\u2500\u2500 hooks/\n\u2502   \u2502   \u251c\u2500\u2500 useAuth.ts                     # Admin auth state, logout helper\n\u2502   \u2502   \u251c\u2500\u2500 useMentors.ts                  # TanStack Query hooks: mentor list, create, update, approve, reject\n\u2502   \u2502   \u2514\u2500\u2500 useUsers.ts                    # TanStack Query hook: user list\n\u2502   \u251c\u2500\u2500 lib/\n\u2502   \u2502   \u251c\u2500\u2500 api-client.ts                  # Axios instance with admin API base URL + Bearer token interceptor\n\u2502   \u2502   \u251c\u2500\u2500 auth.ts                        # Token storage helpers (localStorage)\n\u2502   \u2502   \u2514\u2500\u2500 query-client.ts\n\u2502   \u251c\u2500\u2500 providers/\n\u2502   \u2502   \u2514\u2500\u2500 QueryProvider.tsx\n\u2502   \u2514\u2500\u2500 middleware.ts                      # Next.js middleware: admin role check, redirect non-admin to login\n\u251c\u2500\u2500 .env.local.example\n\u251c\u2500\u2500 next.config.ts\n\u251c\u2500\u2500 tailwind.config.ts\n\u251c\u2500\u2500 postcss.config.mjs\n\u251c\u2500\u2500 tsconfig.json\n\u2514\u2500\u2500 package.json\n"
+      }
+    ]
+  },
+  "libraries": {
+    "packages/shared-types": {
+      "dependencies": [
+        {
+          "name": "typescript",
+          "version": "^5.4.0",
+          "purpose": "TypeScript compiler \u2014 types only package, no runtime dependencies"
+        }
+      ]
+    },
+    "packages/backend-api": {
+      "dependencies": [
+        {
+          "name": "@nestjs/common",
+          "version": "^10.3.10",
+          "purpose": "NestJS decorators, pipes, guards, interceptors, exception filters"
+        },
+        {
+          "name": "@nestjs/core",
+          "version": "^10.3.10",
+          "purpose": "NestJS application bootstrap and DI container"
+        },
+        {
+          "name": "@nestjs/platform-fastify",
+          "version": "^10.3.10",
+          "purpose": "Fastify HTTP adapter for NestJS \u2014 replaces default Express for performance"
+        },
+        {
+          "name": "@nestjs/config",
+          "version": "^3.2.3",
+          "purpose": "Environment variable configuration module with .env file support"
+        },
+        {
+          "name": "@nestjs/passport",
+          "version": "^10.0.3",
+          "purpose": "NestJS Passport.js integration for JWT auth strategy binding to guards"
+        },
+        {
+          "name": "@nestjs/swagger",
+          "version": "^7.3.1",
+          "purpose": "OpenAPI 3.1 spec auto-generation from decorators; Swagger UI at /api/docs"
+        },
+        {
+          "name": "fastify",
+          "version": "^4.27.0",
+          "purpose": "HTTP server \u2014 faster than Express (2-3x throughput), NestJS Fastify adapter dep"
+        },
+        {
+          "name": "@prisma/client",
+          "version": "^5.14.0",
+          "purpose": "Auto-generated Prisma type-safe database client"
+        },
+        {
+          "name": "class-validator",
+          "version": "^0.14.1",
+          "purpose": "DTO validation decorators \u2014 @IsEmail, @IsString, @MinLength, @IsEnum, etc."
+        },
+        {
+          "name": "class-transformer",
+          "version": "^0.5.1",
+          "purpose": "plainToInstance and Exclude/Expose for DTO serialisation; used by ValidationPipe"
+        },
+        {
+          "name": "jsonwebtoken",
+          "version": "^9.0.2",
+          "purpose": "JWT signing and verification in MockAuthAdapter \u2014 same payload shape as KeyCloak JWTs"
+        },
+        {
+          "name": "bcryptjs",
+          "version": "^2.4.3",
+          "purpose": "Password hashing in MockAuthAdapter \u2014 bcrypt rounds 12 for password storage"
+        },
+        {
+          "name": "passport",
+          "version": "^0.7.0",
+          "purpose": "Passport.js core \u2014 authentication middleware wired to NestJS guards"
+        },
+        {
+          "name": "passport-jwt",
+          "version": "^4.0.1",
+          "purpose": "Passport JWT strategy \u2014 extracts and validates Bearer tokens"
+        },
+        {
+          "name": "nestjs-pino",
+          "version": "^4.1.0",
+          "purpose": "NestJS integration for Pino structured JSON logger"
+        },
+        {
+          "name": "pino",
+          "version": "^9.0.0",
+          "purpose": "Fast structured JSON logger \u2014 replaces console.log in all modules"
+        },
+        {
+          "name": "pino-http",
+          "version": "^10.2.0",
+          "purpose": "HTTP request/response logging middleware for Fastify with Pino"
+        },
+        {
+          "name": "@felly/shared-types",
+          "version": "workspace:*",
+          "purpose": "Shared TypeScript enums and interfaces (UserRole, MentorProfileStatus, etc.)"
+        },
+        {
+          "name": "rxjs",
+          "version": "^7.8.1",
+          "purpose": "Reactive extensions \u2014 required by NestJS core pipes and interceptors"
+        },
+        {
+          "name": "reflect-metadata",
+          "version": "^0.1.14",
+          "purpose": "TypeScript decorator metadata reflection \u2014 required by NestJS DI"
+        }
+      ],
+      "devDependencies": [
+        {
+          "name": "prisma",
+          "version": "^5.14.0",
+          "purpose": "Prisma CLI \u2014 npx prisma migrate dev, npx prisma generate, npx prisma studio"
+        },
+        {
+          "name": "@nestjs/testing",
+          "version": "^10.3.10",
+          "purpose": "NestJS testing utilities \u2014 Test.createTestingModule for unit/integration tests"
+        },
+        {
+          "name": "jest",
+          "version": "^29.7.0",
+          "purpose": "Test runner for all unit and integration tests"
+        },
+        {
+          "name": "ts-jest",
+          "version": "^29.1.5",
+          "purpose": "TypeScript preprocessor for Jest \u2014 runs .spec.ts files without compilation step"
+        },
+        {
+          "name": "@types/jest",
+          "version": "^29.5.12",
+          "purpose": "TypeScript types for Jest"
+        },
+        {
+          "name": "supertest",
+          "version": "^7.0.0",
+          "purpose": "HTTP assertion library for NestJS e2e/controller integration tests"
+        },
+        {
+          "name": "@types/supertest",
+          "version": "^6.0.2",
+          "purpose": "TypeScript types for Supertest"
+        },
+        {
+          "name": "@types/jsonwebtoken",
+          "version": "^9.0.6",
+          "purpose": "TypeScript types for jsonwebtoken"
+        },
+        {
+          "name": "@types/bcryptjs",
+          "version": "^2.4.6",
+          "purpose": "TypeScript types for bcryptjs"
+        },
+        {
+          "name": "@types/passport-jwt",
+          "version": "^4.0.1",
+          "purpose": "TypeScript types for passport-jwt"
+        },
+        {
+          "name": "@types/node",
+          "version": "^20.12.0",
+          "purpose": "Node.js type definitions"
+        },
+        {
+          "name": "typescript",
+          "version": "^5.4.5",
+          "purpose": "TypeScript compiler"
+        },
+        {
+          "name": "eslint",
+          "version": "^9.3.0",
+          "purpose": "JavaScript/TypeScript linter"
+        },
+        {
+          "name": "@typescript-eslint/eslint-plugin",
+          "version": "^7.7.0",
+          "purpose": "TypeScript-specific ESLint rules \u2014 strict mode, no-explicit-any, no-unused-vars"
+        },
+        {
+          "name": "@typescript-eslint/parser",
+          "version": "^7.7.0",
+          "purpose": "TypeScript parser for ESLint"
+        },
+        {
+          "name": "prettier",
+          "version": "^3.2.5",
+          "purpose": "Code formatter \u2014 enforced via pre-commit hook and CI check"
+        }
+      ]
+    },
+    "packages/mentee-web-app": {
+      "dependencies": [
+        {
+          "name": "next",
+          "version": "^15.1.7",
+          "purpose": "Next.js 15 \u2014 App Router, SSR for public pages, CSR for authenticated flows"
+        },
+        {
+          "name": "react",
+          "version": "^18.3.1",
+          "purpose": "React 18 \u2014 component framework"
+        },
+        {
+          "name": "react-dom",
+          "version": "^18.3.1",
+          "purpose": "React DOM renderer"
+        },
+        {
+          "name": "@tanstack/react-query",
+          "version": "^5.28.0",
+          "purpose": "Server state management \u2014 caching, background refresh, optimistic updates for profile and auth data"
+        },
+        {
+          "name": "react-hook-form",
+          "version": "^7.51.3",
+          "purpose": "Form state management \u2014 login, register, profile edit forms"
+        },
+        {
+          "name": "@hookform/resolvers",
+          "version": "^3.3.4",
+          "purpose": "Zod resolver for react-hook-form \u2014 schema-based validation"
+        },
+        {
+          "name": "zod",
+          "version": "^3.23.0",
+          "purpose": "Schema validation \u2014 form validation schemas for all frontend forms"
+        },
+        {
+          "name": "axios",
+          "version": "^1.6.8",
+          "purpose": "HTTP client with interceptors for Bearer token injection and 401 refresh handling"
+        },
+        {
+          "name": "tailwindcss",
+          "version": "^3.4.3",
+          "purpose": "Utility-first CSS framework"
+        },
+        {
+          "name": "autoprefixer",
+          "version": "^10.4.19",
+          "purpose": "PostCSS plugin \u2014 auto-adds vendor prefixes for cross-browser compatibility"
+        },
+        {
+          "name": "postcss",
+          "version": "^8.4.38",
+          "purpose": "CSS transformation tool \u2014 required by Tailwind"
+        },
+        {
+          "name": "class-variance-authority",
+          "version": "^0.7.0",
+          "purpose": "shadcn/ui: CSS variant management for component variants (e.g., Button sizes)"
+        },
+        {
+          "name": "clsx",
+          "version": "^2.1.1",
+          "purpose": "Utility for conditional class names \u2014 used across all components"
+        },
+        {
+          "name": "tailwind-merge",
+          "version": "^2.3.0",
+          "purpose": "Merges Tailwind classes without duplicates \u2014 used in cn() utility"
+        },
+        {
+          "name": "lucide-react",
+          "version": "^0.371.0",
+          "purpose": "Icon library used across all UI components"
+        },
+        {
+          "name": "@radix-ui/react-dialog",
+          "version": "^1.0.5",
+          "purpose": "Accessible modal dialog primitive (shadcn Dialog, AlertDialog)"
+        },
+        {
+          "name": "@radix-ui/react-dropdown-menu",
+          "version": "^2.0.6",
+          "purpose": "Accessible dropdown menu primitive (shadcn DropdownMenu for user nav)"
+        },
+        {
+          "name": "@radix-ui/react-label",
+          "version": "^2.0.2",
+          "purpose": "Accessible label primitive for form fields"
+        },
+        {
+          "name": "@radix-ui/react-slot",
+          "version": "^1.0.2",
+          "purpose": "Slot primitive used by shadcn Button asChild pattern"
+        },
+        {
+          "name": "@radix-ui/react-toast",
+          "version": "^1.1.5",
+          "purpose": "Accessible toast notification primitive for success/error feedback"
+        },
+        {
+          "name": "@radix-ui/react-progress",
+          "version": "^1.0.3",
+          "purpose": "Progress bar primitive for profile completeness indicator"
+        },
+        {
+          "name": "@felly/shared-types",
+          "version": "workspace:*",
+          "purpose": "Shared enums and interfaces (UserRole, MentorProfileStatus, etc.)"
+        }
+      ],
+      "devDependencies": [
+        {
+          "name": "@testing-library/react",
+          "version": "^14.3.0",
+          "purpose": "React component testing utilities"
+        },
+        {
+          "name": "@testing-library/jest-dom",
+          "version": "^6.4.2",
+          "purpose": "Custom Jest matchers for DOM assertions (toBeInTheDocument, etc.)"
+        },
+        {
+          "name": "@testing-library/user-event",
+          "version": "^14.5.2",
+          "purpose": "Simulates real user interactions (type, click, focus) in tests"
+        },
+        {
+          "name": "jest",
+          "version": "^29.7.0",
+          "purpose": "Test runner"
+        },
+        {
+          "name": "jest-environment-jsdom",
+          "version": "^29.7.0",
+          "purpose": "jsdom environment for Next.js component tests"
+        },
+        {
+          "name": "ts-jest",
+          "version": "^29.1.5",
+          "purpose": "TypeScript support in Jest"
+        },
+        {
+          "name": "typescript",
+          "version": "^5.4.5",
+          "purpose": "TypeScript compiler"
+        },
+        {
+          "name": "@types/react",
+          "version": "^18.3.1",
+          "purpose": "React TypeScript types"
+        },
+        {
+          "name": "@types/node",
+          "version": "^20.12.0",
+          "purpose": "Node.js types"
+        }
+      ]
+    },
+    "packages/admin-portal": {
+      "dependencies": [
+        {
+          "name": "next",
+          "version": "^15.1.7",
+          "purpose": "Next.js 15 \u2014 CSR-dominant App Router for admin SPA"
+        },
+        {
+          "name": "react",
+          "version": "^18.3.1",
+          "purpose": "React 18"
+        },
+        {
+          "name": "react-dom",
+          "version": "^18.3.1",
+          "purpose": "React DOM renderer"
+        },
+        {
+          "name": "@tanstack/react-query",
+          "version": "^5.28.0",
+          "purpose": "Server state for admin data \u2014 mentor list, user list, verification queue"
+        },
+        {
+          "name": "@tanstack/react-table",
+          "version": "^8.16.0",
+          "purpose": "Headless table primitives \u2014 sorting, filtering, pagination for mentor/user data tables"
+        },
+        {
+          "name": "react-hook-form",
+          "version": "^7.51.3",
+          "purpose": "Multi-step mentor onboarding form state management"
+        },
+        {
+          "name": "@hookform/resolvers",
+          "version": "^3.3.4",
+          "purpose": "Zod resolver for react-hook-form"
+        },
+        {
+          "name": "zod",
+          "version": "^3.23.0",
+          "purpose": "Schema validation for admin forms"
+        },
+        {
+          "name": "axios",
+          "version": "^1.6.8",
+          "purpose": "HTTP client for admin API calls"
+        },
+        {
+          "name": "tailwindcss",
+          "version": "^3.4.3",
+          "purpose": "Utility-first CSS"
+        },
+        {
+          "name": "autoprefixer",
+          "version": "^10.4.19",
+          "purpose": "PostCSS vendor prefix plugin"
+        },
+        {
+          "name": "postcss",
+          "version": "^8.4.38",
+          "purpose": "CSS transformation"
+        },
+        {
+          "name": "class-variance-authority",
+          "version": "^0.7.0",
+          "purpose": "shadcn/ui variant management"
+        },
+        {
+          "name": "clsx",
+          "version": "^2.1.1",
+          "purpose": "Conditional class names utility"
+        },
+        {
+          "name": "tailwind-merge",
+          "version": "^2.3.0",
+          "purpose": "Tailwind class merge utility"
+        },
+        {
+          "name": "lucide-react",
+          "version": "^0.371.0",
+          "purpose": "Icon library"
+        },
+        {
+          "name": "@radix-ui/react-dialog",
+          "version": "^1.0.5",
+          "purpose": "Modal for rejection reason input"
+        },
+        {
+          "name": "@radix-ui/react-dropdown-menu",
+          "version": "^2.0.6",
+          "purpose": "Dropdown menus in admin nav and table row actions"
+        },
+        {
+          "name": "@radix-ui/react-label",
+          "version": "^2.0.2",
+          "purpose": "Form field labels"
+        },
+        {
+          "name": "@radix-ui/react-slot",
+          "version": "^1.0.2",
+          "purpose": "Button asChild pattern"
+        },
+        {
+          "name": "@radix-ui/react-toast",
+          "version": "^1.1.5",
+          "purpose": "Success/error toast notifications for admin actions"
+        },
+        {
+          "name": "@radix-ui/react-tabs",
+          "version": "^1.0.4",
+          "purpose": "Tabs for mentor detail page (profile, pricing, artefacts tabs)"
+        },
+        {
+          "name": "@felly/shared-types",
+          "version": "workspace:*",
+          "purpose": "Shared enums and interfaces"
+        }
+      ],
+      "devDependencies": [
+        {
+          "name": "@testing-library/react",
+          "version": "^14.3.0",
+          "purpose": "Component testing"
+        },
+        {
+          "name": "@testing-library/jest-dom",
+          "version": "^6.4.2",
+          "purpose": "DOM matchers"
+        },
+        {
+          "name": "@testing-library/user-event",
+          "version": "^14.5.2",
+          "purpose": "User interaction simulation"
+        },
+        {
+          "name": "jest",
+          "version": "^29.7.0",
+          "purpose": "Test runner"
+        },
+        {
+          "name": "jest-environment-jsdom",
+          "version": "^29.7.0",
+          "purpose": "jsdom test environment"
+        },
+        {
+          "name": "ts-jest",
+          "version": "^29.1.5",
+          "purpose": "TypeScript Jest support"
+        },
+        {
+          "name": "typescript",
+          "version": "^5.4.5",
+          "purpose": "TypeScript compiler"
+        },
+        {
+          "name": "@types/react",
+          "version": "^18.3.1",
+          "purpose": "React types"
+        },
+        {
+          "name": "@types/node",
+          "version": "^20.12.0",
+          "purpose": "Node.js types"
+        }
+      ]
+    },
+    "root (shared dev tooling)": {
+      "devDependencies": [
+        {
+          "name": "husky",
+          "version": "^9.0.11",
+          "purpose": "Git hooks manager \u2014 runs lint-staged on pre-commit"
+        },
+        {
+          "name": "lint-staged",
+          "version": "^15.2.4",
+          "purpose": "Runs ESLint --fix and Prettier --write on staged files before commit"
+        },
+        {
+          "name": "@playwright/test",
+          "version": "^1.43.0",
+          "purpose": "E2e browser testing for critical user journeys (run against staging)"
+        },
+        {
+          "name": "typescript",
+          "version": "^5.4.5",
+          "purpose": "Root typecheck \u2014 tsc --noEmit across all packages"
+        }
+      ]
+    }
+  },
+  "data_model": {
+    "engine": "Prisma ORM 5.x",
+    "database": "PostgreSQL 16",
+    "schema_path": "packages/backend-api/prisma/schema.prisma",
+    "conventions": [
+      "All primary keys are UUID strings generated by @default(uuid())",
+      "All monetary amounts stored as integer cents/paise/rappen (no floating point per quality-standards.yaml)",
+      "All timestamps use DateTime with @default(now()) for createdAt and @updatedAt for updatedAt",
+      "Cascade deletes on child records when parent User is deleted (GDPR right-to-deletion)",
+      "PII fields (email, IP addresses) are never logged; IP stored as SHA-256 hash in AuditLog",
+      "All enums defined in Prisma schema and mirrored in shared-types package"
+    ],
+    "entities": [
+      {
+        "name": "User",
+        "purpose": "Core user account for all three personas \u2014 single table, role discriminates persona",
+        "prisma_schema": "model User {\n  id              String        @id @default(uuid())\n  email           String        @unique\n  passwordHash    String?       // null for social-login-only users (managed in E11 by KeyCloak)\n  role            UserRole\n  status          UserStatus    @default(PENDING_EMAIL_VERIFICATION)\n  keycloakId      String?       @unique  // null in E1; populated when KeyCloak wired in E11\n\n  createdAt       DateTime      @default(now())\n  updatedAt       DateTime      @updatedAt\n\n  menteeProfile   MenteeProfile?\n  mentorProfile   MentorProfile?\n  auditLogs       AuditLog[]\n\n  @@index([email])\n  @@index([role, status])\n}\n",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String UUID",
+            "constraints": "primary key"
+          },
+          {
+            "name": "email",
+            "type": "String",
+            "constraints": "unique, not null"
+          },
+          {
+            "name": "passwordHash",
+            "type": "String?",
+            "constraints": "nullable \u2014 null for OAuth users or before mock sets it"
+          },
+          {
+            "name": "role",
+            "type": "UserRole enum",
+            "constraints": "not null \u2014 MENTEE | MENTOR | ADMIN"
+          },
+          {
+            "name": "status",
+            "type": "UserStatus enum",
+            "constraints": "not null, default PENDING_EMAIL_VERIFICATION"
+          },
+          {
+            "name": "keycloakId",
+            "type": "String?",
+            "constraints": "unique, nullable \u2014 null until E11"
+          }
+        ]
+      },
+      {
+        "name": "MenteeProfile",
+        "purpose": "Mentee-specific profile data \u2014 one-to-one with User where role = MENTEE",
+        "prisma_schema": "model MenteeProfile {\n  id              String    @id @default(uuid())\n  userId          String    @unique\n  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)\n  firstName       String\n  lastName        String\n  avatarKey       String?   // S3 object key in felly-artefacts bucket; resolved to presigned URL by UserService\n  interests       String[]  @default([])   // free-text interest tags e.g. [\"machine learning\", \"product management\"]\n  goals           String?   // 1000 char max\n  completeness    Int       @default(0)     // 0\u2013100 integer; recomputed by UserService on every profile update\n\n  createdAt       DateTime  @default(now())\n  updatedAt       DateTime  @updatedAt\n}\n",
+        "completeness_calculation": {
+          "description": "completeness is a 0\u2013100 integer recomputed by UserService.computeMenteeCompleteness() on every profile update",
+          "fields": [
+            {
+              "field": "firstName",
+              "weight": 20,
+              "required": true
+            },
+            {
+              "field": "lastName",
+              "weight": 20,
+              "required": true
+            },
+            {
+              "field": "avatarKey",
+              "weight": 20,
+              "required": false
+            },
+            {
+              "field": "interests (length > 0)",
+              "weight": 20,
+              "required": false
+            },
+            {
+              "field": "goals",
+              "weight": 20,
+              "required": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "MentorProfile",
+        "purpose": "Mentor-specific profile data \u2014 one-to-one with User where role = MENTOR; carries verification lifecycle",
+        "prisma_schema": "model MentorProfile {\n  id                    String                 @id @default(uuid())\n  userId                String                 @unique\n  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)\n  firstName             String\n  lastName              String\n  bio                   String                 // 2000 char max\n  expertiseCategories   ExpertiseCategory[]    // PostgreSQL array: one or more categories required\n  photoKey              String?                // S3 key in felly-artefacts bucket\n  status                MentorProfileStatus    @default(DRAFT)\n  verifiedBadge         Boolean                @default(false)  // set true only by AdminService.approveMentor()\n  rejectionReason       String?                // set by AdminService.rejectMentor()\n  submittedAt           DateTime?              // set when admin submits profile for verification\n  verifiedAt            DateTime?              // set when admin approves\n  completeness          Int                    @default(0)  // 0\u2013100 integer\n\n  pricingTiers          MentorPricingTier[]\n  availabilitySlots     MentorAvailabilitySlot[]\n  verificationArtefacts VerificationArtefact[]\n\n  createdAt             DateTime               @default(now())\n  updatedAt             DateTime               @updatedAt\n\n  @@index([status])\n  @@index([userId])\n}\n",
+        "status_lifecycle": {
+          "states": [
+            "DRAFT",
+            "PENDING_VERIFICATION",
+            "VERIFIED",
+            "REJECTED"
+          ],
+          "transitions": [
+            {
+              "from": "DRAFT",
+              "to": "PENDING_VERIFICATION",
+              "trigger": "AdminService.submitMentorForVerification() \u2014 validates all required fields and artefact present",
+              "guard": "firstName, lastName, bio, expertiseCategories (>=1), pricingTiers (>=1), availabilitySlots (>=1), verificationArtefacts (>=1) must all be set"
+            },
+            {
+              "from": "PENDING_VERIFICATION",
+              "to": "VERIFIED",
+              "trigger": "AdminService.approveMentor() \u2014 only ADMIN role",
+              "side_effect": "verifiedBadge = true, verifiedAt = now(), mentor User.status = ACTIVE, credential delivery noted in AuditLog"
+            },
+            {
+              "from": "PENDING_VERIFICATION",
+              "to": "REJECTED",
+              "trigger": "AdminService.rejectMentor(reason) \u2014 only ADMIN role",
+              "side_effect": "rejectionReason stored, audit log entry created"
+            },
+            {
+              "from": "REJECTED",
+              "to": "DRAFT",
+              "trigger": "AdminService.resetRejectedMentor() \u2014 allows re-editing; clears rejectionReason"
+            },
+            {
+              "from": "DRAFT",
+              "to": "PENDING_VERIFICATION",
+              "trigger": "Re-submission after rejection edit"
+            }
+          ]
+        },
+        "completeness_calculation": {
+          "description": "completeness is a 0\u2013100 integer recomputed by AdminService.computeMentorCompleteness() on every profile update",
+          "fields": [
+            {
+              "field": "firstName",
+              "weight": 10,
+              "required": true
+            },
+            {
+              "field": "lastName",
+              "weight": 10,
+              "required": true
+            },
+            {
+              "field": "bio",
+              "weight": 15,
+              "required": true
+            },
+            {
+              "field": "expertiseCategories (length > 0)",
+              "weight": 15,
+              "required": true
+            },
+            {
+              "field": "pricingTiers (length > 0)",
+              "weight": 15,
+              "required": true
+            },
+            {
+              "field": "availabilitySlots (length > 0)",
+              "weight": 15,
+              "required": true
+            },
+            {
+              "field": "photoKey",
+              "weight": 10,
+              "required": false
+            },
+            {
+              "field": "verificationArtefacts (length > 0)",
+              "weight": 10,
+              "required": true
+            }
+          ]
+        },
+        "invariant_enforcement": {
+          "INV-01": "verifiedBadge can only be set true by AdminService.approveMentor(). Never set directly in UserService or via API by non-Admin role.",
+          "INV-03": "MentorProfile.status is only changed by AdminService methods. UserService cannot change status."
+        }
+      },
+      {
+        "name": "MentorPricingTier",
+        "purpose": "Each mentor can offer multiple session durations with per-currency pricing",
+        "prisma_schema": "model MentorPricingTier {\n  id              String        @id @default(uuid())\n  mentorProfileId String\n  mentorProfile   MentorProfile @relation(fields: [mentorProfileId], references: [id], onDelete: Cascade)\n  durationMinutes Int           // 30 | 45 | 60 | 90 \u2014 validated in DTO\n  priceInr        Int?          // Amount in paise (1 INR = 100 paise); null means INR not offered\n  priceUsd        Int?          // Amount in USD cents; null means USD not offered\n  priceChf        Int?          // Amount in CHF rappen; null means CHF not offered\n  priceEur        Int?          // Amount in EUR cents; null means EUR not offered\n\n  @@unique([mentorProfileId, durationMinutes])\n}\n",
+        "notes": [
+          "At least one currency price must be non-null per tier (validated in CreateMentorDto)",
+          "Price = 0 is not allowed \u2014 minimum 1 unit of the currency (validated in DTO)",
+          "durationMinutes must be one of [30, 45, 60, 90] \u2014 validated via @IsIn decorator"
+        ]
+      },
+      {
+        "name": "MentorAvailabilitySlot",
+        "purpose": "Weekly recurring availability schedule for a mentor \u2014 used in E3 for booking slot selection",
+        "prisma_schema": "model MentorAvailabilitySlot {\n  id              String        @id @default(uuid())\n  mentorProfileId String\n  mentorProfile   MentorProfile @relation(fields: [mentorProfileId], references: [id], onDelete: Cascade)\n  dayOfWeek       Int           // 0 = Sunday, 1 = Monday, ..., 6 = Saturday\n  startTimeUtc    String        // \"HH:MM\" format (e.g., \"09:00\") \u2014 UTC always\n  endTimeUtc      String        // \"HH:MM\" format (e.g., \"17:00\") \u2014 UTC always\n\n  @@unique([mentorProfileId, dayOfWeek, startTimeUtc])\n}\n",
+        "notes": [
+          "All times stored in UTC \u2014 frontend converts to local timezone for display",
+          "startTimeUtc must be before endTimeUtc \u2014 validated in DTO (@IsTimeString custom validator)",
+          "Minimum slot duration: 30 minutes (endTimeUtc \u2212 startTimeUtc >= 30 min)"
+        ]
+      },
+      {
+        "name": "VerificationArtefact",
+        "purpose": "Documents/URLs submitted by admin as evidence of mentor's credentials \u2014 admin-eyes-only",
+        "prisma_schema": "model VerificationArtefact {\n  id              String          @id @default(uuid())\n  mentorProfileId String\n  mentorProfile   MentorProfile   @relation(fields: [mentorProfileId], references: [id], onDelete: Cascade)\n  artefactType    ArtefactType    // LINKEDIN_URL | PORTFOLIO_URL | DOCUMENT\n  url             String?         // For LINKEDIN_URL and PORTFOLIO_URL types; null for DOCUMENT\n  s3Key           String?         // S3 key in felly-artefacts bucket; null for URL types\n  fileName        String?         // Original file name (for DOCUMENT type only)\n  mimeType        String?         // e.g., \"application/pdf\", \"image/jpeg\" (for DOCUMENT type only)\n\n  createdAt       DateTime        @default(now())\n}\n",
+        "invariant_enforcement": {
+          "INV-03": "VerificationArtefacts are only readable by Admin role \u2014 AdminModule guards all artefact endpoints with @Roles(UserRole.ADMIN)"
+        }
+      },
+      {
+        "name": "AuditLog",
+        "purpose": "Security and compliance audit trail for key user and admin actions \u2014 retained for compliance review",
+        "prisma_schema": "model AuditLog {\n  id              String      @id @default(uuid())\n  userId          String?     // null for unauthenticated actions (e.g., failed login attempt)\n  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)\n  action          AuditAction\n  ipAddressHash   String?     // SHA-256 hash of IP address \u2014 GDPR: never store raw IP\n  metadata        Json?       // Additional context \u2014 must never include PII (email, name, etc.)\n\n  createdAt       DateTime    @default(now())\n\n  @@index([userId])\n  @@index([action])\n  @@index([createdAt])\n}\n",
+        "logged_actions": [
+          "USER_REGISTERED \u2014 userId, metadata: { role }",
+          "EMAIL_VERIFIED \u2014 userId",
+          "USER_LOGGED_IN \u2014 userId, ipAddressHash",
+          "USER_LOGGED_OUT \u2014 userId",
+          "PASSWORD_RESET_REQUESTED \u2014 userId (or null if email not found)",
+          "PASSWORD_RESET_COMPLETED \u2014 userId",
+          "MENTOR_PROFILE_CREATED \u2014 userId (admin), metadata: { mentorProfileId }",
+          "MENTOR_PROFILE_SUBMITTED \u2014 userId (admin), metadata: { mentorProfileId }",
+          "MENTOR_PROFILE_APPROVED \u2014 userId (admin), metadata: { mentorProfileId, mentorUserId }",
+          "MENTOR_PROFILE_REJECTED \u2014 userId (admin), metadata: { mentorProfileId, reason }",
+          "VERIFICATION_ARTEFACT_UPLOADED \u2014 userId (admin), metadata: { mentorProfileId, artefactType }",
+          "USER_PROFILE_UPDATED \u2014 userId"
+        ]
+      }
+    ],
+    "enums": [
+      {
+        "name": "UserRole",
+        "values": [
+          "MENTEE",
+          "MENTOR",
+          "ADMIN"
+        ],
+        "usage": "User.role \u2014 enforced by INV-02: single role per user, no multiple roles"
+      },
+      {
+        "name": "UserStatus",
+        "values": [
+          "PENDING_EMAIL_VERIFICATION",
+          "ACTIVE",
+          "SUSPENDED"
+        ],
+        "notes": [
+          "PENDING_EMAIL_VERIFICATION: default on registration; transitions to ACTIVE after email verify (B1.1.2) or social login (B1.1.3)",
+          "ACTIVE: fully authenticated and can use the platform",
+          "SUSPENDED: admin-suspended account (not in E1 scope but enum reserved for E6)"
+        ]
+      },
+      {
+        "name": "MentorProfileStatus",
+        "values": [
+          "DRAFT",
+          "PENDING_VERIFICATION",
+          "VERIFIED",
+          "REJECTED"
+        ],
+        "notes": "Full lifecycle in MentorProfile.status_lifecycle above"
+      },
+      {
+        "name": "ExpertiseCategory",
+        "values": [
+          "SPORT",
+          "ENTREPRENEURSHIP",
+          "BUSINESS",
+          "ENTERTAINMENT"
+        ],
+        "notes": "From features.yaml F1.4 definition \u2014 exactly these four categories at MVP"
+      },
+      {
+        "name": "ArtefactType",
+        "values": [
+          "LINKEDIN_URL",
+          "PORTFOLIO_URL",
+          "DOCUMENT"
+        ]
+      },
+      {
+        "name": "AuditAction",
+        "values": [
+          "USER_REGISTERED",
+          "EMAIL_VERIFIED",
+          "USER_LOGGED_IN",
+          "USER_LOGGED_OUT",
+          "PASSWORD_RESET_REQUESTED",
+          "PASSWORD_RESET_COMPLETED",
+          "MENTOR_PROFILE_CREATED",
+          "MENTOR_PROFILE_SUBMITTED",
+          "MENTOR_PROFILE_APPROVED",
+          "MENTOR_PROFILE_REJECTED",
+          "VERIFICATION_ARTEFACT_UPLOADED",
+          "USER_PROFILE_UPDATED"
+        ]
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "PrismaModule",
+      "type": "nestjs-module",
+      "package": "packages/backend-api",
+      "responsibility": "Provides a singleton PrismaService (extends PrismaClient) for all repository classes. Manages database connection lifecycle (connect on ModuleInit, graceful disconnect on ModuleDestroy). Declared as @Global() so all modules can inject PrismaService without explicit import.",
+      "key_files": [
+        {
+          "path": "src/prisma/prisma.module.ts",
+          "purpose": "@Global() @Module({ providers: [PrismaService], exports: [PrismaService] })"
+        },
+        {
+          "path": "src/prisma/prisma.service.ts",
+          "purpose": "extends PrismaClient; implements OnModuleInit (this.$connect()), OnModuleDestroy (this.$disconnect())"
+        },
+        {
+          "path": "prisma/schema.prisma",
+          "purpose": "Full Prisma schema \u2014 all entities, enums, and relations for E1"
+        }
+      ],
+      "public_api": {
+        "exports": [
+          "PrismaService"
+        ]
+      },
+      "notes": "No direct Prisma calls in controllers or service layers except through PrismaService injected into repository classes"
+    },
+    {
+      "id": "AuthModule",
+      "type": "nestjs-module",
+      "package": "packages/backend-api",
+      "responsibility": "Handles all authentication flows: registration, login (email+password and social), email verification, password reset, token refresh, and logout. Issues JWTs via MockAuthAdapter (DI-swappable for KeyCloakAuthAdapter in E11). Provides JwtAuthGuard and RolesGuard used by all other modules. Enforces INV-02 (single role per user) and INV-04 (unique email) and INV-05 (passwords never in responses).",
+      "key_files": [
+        {
+          "path": "src/auth/auth.module.ts",
+          "purpose": "Provides AUTH_ADAPTER_TOKEN \u2192 MockAuthAdapter, PassportModule, JwtStrategy; exports JwtAuthGuard, RolesGuard, Roles decorator, CurrentUser decorator"
+        },
+        {
+          "path": "src/auth/auth.controller.ts",
+          "purpose": "REST routes: POST /auth/register, POST /auth/login, POST /auth/logout, POST /auth/refresh, GET /auth/verify-email, POST /auth/forgot-password, POST /auth/reset-password, GET /auth/social/google, GET /auth/social/google/callback, GET /auth/social/apple, POST /auth/social/apple/callback, GET /auth/me"
+        },
+        {
+          "path": "src/auth/auth.service.ts",
+          "purpose": "Orchestrates IAuthAdapter calls with User persistence in PostgreSQL. register() \u2192 calls adapter.register() + creates User row + creates MenteeProfile/MentorProfile. login() \u2192 calls adapter.login(), writes AuditLog. Handles INV-04 (unique email) by catching Prisma P2002 unique constraint error."
+        },
+        {
+          "path": "src/auth/adapters/auth-adapter.interface.ts",
+          "purpose": "IAuthAdapter interface: register(), login(), socialLogin(), logout(), refresh(), forgotPassword(), resetPassword(), verifyEmail(), validateToken()"
+        },
+        {
+          "path": "src/auth/adapters/mock-auth.adapter.ts",
+          "purpose": "MockAuthAdapter: bcrypt password hashing, jsonwebtoken JWT signing/validation, in-memory refresh token store (Map<userId, refreshToken>), email verification token store (Map<token, userId>), password reset token store (Map<token, {userId, expires}>). Social login mock: creates/finds user by email, skips real OAuth."
+        },
+        {
+          "path": "src/auth/guards/jwt-auth.guard.ts",
+          "purpose": "extends AuthGuard('jwt') \u2014 validates Bearer token, populates request.user with JwtPayload. All protected routes use @UseGuards(JwtAuthGuard)."
+        },
+        {
+          "path": "src/auth/guards/roles.guard.ts",
+          "purpose": "Reads @Roles() metadata, checks request.user.realm_access.roles against required roles. Returns 403 if role not present. Applied after JwtAuthGuard."
+        },
+        {
+          "path": "src/auth/decorators/roles.decorator.ts",
+          "purpose": "@Roles(UserRole.ADMIN) \u2014 SetMetadata('roles', roles)"
+        },
+        {
+          "path": "src/auth/decorators/current-user.decorator.ts",
+          "purpose": "@CurrentUser() \u2014 createParamDecorator extracting request.user (JwtPayload) from ExecutionContext"
+        },
+        {
+          "path": "src/auth/interfaces/jwt-payload.interface.ts",
+          "purpose": "JwtPayload: { sub: string, email: string, realm_access: { roles: UserRole[] }, iss: string, aud: string, exp: number, iat: number } \u2014 matches KeyCloak token shape exactly"
+        },
+        {
+          "path": "src/auth/dto/register.dto.ts",
+          "purpose": "RegisterDto: @IsEmail() email, @IsString() @MinLength(8) @Matches(/[a-zA-Z].*[0-9]|[0-9].*[a-zA-Z]/) password \u2014 enforces INV-05 + B1.1.5"
+        },
+        {
+          "path": "src/auth/dto/login.dto.ts",
+          "purpose": "LoginDto: @IsEmail() email, @IsString() password"
+        },
+        {
+          "path": "src/auth/dto/forgot-password.dto.ts",
+          "purpose": "ForgotPasswordDto: @IsEmail() email"
+        },
+        {
+          "path": "src/auth/dto/reset-password.dto.ts",
+          "purpose": "ResetPasswordDto: @IsString() token, @IsString() @MinLength(8) @Matches(password pattern) newPassword"
+        },
+        {
+          "path": "src/auth/dto/refresh-token.dto.ts",
+          "purpose": "RefreshTokenDto: @IsString() refreshToken"
+        }
+      ],
+      "public_api": {
+        "exports": [
+          "JwtAuthGuard \u2014 imported by UserModule and AdminModule for route protection",
+          "RolesGuard \u2014 imported by UserModule and AdminModule",
+          "Roles \u2014 decorator imported by UserController and AdminController",
+          "CurrentUser \u2014 decorator imported by UserController and AdminController",
+          "AuthModule \u2014 imported by AppModule"
+        ]
+      },
+      "invariants_enforced": [
+        "INV-02: MockAuthAdapter.register() sets exactly one role per user; socialLogin() infers MENTEE role",
+        "INV-04: AuthService catches Prisma P2002 unique constraint violation on User.email and throws ConflictException",
+        "INV-05: RegisterDto and LoginDto never include passwordHash in responses; UserResponseDto uses @Exclude() on passwordHash"
+      ]
+    },
+    {
+      "id": "UserModule",
+      "type": "nestjs-module",
+      "package": "packages/backend-api",
+      "responsibility": "Manages user profile reads and updates for authenticated users. Mentees update their own MenteeProfile. Mentors update their own MentorProfile (bio, pricing, availability, photo). Enforces INV-05 (no password in responses). Recomputes profile completeness on every update.",
+      "key_files": [
+        {
+          "path": "src/user/user.module.ts",
+          "purpose": "@Module: imports PrismaModule, AuthModule; exports UserService"
+        },
+        {
+          "path": "src/user/user.controller.ts",
+          "purpose": "Routes: GET /users/me, GET /users/me/mentee-profile, PATCH /users/me/mentee-profile, GET /users/me/mentor-profile, PATCH /users/me/mentor-profile, POST /users/me/avatar. All protected with @UseGuards(JwtAuthGuard, RolesGuard)."
+        },
+        {
+          "path": "src/user/user.service.ts",
+          "purpose": "Business logic: getCurrentUser(userId), updateMenteeProfile(userId, dto), updateMentorProfile(userId, dto), computeMenteeCompleteness(profile), computeMentorCompleteness(profile). Validates that mentor can only update own profile (B1.6.5 enforcement)."
+        },
+        {
+          "path": "src/user/user.repository.ts",
+          "purpose": "Prisma queries: findUserById(id), findMenteeProfileByUserId(userId), updateMenteeProfile(userId, data), findMentorProfileByUserId(userId), updateMentorProfile(userId, data)"
+        },
+        {
+          "path": "src/user/dto/update-mentee-profile.dto.ts",
+          "purpose": "UpdateMenteeProfileDto: all fields optional \u2014 @IsOptional() @IsString() firstName, lastName, goals; @IsOptional() @IsArray() @IsString({ each: true }) interests; @IsOptional() @IsString() avatarKey"
+        },
+        {
+          "path": "src/user/dto/update-mentor-profile.dto.ts",
+          "purpose": "UpdateMentorProfileDto: @IsOptional() @IsString() bio, photoKey; @IsOptional() @IsArray() @ValidateNested({ each: true }) pricingTiers; @IsOptional() @IsArray() @ValidateNested({ each: true }) availabilitySlots"
+        },
+        {
+          "path": "src/user/dto/user-response.dto.ts",
+          "purpose": "UserResponseDto: serialized User with nested profile. @Exclude() on passwordHash, keycloakId. Uses class-transformer @Expose()."
+        }
+      ],
+      "public_api": {
+        "exports": [
+          "UserService \u2014 exported for use by AdminModule (user lookup by admin)",
+          "UserModule \u2014 imported by AppModule"
+        ]
+      },
+      "invariants_enforced": [
+        "INV-05: UserResponseDto explicitly excludes passwordHash using class-transformer @Exclude()",
+        "B1.6.5 (auth enforcement): UserController only returns current user data via @CurrentUser() \u2014 no userId param exposed"
+      ]
+    },
+    {
+      "id": "AdminModule",
+      "type": "nestjs-module",
+      "package": "packages/backend-api",
+      "responsibility": "Admin operations scoped to E1: mentor onboarding workflow (create draft, edit, upload artefacts, submit for verification), verification queue management (approve/reject), and user list view. All routes require Admin role. Enforces INV-01 (mentor not visible until approved), INV-03 (verified badge admin-only).",
+      "key_files": [
+        {
+          "path": "src/admin/admin.module.ts",
+          "purpose": "@Module: imports PrismaModule, AuthModule, UserModule; no exports (internal use only)"
+        },
+        {
+          "path": "src/admin/admin.controller.ts",
+          "purpose": "All routes use @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN). Routes: GET /admin/users, GET /admin/users/:id, POST /admin/mentors, GET /admin/mentors, GET /admin/mentors/verification-queue, GET /admin/mentors/:id, PATCH /admin/mentors/:id, POST /admin/mentors/:id/submit, POST /admin/mentors/:id/approve, POST /admin/mentors/:id/reject, POST /admin/mentors/:id/artefacts, DELETE /admin/mentors/:id/artefacts/:artefactId"
+        },
+        {
+          "path": "src/admin/admin.service.ts",
+          "purpose": "Mentor onboarding business logic: createMentorDraft(), updateMentorDraft(), submitForVerification() (validates completeness guard), approveMentor() (sets verifiedBadge, changes User.status to ACTIVE, writes AuditLog, returns generated credentials for manual delivery), rejectMentor(reason), getVerificationQueue(), uploadArtefact(), deleteArtefact(). Enforces MentorProfile status transitions."
+        },
+        {
+          "path": "src/admin/admin.repository.ts",
+          "purpose": "Prisma queries: createMentorWithUser(), findMentorById(), listMentors(filters), listMentorsPendingVerification(), updateMentorProfile(), updateMentorStatus(), createArtefact(), deleteArtefact(), listUsers(filters)"
+        },
+        {
+          "path": "src/admin/dto/create-mentor.dto.ts",
+          "purpose": "CreateMentorDto: required fields \u2014 @IsString() firstName, lastName, bio; @IsEmail() email; @IsArray() @IsEnum(ExpertiseCategory, {each:true}) expertiseCategories; @IsArray() @ValidateNested({each:true}) @Type(() => PricingTierDto) pricingTiers; @IsArray() @ValidateNested({each:true}) @Type(() => AvailabilitySlotDto) availabilitySlots"
+        },
+        {
+          "path": "src/admin/dto/update-mentor.dto.ts",
+          "purpose": "UpdateMentorDto: all fields optional (PartialType of CreateMentorDto)"
+        },
+        {
+          "path": "src/admin/dto/reject-mentor.dto.ts",
+          "purpose": "RejectMentorDto: @IsString() @MinLength(10) @MaxLength(500) reason"
+        },
+        {
+          "path": "src/admin/dto/mentor-response.dto.ts",
+          "purpose": "MentorResponseDto: full mentor profile including artefacts list (url/type only, no S3 key), pricing tiers, availability slots, status, verifiedBadge, completeness. Uses @Exclude() on internal s3Key field to prevent S3 key leakage."
+        }
+      ],
+      "public_api": {
+        "exports": []
+      },
+      "invariants_enforced": [
+        "INV-01: MentorProfile.status must be VERIFIED before profile appears in marketplace endpoints (enforced in E2 MarketplaceModule; AdminModule sets status correctly)",
+        "INV-03: verifiedBadge only set to true inside AdminService.approveMentor() \u2014 never in UserService or via direct API",
+        "INV-05: Credentials returned from approveMentor() are temporary one-time values \u2014 never logged; AuditLog records the event only"
+      ]
+    },
+    {
+      "id": "HealthModule",
+      "type": "nestjs-module",
+      "package": "packages/backend-api",
+      "responsibility": "Exposes a single unauthenticated GET /health endpoint for ECS Fargate task health checks and load balancer health probes.",
+      "key_files": [
+        {
+          "path": "src/health/health.controller.ts",
+          "purpose": "GET /health \u2192 HTTP 200 { status: 'ok', timestamp: ISO8601, version: pkg.version }. No auth guard \u2014 must be publicly accessible."
+        }
+      ],
+      "public_api": {
+        "exports": []
+      }
+    },
+    {
+      "id": "mentee-web-app/(auth)",
+      "type": "nextjs-route-group",
+      "package": "packages/mentee-web-app",
+      "responsibility": "All unauthenticated pages: registration, login, email verification, forgot/reset password. Uses a centered-card layout with no app navigation. Server components for page shells; client components for forms.",
+      "key_files": [
+        {
+          "path": "src/app/(auth)/layout.tsx",
+          "purpose": "Auth layout: full-height flex center, white card, Felly Club logo at top. No navigation links."
+        },
+        {
+          "path": "src/app/(auth)/login/page.tsx",
+          "purpose": "Login page: imports LoginForm and SocialLoginButtons. Redirects to /dashboard if already authenticated (middleware handles this)."
+        },
+        {
+          "path": "src/app/(auth)/register/page.tsx",
+          "purpose": "Register page: imports RegisterForm and SocialLoginButtons."
+        },
+        {
+          "path": "src/app/(auth)/verify-email/page.tsx",
+          "purpose": "Email verification page: reads ?token= from searchParams, calls useVerifyEmail() hook (TanStack Query mutation), shows success/error state."
+        },
+        {
+          "path": "src/app/(auth)/forgot-password/page.tsx",
+          "purpose": "Forgot password page: email form, shows 'check your email' success message after submit (no email enumeration)."
+        },
+        {
+          "path": "src/app/(auth)/reset-password/page.tsx",
+          "purpose": "Reset password page: reads ?token= from searchParams, new password form with strength validation."
+        },
+        {
+          "path": "src/components/auth/LoginForm.tsx",
+          "purpose": "'use client' form \u2014 react-hook-form + zod schema (email + password). On success: saves tokens via auth.ts helpers, redirects to /dashboard."
+        },
+        {
+          "path": "src/components/auth/RegisterForm.tsx",
+          "purpose": "'use client' form \u2014 react-hook-form + zod schema (email + password + confirmPassword). On success: shows 'verify your email' message."
+        },
+        {
+          "path": "src/components/auth/SocialLoginButtons.tsx",
+          "purpose": "'use client' \u2014 renders Google and Apple login buttons. Redirects browser to {API_BASE_URL}/auth/social/google or /auth/social/apple."
+        }
+      ]
+    },
+    {
+      "id": "mentee-web-app/(app)",
+      "type": "nextjs-route-group",
+      "package": "packages/mentee-web-app",
+      "responsibility": "All authenticated mentee pages protected by middleware.ts. Includes dashboard and profile management. Uses app layout with top navigation and sidebar.",
+      "key_files": [
+        {
+          "path": "src/app/(app)/layout.tsx",
+          "purpose": "App layout: top nav (AppNav) + optional sidebar (AppSidebar) + main content area. Server component \u2014 reads auth from cookies for initial render."
+        },
+        {
+          "path": "src/app/(app)/dashboard/page.tsx",
+          "purpose": "Dashboard: welcome message with user's first name (from profile), ProfileCompleteness banner if completeness < 100, quick action cards (complete profile, browse mentors (E2 stub))."
+        },
+        {
+          "path": "src/app/(app)/profile/page.tsx",
+          "purpose": "Profile edit page: renders MenteeProfileForm pre-filled with current profile data fetched via useProfile hook. Shows ProfileCompleteness indicator."
+        },
+        {
+          "path": "src/components/profile/MenteeProfileForm.tsx",
+          "purpose": "'use client' \u2014 react-hook-form form for firstName, lastName, interests (tag input), goals (textarea), AvatarUpload. Calls PATCH /users/me/mentee-profile. Invalidates useProfile query on success."
+        },
+        {
+          "path": "src/components/profile/ProfileCompleteness.tsx",
+          "purpose": "'use client' \u2014 shows progress bar (shadcn Progress), percentage number, and list of incomplete fields as action prompts."
+        },
+        {
+          "path": "src/middleware.ts",
+          "purpose": "Next.js middleware: for (app)/* routes, reads 'access_token' cookie or localStorage-equivalent; redirects to /login if absent. For (auth)/* routes, redirects to /dashboard if already authenticated."
+        }
+      ]
+    },
+    {
+      "id": "admin-portal/(auth)",
+      "type": "nextjs-route-group",
+      "package": "packages/admin-portal",
+      "responsibility": "Admin login page only. Email and password form \u2014 no social login for admin role (security requirement). Admin credentials managed by MockAuthAdapter (same backend).",
+      "key_files": [
+        {
+          "path": "src/app/(auth)/layout.tsx",
+          "purpose": "Admin auth layout: centered card, Felly Club Admin branding."
+        },
+        {
+          "path": "src/app/(auth)/login/page.tsx",
+          "purpose": "Admin login: email/password form only. On success redirects to /portal/dashboard."
+        }
+      ]
+    },
+    {
+      "id": "admin-portal/(portal)",
+      "type": "nextjs-route-group",
+      "package": "packages/admin-portal",
+      "responsibility": "All authenticated admin portal pages: dashboard overview, mentor management (list, onboarding wizard, verification queue, detail), and user list. All 'use client' dominant \u2014 CSR SPA style.",
+      "key_files": [
+        {
+          "path": "src/app/(portal)/layout.tsx",
+          "purpose": "Portal layout: AdminSidebar + AdminNav + main content. Checks ADMIN role, redirects to /login if not admin."
+        },
+        {
+          "path": "src/app/(portal)/dashboard/page.tsx",
+          "purpose": "'use client' \u2014 quick stats: total verified mentors, pending verification count, total mentees. TanStack Query hooks for stats."
+        },
+        {
+          "path": "src/app/(portal)/mentors/page.tsx",
+          "purpose": "'use client' \u2014 TanStack Table mentor list with status filter (All/Draft/Pending/Verified/Rejected), search by name, New Mentor button."
+        },
+        {
+          "path": "src/app/(portal)/mentors/new/page.tsx",
+          "purpose": "'use client' \u2014 multi-step wizard using MentorOnboardingForm component."
+        },
+        {
+          "path": "src/app/(portal)/mentors/verify/page.tsx",
+          "purpose": "'use client' \u2014 VerificationQueue component: table of PENDING_VERIFICATION mentors, each row with Approve button and Reject button (opens rejection reason modal)."
+        },
+        {
+          "path": "src/app/(portal)/mentors/[id]/page.tsx",
+          "purpose": "'use client' \u2014 Mentor detail: tabbed view (Profile, Pricing, Availability, Artefacts), status badge, approve/reject actions from detail view."
+        },
+        {
+          "path": "src/app/(portal)/users/page.tsx",
+          "purpose": "'use client' \u2014 UserListTable component: all users, filter by role and status."
+        },
+        {
+          "path": "src/components/mentors/MentorOnboardingForm.tsx",
+          "purpose": "Multi-step form wizard: Step 1 (bio + expertise + photo), Step 2 (pricing tiers via PricingTierEditor), Step 3 (availability slots), Step 4 (artefact upload via ArtefactUploader). Calls POST /admin/mentors on step 1 completion to create DRAFT, then PATCH /admin/mentors/:id for subsequent steps. Final step calls POST /admin/mentors/:id/submit."
+        },
+        {
+          "path": "src/components/mentors/VerificationQueue.tsx",
+          "purpose": "TanStack Table of PENDING_VERIFICATION mentors. Approve action: calls POST /admin/mentors/:id/approve. Reject action: opens Dialog for reason input, calls POST /admin/mentors/:id/reject."
+        },
+        {
+          "path": "src/components/mentors/ArtefactUploader.tsx",
+          "purpose": "Handles LINKEDIN_URL (text input), PORTFOLIO_URL (text input), and DOCUMENT (file input \u2014 multipart upload to POST /admin/mentors/:id/artefacts) artefact types."
+        },
+        {
+          "path": "src/components/mentors/PricingTierEditor.tsx",
+          "purpose": "Dynamic list of pricing tier rows. Each row: duration dropdown (30/45/60/90 min) + INR/USD/CHF/EUR inputs. Add/remove row. Validates at least one currency price per tier."
+        }
+      ]
+    },
+    {
+      "id": "shared-types",
+      "type": "typescript-library",
+      "package": "packages/shared-types",
+      "responsibility": "TypeScript source of truth for enums and API contract types shared between backend and both frontends. No runtime code \u2014 types only. Ensures API contract changes cause compile errors in all consumers.",
+      "key_files": [
+        {
+          "path": "src/enums/user-role.enum.ts",
+          "purpose": "export enum UserRole { MENTEE = 'MENTEE', MENTOR = 'MENTOR', ADMIN = 'ADMIN' }"
+        },
+        {
+          "path": "src/enums/user-status.enum.ts",
+          "purpose": "export enum UserStatus { PENDING_EMAIL_VERIFICATION, ACTIVE, SUSPENDED }"
+        },
+        {
+          "path": "src/enums/mentor-status.enum.ts",
+          "purpose": "export enum MentorProfileStatus { DRAFT, PENDING_VERIFICATION, VERIFIED, REJECTED }"
+        },
+        {
+          "path": "src/enums/expertise-category.enum.ts",
+          "purpose": "export enum ExpertiseCategory { SPORT, ENTREPRENEURSHIP, BUSINESS, ENTERTAINMENT }"
+        },
+        {
+          "path": "src/enums/artefact-type.enum.ts",
+          "purpose": "export enum ArtefactType { LINKEDIN_URL, PORTFOLIO_URL, DOCUMENT }"
+        },
+        {
+          "path": "src/types/auth.types.ts",
+          "purpose": "IAuthTokens: { accessToken: string, refreshToken: string }; IJwtPayload; ILoginResponse: { user: IUser } & IAuthTokens"
+        },
+        {
+          "path": "src/types/user.types.ts",
+          "purpose": "IUser: { id, email, role, status }; IMenteeProfile: all fields; IMentorProfile: all fields including pricingTiers and availabilitySlots"
+        },
+        {
+          "path": "src/types/mentor.types.ts",
+          "purpose": "IPricingTier; IAvailabilitySlot; IVerificationArtefact (url/type only \u2014 no s3Key)"
+        },
+        {
+          "path": "src/types/api-response.types.ts",
+          "purpose": "IPaginatedResponse<T>: { data: T[], total: number, page: number, limit: number }; IApiError: { statusCode, message, error, timestamp }"
+        },
+        {
+          "path": "src/index.ts",
+          "purpose": "Re-exports all enums and types"
+        }
+      ],
+      "public_api": {
+        "exports": [
+          "All enums and interfaces via src/index.ts"
+        ]
+      }
+    }
+  ],
+  "design_decisions": [
+    {
+      "id": "DD-01",
+      "name": "mock-auth-di-pattern",
+      "decision": "AuthModule provides a DI token AUTH_ADAPTER_TOKEN mapped to MockAuthAdapter in E1. In E11, this single token binding is changed to KeyCloakAuthAdapter \u2014 zero other code changes.\n",
+      "rationale": "Architecture.yaml mock_first_services mandates this pattern. Avoids KeyCloak dependency for E1\u2013E10.",
+      "implementation": {
+        "di_token": "AUTH_ADAPTER_TOKEN = Symbol('AUTH_ADAPTER_TOKEN') defined in src/common/constants.ts",
+        "module_binding": "// auth.module.ts\n@Module({\n  providers: [\n    { provide: AUTH_ADAPTER_TOKEN, useClass: MockAuthAdapter },\n    AuthService,\n  ],\n  exports: [JwtAuthGuard, RolesGuard],\n})\nexport class AuthModule {}\n",
+        "injection": "// auth.service.ts\nconstructor(\n  @Inject(AUTH_ADAPTER_TOKEN) private readonly authAdapter: IAuthAdapter,\n) {}\n",
+        "mock_adapter_internals": "MockAuthAdapter stores state in three in-memory Maps: (1) refreshTokens: Map<userId, refreshToken> \u2014 invalidated on logout (2) emailVerificationTokens: Map<token, userId> \u2014 token = UUID, 24h TTL (3) passwordResetTokens: Map<token, {userId, expiresAt}> \u2014 token = UUID, 60min TTL User credentials (email, passwordHash) stored in PostgreSQL User table. JWTs signed with JWT_SECRET env var, 15min access token, 7d refresh token.\n"
+      },
+      "e11_swap_path": "Replace { provide: AUTH_ADAPTER_TOKEN, useClass: MockAuthAdapter } with { useClass: KeyCloakAuthAdapter } in auth.module.ts. KeyCloakAuthAdapter uses KeyCloak Admin REST API for all operations."
+    },
+    {
+      "id": "DD-02",
+      "name": "repository-pattern",
+      "decision": "Each NestJS module has a dedicated repository class (UserRepository, AdminRepository)  that owns all Prisma queries for that domain. Services inject repositories; controllers  inject services. PrismaService is injected into repositories.\n",
+      "rationale": "quality-standards.yaml design_patterns: 'Repository pattern via Prisma service injection \u2014 no direct PrismaClient in controllers or resolvers.'",
+      "implementation": {
+        "rule": "No Prisma calls in controllers (AuthController, UserController, AdminController) and no Prisma calls in service methods \u2014 all data access via repository methods",
+        "example": "// user.repository.ts\n@Injectable()\nexport class UserRepository {\n  constructor(private readonly prisma: PrismaService) {}\n\n  async findById(id: string): Promise<User | null> {\n    return this.prisma.user.findUnique({ where: { id } });\n  }\n\n  async updateMenteeProfile(userId: string, data: Partial<MenteeProfile>): Promise<MenteeProfile> {\n    return this.prisma.menteeProfile.update({ where: { userId }, data });\n  }\n}\n",
+        "cross_module_data_access": "AdminModule uses AdminRepository for all its queries. When AdminModule needs user data, it injects UserService (exported by UserModule) \u2014 not UserRepository directly."
+      }
+    },
+    {
+      "id": "DD-03",
+      "name": "service-layer-ownership",
+      "decision": "Controllers handle HTTP binding only (extract DTO, call service, return result). All business logic, validation (beyond DTO structure), authorization checks, and side effects (AuditLog writes) live in the service layer.\n",
+      "rationale": "quality-standards.yaml conventions: 'Service layer owns all business logic \u2014 controllers handle HTTP binding only.'",
+      "implementation": {
+        "controller_responsibility": "Parse DTO from request, call service method, return serialized result via class-transformer. No if/else business logic.",
+        "service_responsibility": "Domain invariant enforcement, AuditLog writes, completeness calculation, status transition validation, cross-entity consistency checks.",
+        "example": "// admin.controller.ts\n@Post(':id/approve')\n@UseGuards(JwtAuthGuard, RolesGuard)\n@Roles(UserRole.ADMIN)\nasync approveMentor(\n  @Param('id') id: string,\n  @CurrentUser() admin: JwtPayload,\n): Promise<MentorResponseDto> {\n  const result = await this.adminService.approveMentor(id, admin.sub);\n  return plainToInstance(MentorResponseDto, result);\n}\n"
+      }
+    },
+    {
+      "id": "DD-04",
+      "name": "dto-validation-strategy",
+      "decision": "Global ValidationPipe with whitelist: true and forbidNonWhitelisted: true applied in main.ts. All controller inputs use class-validator decorated DTOs. DTO instances are created via class-transformer plainToInstance before service calls.\n",
+      "rationale": "quality-standards.yaml: 'DTOs required for all API request and response shapes (class-validator decorators mandatory for request DTOs).'",
+      "implementation": {
+        "global_pipe": "// main.ts\napp.useGlobalPipes(\n  new ValidationPipe({\n    whitelist: true,\n    forbidNonWhitelisted: true,\n    transform: true,\n    transformOptions: { enableImplicitConversion: true },\n  }),\n);\n",
+        "password_validation": "// register.dto.ts \u2014 enforces INV-05 (strength) + B1.1.5 (8 chars, letter+number)\n@IsString()\n@MinLength(8)\n@Matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).+$/, {\n  message: 'Password must contain at least one letter and one number',\n})\npassword: string;\n"
+      }
+    },
+    {
+      "id": "DD-05",
+      "name": "error-handling-strategy",
+      "decision": "Global HttpExceptionFilter catches all NestJS HttpExceptions and formats them as { statusCode, message, error, timestamp }. Domain errors are mapped to specific HTTP exceptions in the service layer. Unhandled errors are caught as 500s. Prisma constraint errors (P2002, P2025) are mapped to 409 Conflict and 404 Not Found.\n",
+      "rationale": "quality-standards.yaml: 'Error handling complete \u2014 no unhandled promise rejections, all Prisma calls in try/catch or wrapped in NestJS HttpException filters.'",
+      "implementation": {
+        "exception_filter": "// http-exception.filter.ts\n@Catch(HttpException)\nexport class HttpExceptionFilter implements ExceptionFilter {\n  catch(exception: HttpException, host: ArgumentsHost) {\n    const response = host.switchToHttp().getResponse<FastifyReply>();\n    const status = exception.getStatus();\n    const exceptionResponse = exception.getResponse();\n    response.status(status).send({\n      statusCode: status,\n      message: typeof exceptionResponse === 'string'\n        ? exceptionResponse\n        : (exceptionResponse as any).message,\n      error: exception.name,\n      timestamp: new Date().toISOString(),\n    });\n  }\n}\n",
+        "prisma_error_mapping": "// In service methods (catch block pattern)\ntry {\n  return await this.userRepository.create(data);\n} catch (error) {\n  if (error.code === 'P2002') throw new ConflictException('Email already in use'); // INV-04\n  if (error.code === 'P2025') throw new NotFoundException('Record not found');\n  throw error;\n}\n"
+      }
+    },
+    {
+      "id": "DD-06",
+      "name": "rbac-guard-pattern",
+      "decision": "Two guards always applied together on protected routes: (1) JwtAuthGuard \u2014 validates JWT Bearer token, populates request.user (2) RolesGuard \u2014 reads @Roles() metadata, checks request.user.realm_access.roles Public routes use @Public() decorator that skips JwtAuthGuard.\n",
+      "rationale": "Features INV-02 (single role), B1.7.1 (admin-only), B1.7.2 (mentor data), B1.7.4 (unauthenticated)",
+      "implementation": {
+        "guard_application": "// pattern used in all protected controllers\n@UseGuards(JwtAuthGuard, RolesGuard)\n@Roles(UserRole.ADMIN)\n@Post(':id/approve')\nasync approveMentor(...) {}\n",
+        "public_routes": "// @Public() decorator marks routes that skip JwtAuthGuard\n// Applied to: POST /auth/register, POST /auth/login, POST /auth/forgot-password,\n//   POST /auth/reset-password, GET /auth/verify-email, GET /auth/social/*, GET /health\n",
+        "jwt_payload_shape": "request.user is populated with JwtPayload: { sub (userId), email, realm_access: { roles: [UserRole] }, iss, aud, exp, iat }. RolesGuard reads realm_access.roles[0] for role check. This shape matches KeyCloak's token format exactly \u2014 no changes needed in E11.\n"
+      }
+    },
+    {
+      "id": "DD-07",
+      "name": "mentor-credential-delivery-on-approval",
+      "decision": "When admin approves a mentor, AdminService generates a temporary random password, hashes it via MockAuthAdapter, updates User.status to ACTIVE and User.passwordHash. The plain-text temporary password is returned once in the API response for the approving admin to relay manually. It is never logged. An AuditLog entry records the approval event (no password in metadata). In E7, credential delivery will be replaced with SendGrid email \u2014 API response will no longer include the temporary password.\n",
+      "rationale": "Email delivery (SendGrid/CommsModule) is E7 scope. E1 needs a working credential delivery mechanism.",
+      "implementation": {
+        "approve_response": "// admin.service.ts\nasync approveMentor(mentorProfileId: string, adminUserId: string) {\n  const tempPassword = this.generateSecurePassword(); // crypto.randomBytes(16).toString('base64url')\n  const hashedPassword = await bcrypt.hash(tempPassword, 12);\n  // update MentorProfile status, User.status, User.passwordHash\n  // write AuditLog(MENTOR_PROFILE_APPROVED)\n  return { ...mentorProfile, temporaryCredentials: { email, tempPassword } };\n  // tempPassword included in response ONLY \u2014 never in logs or AuditLog\n}\n",
+        "e7_migration_note": "In E7, remove temporaryCredentials from response and fire SendGrid email via CommsModule instead."
+      }
+    },
+    {
+      "id": "DD-08",
+      "name": "token-storage-frontend",
+      "decision": "Access token stored in localStorage (key: 'felly_access_token'). Refresh token stored in localStorage (key: 'felly_refresh_token'). Axios interceptor reads access token from localStorage and adds Bearer header. On 401 response, interceptor calls POST /auth/refresh and retries original request. Tokens cleared on logout.\n",
+      "rationale": "E1 uses a simple localStorage approach for token storage. This is acceptable for the mock auth phase (E1\u2013E10) and for the admin portal. A future security enhancement (E11 or post-launch) can migrate to httpOnly cookies. Architecture.yaml specifies 'JWT Bearer token in Authorization header' \u2014 localStorage to header is the simplest implementation.\n",
+      "implementation": {
+        "storage_helpers": "// lib/auth.ts (both frontends)\nexport const saveTokens = (tokens: IAuthTokens) => {\n  localStorage.setItem('felly_access_token', tokens.accessToken);\n  localStorage.setItem('felly_refresh_token', tokens.refreshToken);\n};\nexport const getAccessToken = () => localStorage.getItem('felly_access_token');\nexport const clearTokens = () => {\n  localStorage.removeItem('felly_access_token');\n  localStorage.removeItem('felly_refresh_token');\n};\n",
+        "axios_interceptor": "// lib/api-client.ts\napiClient.interceptors.request.use((config) => {\n  const token = getAccessToken();\n  if (token) config.headers.Authorization = `Bearer ${token}`;\n  return config;\n});\n// 401 interceptor calls POST /auth/refresh, saves new tokens, retries\n"
+      }
+    }
+  ],
+  "design_patterns": {
+    "backend": [
+      {
+        "pattern": "Repository Pattern",
+        "scope": "All NestJS modules",
+        "description": "Each domain module (auth, user, admin) has a dedicated *Repository class that owns all Prisma queries for that domain. Services inject the repository and never call PrismaService directly. Repository methods are named after the operation they perform (findById, listPending, updateStatus) \u2014 not after SQL operations.\n",
+        "files_pattern": "src/{module}/{module}.repository.ts",
+        "anti_pattern": "No Prisma calls in controllers. No cross-module Prisma access (AdminModule does not import UserRepository; it calls UserService methods)."
+      },
+      {
+        "pattern": "Service Layer",
+        "scope": "All NestJS modules",
+        "description": "Service classes own all business logic: invariant enforcement, state machine transitions, completeness calculation, AuditLog writes, and cross-entity consistency. Controllers are thin HTTP adapters \u2014 they extract DTOs, call one service method, and return the result via plainToInstance serialization.\n",
+        "files_pattern": "src/{module}/{module}.service.ts"
+      },
+      {
+        "pattern": "DTO Validation + Serialization",
+        "scope": "All controllers",
+        "description": "Request DTOs use class-validator decorators. Global ValidationPipe (whitelist, transform). Response DTOs use class-transformer @Exclude()/@Expose() to control serialization. @ApiProperty decorators on all DTO fields for OpenAPI spec generation. plainToInstance(ResponseDto, entity, { excludeExtraneousValues: true }) on all controller returns.\n",
+        "files_pattern": "src/{module}/dto/*.dto.ts"
+      },
+      {
+        "pattern": "Global Exception Filter",
+        "scope": "Application-wide",
+        "description": "HttpExceptionFilter registered globally in main.ts catches all HttpExceptions. Prisma constraint errors (P2002, P2025) mapped to ConflictException and NotFoundException in service methods. All errors return { statusCode, message, error, timestamp } shape.\n",
+        "files_pattern": "src/common/filters/http-exception.filter.ts"
+      },
+      {
+        "pattern": "Guard + Decorator RBAC",
+        "scope": "All protected routes",
+        "description": "JwtAuthGuard and RolesGuard always applied as a pair. @Roles() decorator sets required roles on handler metadata. @CurrentUser() decorator extracts JwtPayload from request. @Public() decorator marks routes that skip JWT validation. This pattern is KeyCloak-compatible \u2014 same guards and decorators work when MockAuthAdapter is swapped for KeyCloakAuthAdapter in E11.\n",
+        "files_pattern": "src/auth/guards/*.guard.ts, src/auth/decorators/*.decorator.ts"
+      },
+      {
+        "pattern": "Module Public API via exports",
+        "scope": "NestJS module boundaries",
+        "description": "Each module's @Module({ exports: [...] }) declares only what other modules may use. No module imports another module's internal service unless it is exported. PrismaModule is @Global() and exports PrismaService (exception to avoid repeated imports). AuthModule exports guards and decorators only \u2014 not AuthService.\n",
+        "reference": "knowledge/architecture/patterns/modular-monolith.md \u2014 'Module rules: only import via index.ts public API'"
+      },
+      {
+        "pattern": "Prisma Transaction for Multi-Table Writes",
+        "scope": "All service operations writing to multiple tables",
+        "description": "Any service method that writes to multiple Prisma models within one logical operation uses this.prisma.$transaction([...]) or the interactive transactions API. Examples: createMentorWithUser() (creates User + MentorProfile atomically), approveMentor() (updates MentorProfile + User status + AuditLog atomically).\n",
+        "reference": "quality-standards.yaml: 'Prisma transactions (@prisma/client.$transaction) required for all writes spanning multiple tables'"
+      }
+    ],
+    "frontend": [
+      {
+        "pattern": "Next.js App Router Route Groups",
+        "scope": "Both frontends",
+        "description": "(auth) route group: unauthenticated pages with auth layout (no nav). (app) / (portal) route group: authenticated pages with full nav layout. Route group name is NOT part of the URL path \u2014 (auth)/login renders at /login. Each group has its own layout.tsx defining the shared UI wrapper.\n",
+        "middleware_guard": "middleware.ts runs on all routes to enforce auth \u2014 redirects /app/* to /login if no valid token"
+      },
+      {
+        "pattern": "Server Components by Default, 'use client' Where Needed",
+        "scope": "Both frontends",
+        "description": "Page components (page.tsx) are server components unless they need interactivity. Form components, hooks, and anything using useState/useEffect are 'use client'. The QueryProvider wrapper is 'use client' wrapping server layouts. This minimises client bundle size and maximises SSR for public pages.\n"
+      },
+      {
+        "pattern": "TanStack Query for Server State",
+        "scope": "Both frontends",
+        "description": "All API data fetching uses TanStack Query hooks (useQuery for reads, useMutation for writes). Hook files in src/hooks/ encapsulate query keys, fetcher functions, and mutation callbacks. No direct axios calls in page/component files. On successful mutations (profile update, approve/reject), invalidate relevant query keys.\n",
+        "example": "// hooks/useProfile.ts\nexport const useProfile = () => useQuery({\n  queryKey: ['mentee-profile'],\n  queryFn: () => apiClient.get<IMenteeProfile>('/users/me/mentee-profile').then(r => r.data),\n});\nexport const useUpdateProfile = () => useMutation({\n  mutationFn: (data: Partial<IMenteeProfile>) =>\n    apiClient.patch('/users/me/mentee-profile', data).then(r => r.data),\n  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mentee-profile'] }),\n});\n"
+      },
+      {
+        "pattern": "react-hook-form + zod Schema Validation",
+        "scope": "All forms in both frontends",
+        "description": "Forms use react-hook-form with useForm<z.infer<typeof schema>>() and zodResolver. Zod schemas defined alongside form components \u2014 field-level validation messages match the API's validation error messages. Form submission calls TanStack Query useMutation \u2014 no direct axios in form onSubmit handlers.\n",
+        "example": "const loginSchema = z.object({\n  email: z.string().email('Enter a valid email'),\n  password: z.string().min(1, 'Password is required'),\n});\nconst { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof loginSchema>>({\n  resolver: zodResolver(loginSchema),\n});\n"
+      },
+      {
+        "pattern": "Axios Interceptor for Auth",
+        "scope": "Both frontends (lib/api-client.ts)",
+        "description": "Single Axios instance configured with base URL from NEXT_PUBLIC_API_BASE_URL. Request interceptor adds Bearer token from localStorage. Response interceptor handles 401: calls POST /auth/refresh, updates tokens, retries original request once. If refresh fails: clears tokens, redirects to /login.\n",
+        "files": "src/lib/api-client.ts"
+      },
+      {
+        "pattern": "shadcn/ui Component Integration",
+        "scope": "Both frontends",
+        "description": "Components installed via shadcn CLI (npx shadcn add button input card dialog, etc.) into src/components/ui/. These are source files \u2014 edit directly if customization needed. cn() utility function (clsx + tailwind-merge) used for conditional classes. All form inputs use shadcn Input and Label for consistent styling and accessibility.\n"
+      }
+    ]
+  },
+  "feature_mapping": {
+    "F1.1": {
+      "name": "Mentee Registration",
+      "behaviors": [
+        "B1.1.1",
+        "B1.1.2",
+        "B1.1.3",
+        "B1.1.4",
+        "B1.1.5"
+      ],
+      "implementing_components": [
+        {
+          "component": "AuthModule (backend)",
+          "contribution": "POST /auth/register (B1.1.1, B1.1.4, B1.1.5), GET /auth/verify-email (B1.1.2), GET /auth/social/google and /apple (B1.1.3)",
+          "key_files": [
+            "src/auth/auth.controller.ts",
+            "src/auth/auth.service.ts",
+            "src/auth/adapters/mock-auth.adapter.ts",
+            "src/auth/dto/register.dto.ts"
+          ]
+        },
+        {
+          "component": "UserModule (backend)",
+          "contribution": "Creates MenteeProfile row atomically with User row on registration",
+          "key_files": [
+            "src/user/user.repository.ts"
+          ]
+        },
+        {
+          "component": "mentee-web-app/(auth) (frontend)",
+          "contribution": "RegisterForm (B1.1.1, B1.1.5), SocialLoginButtons (B1.1.3), verify-email page (B1.1.2)",
+          "key_files": [
+            "src/app/(auth)/register/page.tsx",
+            "src/components/auth/RegisterForm.tsx",
+            "src/components/auth/SocialLoginButtons.tsx",
+            "src/app/(auth)/verify-email/page.tsx"
+          ]
+        }
+      ],
+      "invariants_covered": [
+        "INV-04 (unique email \u2014 B1.1.4)",
+        "INV-05 (password never in response)"
+      ]
+    },
+    "F1.2": {
+      "name": "User Authentication",
+      "behaviors": [
+        "B1.2.1",
+        "B1.2.2",
+        "B1.2.3",
+        "B1.2.4",
+        "B1.2.5"
+      ],
+      "implementing_components": [
+        {
+          "component": "AuthModule (backend)",
+          "contribution": "POST /auth/login (B1.2.1, B1.2.2), POST /auth/refresh (B1.2.4), POST /auth/logout (B1.2.5). Rate limiting (B1.2.3) implemented in MockAuthAdapter using a loginAttempts Map<ip, {count, windowStart}>.",
+          "key_files": [
+            "src/auth/auth.controller.ts",
+            "src/auth/auth.service.ts",
+            "src/auth/adapters/mock-auth.adapter.ts",
+            "src/auth/guards/jwt-auth.guard.ts"
+          ]
+        },
+        {
+          "component": "mentee-web-app/(auth) (frontend)",
+          "contribution": "LoginForm (B1.2.1, B1.2.2), token refresh via Axios interceptor (B1.2.4), logout on dashboard (B1.2.5)",
+          "key_files": [
+            "src/app/(auth)/login/page.tsx",
+            "src/components/auth/LoginForm.tsx",
+            "src/lib/api-client.ts",
+            "src/lib/auth.ts"
+          ]
+        },
+        {
+          "component": "admin-portal/(auth) (frontend)",
+          "contribution": "Admin login page (B1.2.1 for Admin role)",
+          "key_files": [
+            "src/app/(auth)/login/page.tsx"
+          ]
+        }
+      ],
+      "invariants_covered": [
+        "INV-02 (single role \u2014 JWT realm_access.roles contains exactly one role)"
+      ],
+      "notes": "B1.2.3 rate limiting: MockAuthAdapter tracks failed attempts by IP hash (from request IP header, hashed). 10 failures in 15 minutes triggers 429 response. Redis-backed rate limiting can replace this in E11."
+    },
+    "F1.3": {
+      "name": "Password Reset & Recovery",
+      "behaviors": [
+        "B1.3.1",
+        "B1.3.2",
+        "B1.3.3"
+      ],
+      "implementing_components": [
+        {
+          "component": "AuthModule (backend)",
+          "contribution": "POST /auth/forgot-password (B1.3.1), POST /auth/reset-password (B1.3.2, B1.3.3). MockAuthAdapter stores reset tokens in memory with 60min TTL.",
+          "key_files": [
+            "src/auth/auth.controller.ts",
+            "src/auth/auth.service.ts",
+            "src/auth/adapters/mock-auth.adapter.ts",
+            "src/auth/dto/forgot-password.dto.ts",
+            "src/auth/dto/reset-password.dto.ts"
+          ]
+        },
+        {
+          "component": "mentee-web-app/(auth) (frontend)",
+          "contribution": "ForgotPasswordForm (B1.3.1), ResetPasswordForm via reset-password page (B1.3.2, B1.3.3)",
+          "key_files": [
+            "src/app/(auth)/forgot-password/page.tsx",
+            "src/app/(auth)/reset-password/page.tsx"
+          ]
+        }
+      ],
+      "notes": "B1.3.1: forgot-password always returns 200 with success message regardless of whether email exists (prevents email enumeration). The reset link contains the token as a URL query param: {FRONTEND_URL}/reset-password?token=<uuid>. In E1, the reset link URL is returned in the API response (dev convenience) \u2014 in E7 this becomes a SendGrid email. B1.3.2: On success, MockAuthAdapter invalidates all refresh tokens for the user (calls logout internally).\n"
+    },
+    "F1.4": {
+      "name": "Admin-Driven Mentor Onboarding",
+      "behaviors": [
+        "B1.4.1",
+        "B1.4.2",
+        "B1.4.3",
+        "B1.4.4"
+      ],
+      "implementing_components": [
+        {
+          "component": "AdminModule (backend)",
+          "contribution": "POST /admin/mentors (B1.4.1, B1.4.2 \u2014 creates DRAFT or PENDING_VERIFICATION), POST /admin/mentors/:id/artefacts (B1.4.3), POST /admin/mentors/:id/submit (B1.4.4)",
+          "key_files": [
+            "src/admin/admin.controller.ts",
+            "src/admin/admin.service.ts",
+            "src/admin/admin.repository.ts",
+            "src/admin/dto/create-mentor.dto.ts"
+          ]
+        },
+        {
+          "component": "AuthModule (backend)",
+          "contribution": "User account creation for mentor (credentials generated in B1.4.4 via AdminService.approveMentor)",
+          "key_files": [
+            "src/auth/adapters/mock-auth.adapter.ts"
+          ]
+        },
+        {
+          "component": "admin-portal/(portal) (frontend)",
+          "contribution": "MentorOnboardingForm wizard (B1.4.1\u2013B1.4.4), ArtefactUploader (B1.4.3)",
+          "key_files": [
+            "src/app/(portal)/mentors/new/page.tsx",
+            "src/components/mentors/MentorOnboardingForm.tsx",
+            "src/components/mentors/ArtefactUploader.tsx",
+            "src/components/mentors/PricingTierEditor.tsx"
+          ]
+        }
+      ],
+      "notes": "B1.4.2: POST /admin/mentors with a request body that omits required fields returns DRAFT status. The frontend wizard saves each step as a PATCH request, then POSTs /submit only when all steps are complete. B1.4.4: Credentials are held (User record created with status=PENDING_EMAIL_VERIFICATION) until B1.5.2 approval.\n"
+    },
+    "F1.5": {
+      "name": "Mentor Verification & Badge Assignment",
+      "behaviors": [
+        "B1.5.1",
+        "B1.5.2",
+        "B1.5.3",
+        "B1.5.4"
+      ],
+      "implementing_components": [
+        {
+          "component": "AdminModule (backend)",
+          "contribution": "GET /admin/mentors/verification-queue (B1.5.1), POST /admin/mentors/:id/approve (B1.5.2), POST /admin/mentors/:id/reject (B1.5.3), PATCH /admin/mentors/:id + POST /admin/mentors/:id/submit (B1.5.4)",
+          "key_files": [
+            "src/admin/admin.controller.ts",
+            "src/admin/admin.service.ts",
+            "src/admin/admin.repository.ts",
+            "src/admin/dto/reject-mentor.dto.ts"
+          ]
+        },
+        {
+          "component": "admin-portal/(portal) (frontend)",
+          "contribution": "VerificationQueue component (B1.5.1, B1.5.2, B1.5.3), mentor detail page (B1.5.4)",
+          "key_files": [
+            "src/app/(portal)/mentors/verify/page.tsx",
+            "src/components/mentors/VerificationQueue.tsx",
+            "src/app/(portal)/mentors/[id]/page.tsx"
+          ]
+        }
+      ],
+      "invariants_covered": [
+        "INV-01: verifiedBadge only set via AdminService.approveMentor() \u2014 see DD-07",
+        "INV-03: AdminService.approveMentor() is the only path to set verifiedBadge = true"
+      ],
+      "notes": "B1.5.1: verification-queue returns profiles sorted by submittedAt ASC (oldest first) per feature spec. B1.5.2: approval sets verifiedBadge = true, changes User.status to ACTIVE, returns temporary credentials in response (DD-07). B1.5.4: rejected profile can be re-edited (status REJECTED \u2192 admin patches fields \u2192 submits \u2192 PENDING_VERIFICATION).\n"
+    },
+    "F1.6": {
+      "name": "Profile Management",
+      "behaviors": [
+        "B1.6.1",
+        "B1.6.2",
+        "B1.6.3",
+        "B1.6.4",
+        "B1.6.5"
+      ],
+      "implementing_components": [
+        {
+          "component": "UserModule (backend)",
+          "contribution": "GET /users/me (B1.6.1, B1.6.3), PATCH /users/me/mentee-profile (B1.6.2), PATCH /users/me/mentor-profile (B1.6.4). B1.6.5 enforced by UserController using @CurrentUser() \u2014 only own profile accessible.",
+          "key_files": [
+            "src/user/user.controller.ts",
+            "src/user/user.service.ts",
+            "src/user/user.repository.ts",
+            "src/user/dto/update-mentee-profile.dto.ts",
+            "src/user/dto/update-mentor-profile.dto.ts"
+          ]
+        },
+        {
+          "component": "mentee-web-app/(app) (frontend)",
+          "contribution": "ProfileCompleteness (B1.6.1 indicator), MenteeProfileForm (B1.6.2)",
+          "key_files": [
+            "src/app/(app)/profile/page.tsx",
+            "src/components/profile/MenteeProfileForm.tsx",
+            "src/components/profile/ProfileCompleteness.tsx"
+          ]
+        },
+        {
+          "component": "admin-portal/(portal) (frontend)",
+          "contribution": "Mentor detail page with edit form (B1.6.3, B1.6.4)",
+          "key_files": [
+            "src/app/(portal)/mentors/[id]/page.tsx"
+          ]
+        }
+      ],
+      "invariants_covered": [
+        "INV-05: UserResponseDto uses @Exclude() on passwordHash"
+      ],
+      "notes": "B1.6.4: pricing/availability changes update MentorProfile immediately. Future sessions (E3) will lock pricing at booking time \u2014 not enforced in E1."
+    },
+    "F1.7": {
+      "name": "Role-Based Access Control",
+      "behaviors": [
+        "B1.7.1",
+        "B1.7.2",
+        "B1.7.3",
+        "B1.7.4"
+      ],
+      "implementing_components": [
+        {
+          "component": "AuthModule (backend)",
+          "contribution": "JwtAuthGuard (B1.7.4 \u2014 unauthenticated blocked), RolesGuard (B1.7.1, B1.7.2 \u2014 wrong role blocked)",
+          "key_files": [
+            "src/auth/guards/jwt-auth.guard.ts",
+            "src/auth/guards/roles.guard.ts",
+            "src/auth/decorators/roles.decorator.ts",
+            "src/auth/decorators/current-user.decorator.ts"
+          ]
+        },
+        {
+          "component": "UserModule (backend)",
+          "contribution": "UserController applies @Roles(UserRole.MENTEE) on mentee routes, @Roles(UserRole.MENTOR) on mentor routes. @CurrentUser() injection prevents accessing other users' data (B1.7.2).",
+          "key_files": [
+            "src/user/user.controller.ts"
+          ]
+        },
+        {
+          "component": "AdminModule (backend)",
+          "contribution": "All admin routes apply @Roles(UserRole.ADMIN) \u2014 satisfies B1.7.1, B1.7.3",
+          "key_files": [
+            "src/admin/admin.controller.ts"
+          ]
+        },
+        {
+          "component": "mentee-web-app middleware (frontend)",
+          "contribution": "B1.7.4: redirects unauthenticated users from (app)/* to /login",
+          "key_files": [
+            "src/middleware.ts"
+          ]
+        },
+        {
+          "component": "admin-portal middleware (frontend)",
+          "contribution": "B1.7.4: redirects non-admin users to /login",
+          "key_files": [
+            "src/middleware.ts"
+          ]
+        }
+      ],
+      "invariants_covered": [
+        "INV-02: JwtAuthGuard rejects tokens with multiple roles (validator in MockAuthAdapter ensures only one role per JWT)"
+      ]
+    }
+  },
+  "dev_environment": {
+    "docker_compose": {
+      "file": "docker-compose.yml",
+      "description": "Local development services \u2014 PostgreSQL 16 and Redis 7 only. KeyCloak excluded (mock auth in E1). OpenSearch excluded (marketplace search is E2).",
+      "content": "version: '3.9'\nservices:\n  postgres:\n    image: postgres:16-alpine\n    container_name: felly-postgres\n    ports:\n      - \"5432:5432\"\n    environment:\n      POSTGRES_DB: felly_club_dev\n      POSTGRES_USER: felly\n      POSTGRES_PASSWORD: fellydev\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U felly -d felly_club_dev\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n\n  redis:\n    image: redis:7-alpine\n    container_name: felly-redis\n    ports:\n      - \"6379:6379\"\n    command: redis-server --save 60 1 --loglevel warning\n    volumes:\n      - redis_data:/data\n    healthcheck:\n      test: [\"CMD\", \"redis-cli\", \"ping\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n\nvolumes:\n  postgres_data:\n  redis_data:\n"
+    },
+    "ports": [
+      {
+        "service": "PostgreSQL",
+        "port": 5432,
+        "local_url": "localhost:5432",
+        "container_name": "felly-postgres"
+      },
+      {
+        "service": "Redis",
+        "port": 6379,
+        "local_url": "localhost:6379",
+        "container_name": "felly-redis"
+      },
+      {
+        "service": "backend-api (NestJS)",
+        "port": 3000,
+        "local_url": "http://localhost:3000",
+        "configured_via": "API_PORT env var"
+      },
+      {
+        "service": "mentee-web-app (Next.js)",
+        "port": 3001,
+        "local_url": "http://localhost:3001",
+        "configured_via": "next dev -p 3001"
+      },
+      {
+        "service": "admin-portal (Next.js)",
+        "port": 3002,
+        "local_url": "http://localhost:3002",
+        "configured_via": "next dev -p 3002"
+      }
+    ],
+    "env_vars": {
+      "packages/backend-api/.env.local.example": [
+        {
+          "name": "DATABASE_URL",
+          "value_example": "see .env.example for connection string format",
+          "required": true,
+          "description": "Prisma primary database connection string"
+        },
+        {
+          "name": "REDIS_URL",
+          "value_example": "redis://localhost:6379",
+          "required": true,
+          "description": "Redis connection string for BullMQ and cache"
+        },
+        {
+          "name": "AUTH_ADAPTER",
+          "value_example": "mock",
+          "required": true,
+          "description": "Auth adapter selector: 'mock' for E1, 'keycloak' for E11"
+        },
+        {
+          "name": "JWT_SECRET",
+          "value_example": "dev-jwt-secret-min-32-chars-please-change",
+          "required": true,
+          "description": "Secret for MockAuthAdapter JWT signing \u2014 minimum 32 characters"
+        },
+        {
+          "name": "JWT_ACCESS_EXPIRY",
+          "value_example": "15m",
+          "required": true,
+          "description": "JWT access token expiry \u2014 15 minutes per architecture.yaml NFR"
+        },
+        {
+          "name": "JWT_REFRESH_EXPIRY",
+          "value_example": "7d",
+          "required": true,
+          "description": "JWT refresh token expiry \u2014 7 days"
+        },
+        {
+          "name": "JWT_ISSUER",
+          "value_example": "felly-club-mock",
+          "required": true,
+          "description": "JWT iss claim \u2014 in E11 replaced with KeyCloak realm URL"
+        },
+        {
+          "name": "JWT_AUDIENCE",
+          "value_example": "felly-club-api",
+          "required": true,
+          "description": "JWT aud claim \u2014 must match what guards validate"
+        },
+        {
+          "name": "API_PORT",
+          "value_example": "3000",
+          "required": false,
+          "description": "NestJS HTTP server port \u2014 default 3000"
+        },
+        {
+          "name": "FRONTEND_URL",
+          "value_example": "http://localhost:3001",
+          "required": true,
+          "description": "Mentee web app URL \u2014 used for email verification link and OAuth callbacks"
+        },
+        {
+          "name": "ADMIN_PORTAL_URL",
+          "value_example": "http://localhost:3002",
+          "required": true,
+          "description": "Admin portal URL \u2014 used for admin OAuth callbacks"
+        },
+        {
+          "name": "AWS_REGION",
+          "value_example": "us-east-1",
+          "required": true,
+          "description": "AWS region for S3 operations"
+        },
+        {
+          "name": "S3_ARTEFACTS_BUCKET",
+          "value_example": "felly-artefacts-dev",
+          "required": true,
+          "description": "S3 bucket for mentor verification artefacts and profile photos"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "value_example": "localstack",
+          "required": false,
+          "description": "AWS credentials for local dev \u2014 use LocalStack or stub. Production: ECS task role (no static credentials)"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "value_example": "localstack",
+          "required": false,
+          "description": "AWS credentials for local dev. Production: ECS task role"
+        },
+        {
+          "name": "S3_ENDPOINT",
+          "value_example": "http://localhost:4566",
+          "required": false,
+          "description": "S3 endpoint override \u2014 set to LocalStack endpoint for local dev. Leave unset in production."
+        },
+        {
+          "name": "LOG_LEVEL",
+          "value_example": "debug",
+          "required": false,
+          "description": "Pino log level \u2014 debug (dev), info (production)"
+        },
+        {
+          "name": "NODE_ENV",
+          "value_example": "development",
+          "required": true,
+          "description": "Node environment \u2014 development | staging | production"
+        }
+      ],
+      "packages/mentee-web-app/.env.local.example": [
+        {
+          "name": "NEXT_PUBLIC_API_BASE_URL",
+          "value_example": "http://localhost:3000/api/v1",
+          "required": true,
+          "description": "Backend API base URL for all API client calls"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "value_example": "http://localhost:3001",
+          "required": true,
+          "description": "This app's URL \u2014 used for OAuth redirect URIs and canonical URL construction"
+        }
+      ],
+      "packages/admin-portal/.env.local.example": [
+        {
+          "name": "NEXT_PUBLIC_API_BASE_URL",
+          "value_example": "http://localhost:3000/api/v1",
+          "required": true,
+          "description": "Backend API base URL for admin portal API calls"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "value_example": "http://localhost:3002",
+          "required": true,
+          "description": "This portal's URL"
+        }
+      ]
+    },
+    "local_commands": {
+      "setup": [
+        {
+          "command": "pnpm install",
+          "cwd": "felly-club/",
+          "description": "Install all workspace dependencies"
+        },
+        {
+          "command": "docker-compose up -d",
+          "cwd": "felly-club/",
+          "description": "Start PostgreSQL and Redis containers"
+        },
+        {
+          "command": "pnpm --filter backend-api prisma:migrate",
+          "cwd": "felly-club/",
+          "description": "Run Prisma migrations against local PostgreSQL (alias: npx prisma migrate dev)"
+        },
+        {
+          "command": "pnpm --filter backend-api prisma:generate",
+          "cwd": "felly-club/",
+          "description": "Regenerate Prisma client after schema changes"
+        }
+      ],
+      "dev": [
+        {
+          "command": "pnpm --filter backend-api dev",
+          "cwd": "felly-club/",
+          "description": "Start NestJS backend in watch mode (nodemon) on port 3000"
+        },
+        {
+          "command": "pnpm --filter mentee-web-app dev",
+          "cwd": "felly-club/",
+          "description": "Start mentee web app Next.js dev server on port 3001"
+        },
+        {
+          "command": "pnpm --filter admin-portal dev",
+          "cwd": "felly-club/",
+          "description": "Start admin portal Next.js dev server on port 3002"
+        }
+      ],
+      "test": [
+        {
+          "command": "pnpm --filter backend-api test",
+          "cwd": "felly-club/",
+          "description": "Run Jest unit and integration tests for backend-api with coverage"
+        },
+        {
+          "command": "pnpm --filter backend-api test:e2e",
+          "cwd": "felly-club/",
+          "description": "Run NestJS e2e tests (Supertest against in-memory NestJS app)"
+        },
+        {
+          "command": "pnpm --filter mentee-web-app test",
+          "cwd": "felly-club/",
+          "description": "Run React Testing Library tests for mentee-web-app"
+        },
+        {
+          "command": "pnpm test",
+          "cwd": "felly-club/",
+          "description": "Run all tests across all packages"
+        }
+      ],
+      "quality": [
+        {
+          "command": "pnpm lint",
+          "cwd": "felly-club/",
+          "description": "Run ESLint across all packages"
+        },
+        {
+          "command": "pnpm format",
+          "cwd": "felly-club/",
+          "description": "Run Prettier format check across all packages"
+        },
+        {
+          "command": "pnpm typecheck",
+          "cwd": "felly-club/",
+          "description": "Run tsc --noEmit across all packages"
+        }
+      ],
+      "database": [
+        {
+          "command": "npx prisma studio",
+          "cwd": "packages/backend-api/",
+          "description": "Open Prisma Studio GUI for local database browsing at http://localhost:5555"
+        },
+        {
+          "command": "npx prisma migrate reset",
+          "cwd": "packages/backend-api/",
+          "description": "Drop and recreate database with all migrations applied (destructive \u2014 dev only)"
+        }
+      ],
+      "package_scripts": {
+        "prisma_package_json": {
+          "prisma:migrate": "prisma migrate dev",
+          "prisma:generate": "prisma generate",
+          "prisma:studio": "prisma studio",
+          "prisma:reset": "prisma migrate reset",
+          "build": "nest build",
+          "dev": "nest start --watch",
+          "test": "jest --coverage",
+          "test:e2e": "jest --config jest-e2e.config.ts --coverage",
+          "lint": "eslint src --ext .ts",
+          "format": "prettier --check \"src/**/*.ts\"",
+          "typecheck": "tsc --noEmit"
+        }
+      }
+    }
+  },
+  "api_endpoints": [
+    {
+      "id": "E1-API-01",
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "auth": "none",
+      "feature": "F1.1",
+      "behaviors": [
+        "B1.1.1",
+        "B1.1.4",
+        "B1.1.5"
+      ],
+      "description": "Register a new mentee account with email and password",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "email": "string (valid email) \u2014 INV-04: must be unique",
+          "password": "string (min 8 chars, at least 1 letter and 1 number) \u2014 B1.1.5"
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Registration accepted \u2014 verification email sent (in E7; link returned in E1 response)",
+          "schema": {
+            "userId": "string (UUID)",
+            "email": "string",
+            "message": "Verification email sent. Please verify your email to activate your account.",
+            "verificationLink": "string (URL) \u2014 dev convenience only; removed in production (E7 sends email)"
+          }
+        },
+        "409": {
+          "description": "Email already in use \u2014 INV-04",
+          "schema": {
+            "statusCode": 409,
+            "message": "Email already in use",
+            "error": "Conflict"
+          }
+        },
+        "422": {
+          "description": "Validation failed \u2014 B1.1.5 (weak password) or invalid email",
+          "schema": {
+            "statusCode": 422,
+            "message": [
+              "password is too short",
+              "..."
+            ],
+            "error": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-02",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "auth": "none",
+      "feature": "F1.2",
+      "behaviors": [
+        "B1.2.1",
+        "B1.2.2",
+        "B1.2.3"
+      ],
+      "description": "Authenticate with email and password. Returns JWT access + refresh tokens.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "email": "string",
+          "password": "string"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Login successful",
+          "schema": {
+            "accessToken": "string (JWT, 15min expiry)",
+            "refreshToken": "string (JWT, 7d expiry)",
+            "user": {
+              "id": "string (UUID)",
+              "email": "string",
+              "role": "UserRole (MENTEE | MENTOR | ADMIN)",
+              "status": "UserStatus"
+            }
+          }
+        },
+        "401": {
+          "description": "Invalid credentials \u2014 B1.2.2: generic message, does not reveal if email exists",
+          "schema": {
+            "statusCode": 401,
+            "message": "Invalid email or password",
+            "error": "Unauthorized"
+          }
+        },
+        "403": {
+          "description": "Unverified email \u2014 email not yet verified via verification link",
+          "schema": {
+            "statusCode": 403,
+            "message": "Email not verified. Please verify your email before logging in.",
+            "error": "Forbidden"
+          }
+        },
+        "429": {
+          "description": "Rate limit exceeded \u2014 B1.2.3: 10 failures in 15 minutes",
+          "schema": {
+            "statusCode": 429,
+            "message": "Too many login attempts. Try again in 15 minutes.",
+            "error": "Too Many Requests"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-03",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "auth": "jwt",
+      "feature": "F1.2",
+      "behaviors": [
+        "B1.2.5"
+      ],
+      "description": "Invalidate session \u2014 clears refresh token in MockAuthAdapter's in-memory store",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "refreshToken": "string"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Logged out successfully",
+          "schema": {
+            "message": "Logged out successfully"
+          }
+        },
+        "401": {
+          "description": "Invalid or expired access token"
+        }
+      }
+    },
+    {
+      "id": "E1-API-04",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "auth": "none",
+      "feature": "F1.2",
+      "behaviors": [
+        "B1.2.4"
+      ],
+      "description": "Refresh access token using refresh token. Returns new access + refresh token pair.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "refreshToken": "string"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "New token pair issued",
+          "schema": {
+            "accessToken": "string (JWT, 15min)",
+            "refreshToken": "string (JWT, 7d)"
+          }
+        },
+        "401": {
+          "description": "Invalid or expired refresh token",
+          "schema": {
+            "statusCode": 401,
+            "message": "Invalid or expired refresh token",
+            "error": "Unauthorized"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-05",
+      "method": "GET",
+      "path": "/api/v1/auth/verify-email",
+      "auth": "none",
+      "feature": "F1.1",
+      "behaviors": [
+        "B1.1.2"
+      ],
+      "description": "Verify user's email using the token from the verification email link",
+      "query_params": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "description": "Email verification token (UUID) from the verification link"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Email verified \u2014 User.status changed to ACTIVE. MenteeProfile created if not exists.",
+          "schema": {
+            "message": "Email verified successfully. You can now log in."
+          }
+        },
+        "400": {
+          "description": "Token expired or already used \u2014 B1.1.2 validity period check",
+          "schema": {
+            "statusCode": 400,
+            "message": "Verification token is invalid or has expired.",
+            "error": "Bad Request"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-06",
+      "method": "POST",
+      "path": "/api/v1/auth/forgot-password",
+      "auth": "none",
+      "feature": "F1.3",
+      "behaviors": [
+        "B1.3.1"
+      ],
+      "description": "Request a password reset link. Always returns 200 regardless of whether email exists (prevents email enumeration \u2014 B1.3.1).",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "email": "string (valid email)"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Always returns success \u2014 B1.3.1 email enumeration prevention",
+          "schema": {
+            "message": "If this email is registered, a reset link has been sent.",
+            "resetLink": "string (URL) \u2014 dev convenience only; included when NODE_ENV=development; omitted in production"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-07",
+      "method": "POST",
+      "path": "/api/v1/auth/reset-password",
+      "auth": "none",
+      "feature": "F1.3",
+      "behaviors": [
+        "B1.3.2",
+        "B1.3.3"
+      ],
+      "description": "Reset password using the token from the reset email link. Invalidates all existing sessions on success.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "token": "string (UUID from reset link)",
+          "newPassword": "string (min 8 chars, letter+number)"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Password reset \u2014 all refresh tokens invalidated (B1.3.2)",
+          "schema": {
+            "message": "Password reset successfully. Please log in with your new password."
+          }
+        },
+        "400": {
+          "description": "Token expired or already used \u2014 B1.3.3",
+          "schema": {
+            "statusCode": 400,
+            "message": "Reset token is invalid or has expired. Please request a new link.",
+            "error": "Bad Request"
+          }
+        },
+        "422": {
+          "description": "Password does not meet strength requirements"
+        }
+      }
+    },
+    {
+      "id": "E1-API-08",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "auth": "jwt",
+      "feature": "F1.2",
+      "behaviors": [
+        "B1.2.1"
+      ],
+      "description": "Get current authenticated user info from JWT claims",
+      "responses": {
+        "200": {
+          "description": "Current user info",
+          "schema": {
+            "id": "string (UUID)",
+            "email": "string",
+            "role": "UserRole",
+            "status": "UserStatus"
+          }
+        },
+        "401": {
+          "description": "No valid JWT Bearer token"
+        }
+      }
+    },
+    {
+      "id": "E1-API-09",
+      "method": "GET",
+      "path": "/api/v1/auth/social/google",
+      "auth": "none",
+      "feature": "F1.1",
+      "behaviors": [
+        "B1.1.3"
+      ],
+      "description": "Initiate Google OAuth flow. In production (E11): redirects to KeyCloak Google IDP. In E1 mock: returns a simulated OAuth URL or directly issues tokens for a test user.",
+      "responses": {
+        "302": {
+          "description": "Redirect to OAuth provider (KeyCloak in E11; mock endpoint in E1)"
+        },
+        "notes": "In E1 mock mode, accepting a query param ?email=user@example.com allows simulating social login without real OAuth roundtrip (dev convenience only \u2014 guarded by NODE_ENV=development check)"
+      }
+    },
+    {
+      "id": "E1-API-10",
+      "method": "GET",
+      "path": "/api/v1/auth/social/google/callback",
+      "auth": "none",
+      "feature": "F1.1",
+      "behaviors": [
+        "B1.1.3"
+      ],
+      "description": "Google OAuth callback. Creates or retrieves user, issues tokens, redirects to frontend dashboard.",
+      "responses": {
+        "302": {
+          "description": "Redirect to {FRONTEND_URL}/dashboard with tokens in query params or via cookie (implementation choice per DD-08)"
+        },
+        "200": {
+          "description": "In mock mode: returns token pair directly",
+          "schema": {
+            "accessToken": "string",
+            "refreshToken": "string",
+            "user": {
+              "id": "string",
+              "email": "string",
+              "role": "MENTEE"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-11",
+      "method": "GET",
+      "path": "/api/v1/auth/social/apple",
+      "auth": "none",
+      "feature": "F1.1",
+      "behaviors": [
+        "B1.1.3"
+      ],
+      "description": "Initiate Apple Sign In flow. Same pattern as Google OAuth \u2014 KeyCloak-brokered in E11.",
+      "responses": {
+        "302": {
+          "description": "Redirect to Apple Sign In (via KeyCloak in E11; mock in E1)"
+        }
+      }
+    },
+    {
+      "id": "E1-API-12",
+      "method": "POST",
+      "path": "/api/v1/auth/social/apple/callback",
+      "auth": "none",
+      "feature": "F1.1",
+      "behaviors": [
+        "B1.1.3"
+      ],
+      "description": "Apple Sign In callback (Apple uses POST for callbacks, not GET). Creates or retrieves user, issues tokens.",
+      "responses": {
+        "302": {
+          "description": "Redirect to frontend with tokens"
+        }
+      }
+    },
+    {
+      "id": "E1-API-13",
+      "method": "GET",
+      "path": "/api/v1/users/me",
+      "auth": "jwt",
+      "feature": "F1.6",
+      "behaviors": [
+        "B1.6.1",
+        "B1.6.3"
+      ],
+      "description": "Get current user with their profile (MenteeProfile or MentorProfile based on role)",
+      "responses": {
+        "200": {
+          "description": "User with nested profile",
+          "schema": {
+            "id": "string",
+            "email": "string",
+            "role": "UserRole",
+            "status": "UserStatus",
+            "menteeProfile": "MenteeProfile | null (present if role=MENTEE)",
+            "mentorProfile": "MentorProfile | null (present if role=MENTOR; excludes s3Keys)"
+          }
+        },
+        "401": {
+          "description": "No valid JWT"
+        },
+        "notes": "passwordHash, keycloakId NEVER included in response \u2014 enforced by UserResponseDto @Exclude()"
+      }
+    },
+    {
+      "id": "E1-API-14",
+      "method": "GET",
+      "path": "/api/v1/users/me/mentee-profile",
+      "auth": "jwt \u2014 role: MENTEE",
+      "feature": "F1.6",
+      "behaviors": [
+        "B1.6.1"
+      ],
+      "description": "Get current mentee's profile with completeness score",
+      "responses": {
+        "200": {
+          "schema": {
+            "id": "string",
+            "userId": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "avatarUrl": "string | null (presigned S3 URL, 1h expiry \u2014 generated from avatarKey)",
+            "interests": "string[]",
+            "goals": "string | null",
+            "completeness": "integer 0\u2013100"
+          }
+        },
+        "403": {
+          "description": "Not a MENTEE role"
+        }
+      }
+    },
+    {
+      "id": "E1-API-15",
+      "method": "PATCH",
+      "path": "/api/v1/users/me/mentee-profile",
+      "auth": "jwt \u2014 role: MENTEE",
+      "feature": "F1.6",
+      "behaviors": [
+        "B1.6.2"
+      ],
+      "description": "Update current mentee's profile. Recomputes and saves completeness score.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "firstName": "string (optional)",
+          "lastName": "string (optional)",
+          "interests": "string[] (optional)",
+          "goals": "string (optional, max 1000 chars)",
+          "avatarKey": "string (optional, S3 key from pre-signed upload)"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Updated profile with new completeness score",
+          "schema": "same as GET /users/me/mentee-profile"
+        },
+        "422": {
+          "description": "Validation error"
+        }
+      }
+    },
+    {
+      "id": "E1-API-16",
+      "method": "GET",
+      "path": "/api/v1/users/me/mentor-profile",
+      "auth": "jwt \u2014 role: MENTOR",
+      "feature": "F1.6",
+      "behaviors": [
+        "B1.6.3"
+      ],
+      "description": "Get current mentor's profile",
+      "responses": {
+        "200": {
+          "schema": {
+            "id": "string",
+            "userId": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "bio": "string",
+            "expertiseCategories": "ExpertiseCategory[]",
+            "photoUrl": "string | null (presigned S3 URL)",
+            "status": "MentorProfileStatus",
+            "verifiedBadge": "boolean",
+            "pricingTiers": "IPricingTier[]",
+            "availabilitySlots": "IAvailabilitySlot[]",
+            "completeness": "integer 0\u2013100",
+            "notes": "verificationArtefacts NOT included \u2014 admin-only view"
+          }
+        },
+        "403": {
+          "description": "Not a MENTOR role"
+        }
+      }
+    },
+    {
+      "id": "E1-API-17",
+      "method": "PATCH",
+      "path": "/api/v1/users/me/mentor-profile",
+      "auth": "jwt \u2014 role: MENTOR",
+      "feature": "F1.6",
+      "behaviors": [
+        "B1.6.4"
+      ],
+      "description": "Update current mentor's bio, pricing, availability, and photo. Recomputes completeness.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "bio": "string (optional, max 2000 chars)",
+          "expertiseCategories": "ExpertiseCategory[] (optional)",
+          "photoKey": "string (optional, S3 key)",
+          "pricingTiers": "PricingTier[] (optional, replaces all existing tiers)",
+          "availabilitySlots": "AvailabilitySlot[] (optional, replaces all existing slots)"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Updated mentor profile",
+          "schema": "same as GET /users/me/mentor-profile"
+        },
+        "422": {
+          "description": "Validation error"
+        }
+      }
+    },
+    {
+      "id": "E1-API-18",
+      "method": "GET",
+      "path": "/api/v1/admin/users",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.7",
+      "behaviors": [
+        "B1.7.3"
+      ],
+      "description": "List all users with status filters. Admin user management view.",
+      "query_params": [
+        {
+          "name": "role",
+          "type": "UserRole (optional)",
+          "description": "Filter by role: MENTEE | MENTOR | ADMIN"
+        },
+        {
+          "name": "status",
+          "type": "UserStatus (optional)",
+          "description": "Filter by status: PENDING_EMAIL_VERIFICATION | ACTIVE | SUSPENDED"
+        },
+        {
+          "name": "page",
+          "type": "integer (optional, default 1)"
+        },
+        {
+          "name": "limit",
+          "type": "integer (optional, default 20, max 100)"
+        }
+      ],
+      "responses": {
+        "200": {
+          "schema": {
+            "data": "IUser[] with basic profile (firstName, lastName, completeness)",
+            "total": "integer",
+            "page": "integer",
+            "limit": "integer"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-19",
+      "method": "GET",
+      "path": "/api/v1/admin/users/:id",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.7",
+      "behaviors": [
+        "B1.7.3"
+      ],
+      "description": "Get a single user's full detail (no passwordHash)",
+      "responses": {
+        "200": {
+          "schema": "Full user with menteeProfile or mentorProfile (for MENTOR: includes verificationArtefacts)"
+        },
+        "404": {
+          "description": "User not found"
+        }
+      }
+    },
+    {
+      "id": "E1-API-20",
+      "method": "POST",
+      "path": "/api/v1/admin/mentors",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.4",
+      "behaviors": [
+        "B1.4.1",
+        "B1.4.2"
+      ],
+      "description": "Create a new mentor profile (and associated User account). If all required fields provided and artefact uploaded, status = PENDING_VERIFICATION. Otherwise DRAFT.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "firstName": "string (required)",
+          "lastName": "string (required)",
+          "email": "string (required, unique) \u2014 new User account email",
+          "bio": "string (required, max 2000 chars)",
+          "expertiseCategories": "ExpertiseCategory[] (required, min 1)",
+          "pricingTiers": "PricingTier[] (required, min 1)",
+          "availabilitySlots": "AvailabilitySlot[] (required, min 1)"
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Mentor profile created (DRAFT or PENDING_VERIFICATION based on completeness)",
+          "schema": {
+            "id": "string (MentorProfile UUID)",
+            "userId": "string (User UUID)",
+            "status": "MentorProfileStatus",
+            "completeness": "integer",
+            "email": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "bio": "string",
+            "expertiseCategories": "ExpertiseCategory[]",
+            "pricingTiers": "MentorPricingTier[]",
+            "availabilitySlots": "MentorAvailabilitySlot[]",
+            "verificationArtefacts": "[] (empty on creation)"
+          }
+        },
+        "409": {
+          "description": "Email already in use \u2014 INV-04"
+        }
+      }
+    },
+    {
+      "id": "E1-API-21",
+      "method": "GET",
+      "path": "/api/v1/admin/mentors",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.5",
+      "behaviors": [
+        "B1.5.1"
+      ],
+      "description": "List mentor profiles with optional status filter",
+      "query_params": [
+        {
+          "name": "status",
+          "type": "MentorProfileStatus (optional)"
+        },
+        {
+          "name": "page",
+          "type": "integer (optional, default 1)"
+        },
+        {
+          "name": "limit",
+          "type": "integer (optional, default 20, max 100)"
+        }
+      ],
+      "responses": {
+        "200": {
+          "schema": {
+            "data": "MentorResponseDto[]",
+            "total": "integer",
+            "page": "integer",
+            "limit": "integer"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-API-22",
+      "method": "GET",
+      "path": "/api/v1/admin/mentors/verification-queue",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.5",
+      "behaviors": [
+        "B1.5.1"
+      ],
+      "description": "List all mentors in PENDING_VERIFICATION status, sorted oldest submittedAt first",
+      "query_params": [
+        {
+          "name": "page",
+          "type": "integer (optional, default 1)"
+        },
+        {
+          "name": "limit",
+          "type": "integer (optional, default 20)"
+        }
+      ],
+      "responses": {
+        "200": {
+          "schema": {
+            "data": "MentorResponseDto[] \u2014 sorted by submittedAt ASC",
+            "total": "integer",
+            "page": "integer"
+          }
+        }
+      },
+      "notes": "Route /admin/mentors/verification-queue must be registered BEFORE /admin/mentors/:id in the controller to avoid param collision \u2014 Express/Fastify routes match in order."
+    },
+    {
+      "id": "E1-API-23",
+      "method": "GET",
+      "path": "/api/v1/admin/mentors/:id",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.5",
+      "behaviors": [
+        "B1.5.1"
+      ],
+      "description": "Get a single mentor profile with all verification artefacts",
+      "responses": {
+        "200": {
+          "description": "Full mentor profile including artefacts list",
+          "schema": {
+            "id": "string",
+            "userId": "string",
+            "email": "string (from User)",
+            "firstName": "string",
+            "lastName": "string",
+            "bio": "string",
+            "expertiseCategories": "ExpertiseCategory[]",
+            "status": "MentorProfileStatus",
+            "verifiedBadge": "boolean",
+            "rejectionReason": "string | null",
+            "submittedAt": "ISO8601 | null",
+            "verifiedAt": "ISO8601 | null",
+            "completeness": "integer",
+            "pricingTiers": "MentorPricingTier[]",
+            "availabilitySlots": "MentorAvailabilitySlot[]",
+            "verificationArtefacts": [
+              {
+                "id": "string",
+                "artefactType": "ArtefactType",
+                "url": "string | null",
+                "artefactUrl": "string | null (presigned S3 URL for DOCUMENT type, 1h expiry)",
+                "fileName": "string | null",
+                "mimeType": "string | null",
+                "createdAt": "ISO8601"
+              }
+            ]
+          }
+        },
+        "404": {
+          "description": "Mentor profile not found"
+        }
+      }
+    },
+    {
+      "id": "E1-API-24",
+      "method": "PATCH",
+      "path": "/api/v1/admin/mentors/:id",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.4",
+      "behaviors": [
+        "B1.4.2"
+      ],
+      "description": "Update a mentor profile in DRAFT or REJECTED status. Recomputes completeness.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": "Partial MentorProfile fields \u2014 same as CreateMentorDto but all optional"
+      },
+      "responses": {
+        "200": {
+          "description": "Updated mentor profile"
+        },
+        "400": {
+          "description": "Cannot edit a VERIFIED or PENDING_VERIFICATION mentor profile via this endpoint"
+        },
+        "404": {
+          "description": "Mentor profile not found"
+        }
+      }
+    },
+    {
+      "id": "E1-API-25",
+      "method": "POST",
+      "path": "/api/v1/admin/mentors/:id/submit",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.4",
+      "behaviors": [
+        "B1.4.1",
+        "B1.4.4"
+      ],
+      "description": "Submit a DRAFT mentor profile for verification. Validates completeness guard: all required fields and at least one artefact must be present.",
+      "responses": {
+        "200": {
+          "description": "Status changed to PENDING_VERIFICATION, submittedAt set",
+          "schema": "MentorResponseDto with status=PENDING_VERIFICATION"
+        },
+        "400": {
+          "description": "Completeness guard failed \u2014 missing required fields or no artefact",
+          "schema": {
+            "statusCode": 400,
+            "message": "Cannot submit: profile is missing required fields or has no verification artefacts",
+            "error": "Bad Request",
+            "missingFields": [
+              "bio",
+              "pricingTiers"
+            ]
+          }
+        },
+        "409": {
+          "description": "Profile is already PENDING_VERIFICATION or VERIFIED"
+        }
+      }
+    },
+    {
+      "id": "E1-API-26",
+      "method": "POST",
+      "path": "/api/v1/admin/mentors/:id/approve",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.5",
+      "behaviors": [
+        "B1.5.2"
+      ],
+      "description": "Approve a PENDING_VERIFICATION mentor profile. Sets verifiedBadge=true, User.status=ACTIVE. Returns temporary credentials for manual relay to mentor (E7 will replace with email).",
+      "responses": {
+        "200": {
+          "description": "Mentor approved \u2014 INV-01 and INV-03 satisfied",
+          "schema": {
+            "mentor": "MentorResponseDto (status=VERIFIED, verifiedBadge=true)",
+            "temporaryCredentials": {
+              "email": "string",
+              "temporaryPassword": "string \u2014 one-time plain-text password; log as audit event but never store in plaintext"
+            }
+          }
+        },
+        "400": {
+          "description": "Mentor is not in PENDING_VERIFICATION status"
+        },
+        "404": {
+          "description": "Mentor profile not found"
+        }
+      },
+      "security_note": "temporaryCredentials.temporaryPassword is returned ONCE in API response only. It is NEVER written to logs or AuditLog metadata. AuditLog records MENTOR_PROFILE_APPROVED event without password."
+    },
+    {
+      "id": "E1-API-27",
+      "method": "POST",
+      "path": "/api/v1/admin/mentors/:id/reject",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.5",
+      "behaviors": [
+        "B1.5.3"
+      ],
+      "description": "Reject a PENDING_VERIFICATION mentor profile with a reason.",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "reason": "string (min 10, max 500 chars)"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Status changed to REJECTED, rejectionReason stored",
+          "schema": "MentorResponseDto (status=REJECTED)"
+        },
+        "400": {
+          "description": "Mentor is not in PENDING_VERIFICATION status"
+        },
+        "422": {
+          "description": "Reason is too short or too long"
+        }
+      }
+    },
+    {
+      "id": "E1-API-28",
+      "method": "POST",
+      "path": "/api/v1/admin/mentors/:id/artefacts",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.4",
+      "behaviors": [
+        "B1.4.3"
+      ],
+      "description": "Upload a verification artefact to a mentor profile. Accepts URL types (JSON body) or document files (multipart).",
+      "request_body": {
+        "content_type": "multipart/form-data OR application/json",
+        "schema": {
+          "artefactType": "ArtefactType (required)",
+          "url": "string (required for LINKEDIN_URL and PORTFOLIO_URL types)",
+          "file": "binary (required for DOCUMENT type \u2014 uploaded to S3)"
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Artefact created and associated with mentor profile",
+          "schema": {
+            "id": "string",
+            "artefactType": "ArtefactType",
+            "url": "string | null",
+            "fileName": "string | null",
+            "mimeType": "string | null",
+            "createdAt": "ISO8601"
+          }
+        },
+        "400": {
+          "description": "Invalid artefact type or missing URL/file for the given type"
+        },
+        "404": {
+          "description": "Mentor profile not found"
+        }
+      },
+      "notes": "For DOCUMENT uploads, backend receives multipart via @fastify/multipart, uploads to S3 felly-artefacts bucket, stores S3 key. s3Key is never returned to API consumers \u2014 only presigned URL (E1-API-23)."
+    },
+    {
+      "id": "E1-API-29",
+      "method": "DELETE",
+      "path": "/api/v1/admin/mentors/:id/artefacts/:artefactId",
+      "auth": "jwt \u2014 role: ADMIN",
+      "feature": "F1.4",
+      "behaviors": [
+        "B1.4.3"
+      ],
+      "description": "Delete a verification artefact. For DOCUMENT type, also deletes S3 object.",
+      "responses": {
+        "204": {
+          "description": "Artefact deleted (no body)"
+        },
+        "404": {
+          "description": "Artefact not found or does not belong to mentor profile"
+        }
+      }
+    },
+    {
+      "id": "E1-API-30",
+      "method": "GET",
+      "path": "/health",
+      "auth": "none",
+      "feature": "infrastructure",
+      "description": "ECS Fargate health check endpoint \u2014 returns 200 when app is healthy",
+      "responses": {
+        "200": {
+          "schema": {
+            "status": "ok",
+            "timestamp": "ISO8601",
+            "version": "string (from package.json)"
+          }
+        }
+      }
+    }
+  ],
+  "mock_first": {
+    "keycloak": {
+      "strategy": "IAuthAdapter interface injected via DI token AUTH_ADAPTER_TOKEN. MockAuthAdapter issues real JWTs (jsonwebtoken) signed with JWT_SECRET, stores user credentials in PostgreSQL (bcrypt-hashed passwords), and validates tokens locally. In E11, KeyCloakAuthAdapter replaces MockAuthAdapter with no guard or decorator changes.",
+      "di_token": "AUTH_ADAPTER_TOKEN",
+      "provider_class_e1": "MockAuthAdapter",
+      "provider_class_e11": "KeyCloakAuthAdapter",
+      "jwt_payload_shape": "{ sub: string, email: string, realm_access: { roles: [UserRole] }, iss: string, aud: string, exp: number, iat: number }"
+    },
+    "stripe": {
+      "notes": "Stripe not applicable to E1 (payment is E4). No Stripe mock needed in E1."
+    }
+  }
+}

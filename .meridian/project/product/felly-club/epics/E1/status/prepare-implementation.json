@@ -1,0 +1,26 @@
+{
+  "recipe": "prepare-implementation",
+  "epic_id": "E1",
+  "slug": "felly-club",
+  "started_at": "2026-03-26T16:00:00+0530",
+  "tasks": {
+    "read-upstream": { "status": "completed", "completed_at": "2026-03-26T16:00:00+0530" },
+    "resolve-dependencies": { "status": "completed", "completed_at": "2026-03-26T16:00:00+0530" },
+    "scan-codebase": { "status": "completed", "completed_at": "2026-03-26T16:01:00+0530" },
+    "read-ltm": { "status": "completed", "completed_at": "2026-03-26T16:02:00+0530" },
+    "produce-dependency-report": { "status": "completed", "completed_at": "2026-03-26T16:03:00+0530" },
+    "context-resolution-approval": { "status": "in_progress", "started_at": "2026-03-26T16:03:00+0530" },
+    "draft-features": { "status": "pending" },
+    "generate-features-brief": { "status": "pending" },
+    "checkpoint-1": { "status": "pending" },
+    "draft-tech": { "status": "pending" },
+    "generate-tech-brief": { "status": "pending" },
+    "checkpoint-2": { "status": "pending" },
+    "draft-scenarios": { "status": "pending" },
+    "draft-plan": { "status": "pending" },
+    "generate-scenarios-plan-briefs": { "status": "pending" },
+    "checkpoint-3": { "status": "pending" },
+    "validate-all": { "status": "pending" },
+    "lock-artifacts": { "status": "pending" }
+  }
+}

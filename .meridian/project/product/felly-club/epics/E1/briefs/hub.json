@@ -1,0 +1,45 @@
+{
+  "slug": "felly-club",
+  "product_name": "Felly Club — E1: User Identity & Profile Foundation",
+  "generated_at": "2026-03-26T16:10:00+0530",
+  "product_level": [],
+  "epics": [
+    {
+      "epic_id": "E1",
+      "artifacts": [
+        {
+          "name": "Features",
+          "type": "features",
+          "status": "DRAFT",
+          "brief_path": "features-brief.html",
+          "has_brief": true,
+          "checksum": null
+        },
+        {
+          "name": "Tech Design",
+          "type": "tech",
+          "status": "pending",
+          "brief_path": "tech-brief.html",
+          "has_brief": false,
+          "checksum": null
+        },
+        {
+          "name": "Scenarios",
+          "type": "scenarios",
+          "status": "pending",
+          "brief_path": "scenarios-brief.html",
+          "has_brief": false,
+          "checksum": null
+        },
+        {
+          "name": "Execution Plan",
+          "type": "plan",
+          "status": "pending",
+          "brief_path": "plan-brief.html",
+          "has_brief": false,
+          "checksum": null
+        }
+      ]
+    }
+  ]
+}
