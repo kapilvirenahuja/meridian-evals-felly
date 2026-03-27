@@ -28,6 +28,8 @@ enum MentorProfileStatus {
   PENDING_REVIEW
   ACTIVE
   SUSPENDED
+  DRAFT
+  PENDING_VERIFICATION
 }
 
 enum ExpertiseCategory {
@@ -38,6 +40,9 @@ enum ExpertiseCategory {
   BUSINESS
   MARKETING
   OTHER
+  SPORT
+  ENTREPRENEURSHIP
+  ENTERTAINMENT
 }
 
 enum ArtefactType {
@@ -46,6 +51,7 @@ enum ArtefactType {
   PORTFOLIO_URL
   CERTIFICATION
   GITHUB_URL
+  DOCUMENT
 }
 
 enum AuditAction {

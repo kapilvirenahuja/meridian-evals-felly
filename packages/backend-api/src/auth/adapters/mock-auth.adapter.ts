@@ -141,7 +141,6 @@ export class MockAuthAdapter implements IAuthAdapter {
     }
     // F1.3: Also check if the token's user has had all tokens invalidated
     try {
-      const secret = process.env['JWT_SECRET'] || 'mock-secret';
       const payload = jwt.decode(refreshToken) as { sub?: string } | null;
       if (payload?.sub && this.invalidatedUsers.has(payload.sub)) {
         return true;

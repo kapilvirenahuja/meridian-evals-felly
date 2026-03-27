@@ -4,6 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { PassportModule } from '@nestjs/passport';
 import request from 'supertest';
 import { AdminController } from '../../admin/admin.controller';
+import { AdminService } from '../../admin/admin.service';
 import { UserController } from '../../user/user.controller';
 import { UserService } from '../../user/user.service';
 import { MockAuthAdapter } from '../adapters/mock-auth.adapter';
@@ -46,6 +47,7 @@ describe('RBAC Integration', () => {
       controllers: [UserController, AdminController],
       providers: [
         { provide: UserService, useValue: mockUserService },
+        { provide: AdminService, useValue: {} },
         JwtStrategy,
         JwtAuthGuard,
         RolesGuard,
