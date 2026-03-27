@@ -1,0 +1,151 @@
+implementation:
+  feature: F1.3
+  description: Password Reset & Recovery
+  success: true
+  steps_completed: 8
+  steps_total: 8
+
+  changes:
+    - step: 1
+      description: 'Write TDD test suite for F1.3 password reset'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/__tests__/password-reset.spec.ts'
+          action: created
+          summary: '27 tests covering controller-level (POST /forgot-password, POST /reset-password) and service-level (forgotPassword, resetPassword) behaviors including no-enumeration, token expiry, session invalidation, audit logging'
+      verified: true
+      deviation: null
+
+    - step: 2
+      description: 'Create ForgotPasswordDto and ResetPasswordDto'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/dto/forgot-password.dto.ts'
+          action: created
+          summary: 'DTO with @IsEmail validation for forgot-password endpoint'
+        - path: 'packages/backend-api/src/auth/dto/reset-password.dto.ts'
+          action: created
+          summary: 'DTO with @IsString token and @MinLength(8) + @Matches (letter+number) newPassword validation'
+      verified: true
+      deviation: null
+
+    - step: 3
+      description: 'Extend IAuthAdapter interface with F1.3 methods'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/adapters/auth-adapter.interface.ts'
+          action: modified
+          summary: 'Added generateResetToken(userId), verifyResetToken(token), updatePassword(userId, newHash), invalidateAllUserRefreshTokens(userId)'
+      verified: true
+      deviation: null
+
+    - step: 4
+      description: 'Add PASSWORD_RESET_TTL_MS constant'
+      files_modified:
+        - path: 'packages/backend-api/src/common/constants.ts'
+          action: modified
+          summary: 'Added PASSWORD_RESET_TTL_MS = 60 * 60 * 1000 (60 minutes)'
+      verified: true
+      deviation: null
+
+    - step: 5
+      description: 'Implement F1.3 methods in MockAuthAdapter'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/adapters/mock-auth.adapter.ts'
+          action: modified
+          summary: 'Added passwordResetTokens Map (UUID v4, 60-min TTL, single-use), invalidatedUsers Set for user-level session invalidation, generateResetToken, verifyResetToken, updatePassword (stub), invalidateAllUserRefreshTokens. Updated isRefreshTokenInvalidated to check invalidatedUsers by JWT decode.'
+      verified: true
+      deviation: null
+
+    - step: 6
+      description: 'Add forgotPassword and resetPassword to AuthService'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/auth.service.ts'
+          action: modified
+          summary: 'forgotPassword: normalizes email, looks up user, generates reset token, logs PASSWORD_RESET_REQUESTED; always returns {success:true}. resetPassword: verifies token, hashes new password, updates DB, invalidates all user sessions, logs PASSWORD_CHANGED.'
+      verified: true
+      deviation: 'Used PASSWORD_CHANGED audit action (existing enum) instead of PASSWORD_RESET_COMPLETED (not in Prisma schema AuditAction enum)'
+
+    - step: 7
+      description: 'Add forgot-password and reset-password endpoints to AuthController'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/auth.controller.ts'
+          action: modified
+          summary: 'Added POST /auth/forgot-password → forgotPassword(dto.email) and POST /auth/reset-password → resetPassword(dto.token, dto.newPassword), both HTTP 200'
+      verified: true
+      deviation: null
+
+    - step: 8
+      description: 'Update auth.service.spec.ts mock to include F1.3 adapter methods'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/__tests__/auth.service.spec.ts'
+          action: modified
+          summary: 'Added generateResetToken, verifyResetToken, updatePassword, invalidateAllUserRefreshTokens stubs to existing mock adapter to satisfy TypeScript after interface extension'
+      verified: true
+      deviation: null
+
+    - step: 9
+      description: 'Create forgot-password frontend page'
+      files_modified:
+        - path: 'packages/mentee-web-app/src/app/(auth)/forgot-password/page.tsx'
+          action: created
+          summary: 'Client component with email form, react-hook-form + zod validation, apiClient POST /auth/forgot-password, success state shows confirmation message (no email enumeration on frontend)'
+      verified: true
+      deviation: null
+
+    - step: 10
+      description: 'Create reset-password frontend page'
+      files_modified:
+        - path: 'packages/mentee-web-app/src/app/(auth)/reset-password/page.tsx'
+          action: created
+          summary: 'Client component reading token from URL query param, newPassword + confirmPassword fields with zod validation (>=8 chars, letter+number), apiClient POST /auth/reset-password, 400 handling, success state'
+      verified: true
+      deviation: null
+
+  test_results:
+    command: 'pnpm -r test'
+    total_suites: 8
+    passed_suites: 8
+    failed_suites: 0
+    total_tests: 113
+    passed_tests: 113
+    failed_tests: 0
+    new_tests_added: 27
+    prior_test_count: 86
+
+  typecheck_results:
+    command: 'pnpm -r typecheck'
+    backend_api: pass
+    mentee_web_app: pass
+    admin_portal: pass
+    shared_types: pass
+
+  lint_results:
+    command: 'pnpm --filter @felly/backend-api lint'
+    status: pre_existing_failure
+    note: "ESLint fails with 'Cannot read file packages/backend-api/tsconfig.test.json' — this error exists in the repository before F1.3 changes (confirmed by git stash test). Not caused by F1.3 implementation."
+
+  exit_gate_verification:
+    forgot_password_200_any_email: true
+    reset_password_200_valid_token_strong_pwd: true
+    reset_password_400_expired_token: true
+    session_invalidation_after_reset: true
+    frontend_forms_render_and_submit: true
+
+  files_touched:
+    - packages/backend-api/src/auth/__tests__/password-reset.spec.ts
+    - packages/backend-api/src/auth/dto/forgot-password.dto.ts
+    - packages/backend-api/src/auth/dto/reset-password.dto.ts
+    - packages/backend-api/src/auth/adapters/auth-adapter.interface.ts
+    - packages/backend-api/src/auth/adapters/mock-auth.adapter.ts
+    - packages/backend-api/src/auth/auth.service.ts
+    - packages/backend-api/src/auth/auth.controller.ts
+    - packages/backend-api/src/auth/__tests__/auth.service.spec.ts
+    - packages/backend-api/src/common/constants.ts
+    - packages/mentee-web-app/src/app/(auth)/forgot-password/page.tsx
+    - packages/mentee-web-app/src/app/(auth)/reset-password/page.tsx
+
+  issues_encountered:
+    - description: 'AuditAction enum in Prisma schema does not include PASSWORD_RESET_COMPLETED'
+      resolution: 'Used PASSWORD_CHANGED (existing enum value) for the reset-completed audit log; PASSWORD_RESET_REQUESTED was already present'
+      severity: low
+    - description: "ESLint fails with pre-existing 'Cannot read file tsconfig.test.json' parsing error"
+      resolution: 'Confirmed pre-existing by git stash test; not introduced by F1.3 changes'
+      severity: low

@@ -21,4 +21,10 @@ export interface IAuthAdapter {
   // F1.2: Refresh token invalidation
   isRefreshTokenInvalidated(refreshToken: string): boolean;
   invalidateRefreshToken(refreshToken: string): void;
+
+  // F1.3: Password reset
+  generateResetToken(userId: string): Promise<string>;
+  verifyResetToken(token: string): Promise<string | null>;
+  updatePassword(userId: string, newHash: string): Promise<void>;
+  invalidateAllUserRefreshTokens(userId: string): void;
 }

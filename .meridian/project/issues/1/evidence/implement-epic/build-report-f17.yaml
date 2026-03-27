@@ -1,0 +1,198 @@
+implementation:
+  success: true
+  feature: F1.7
+  description: 'Role-Based Access Control (RBAC) for Felly Club'
+  steps_completed: 15
+  steps_total: 15
+
+  verification:
+    tests_before: 79
+    tests_after: 86
+    new_tests: 7
+    all_tests_pass: true
+    lint_pass: true
+    typecheck_pass: true
+
+  exit_gate_coverage:
+    - gate: 'GET /api/v1/users/me with no token returns 401'
+      covered_by: 'rbac.spec.ts → GET /users/me → should return 401 when no Authorization header'
+      status: pass
+    - gate: 'GET /api/v1/users/me with valid MENTEE JWT → 200'
+      covered_by: 'rbac.spec.ts → GET /users/me → should return 200 with valid MENTEE JWT'
+      status: pass
+    - gate: 'GET /api/v1/admin/ping with MENTEE token returns 403'
+      covered_by: 'rbac.spec.ts → GET /admin/ping → should return 403 with MENTEE JWT'
+      status: pass
+    - gate: 'GET /api/v1/admin/ping with ADMIN JWT → 200'
+      covered_by: 'rbac.spec.ts → GET /admin/ping → should return 200 with ADMIN JWT'
+      status: pass
+    - gate: 'GET /api/v1/admin/ping with no token → 401'
+      covered_by: 'rbac.spec.ts → GET /admin/ping → should return 401 when no Authorization header'
+      status: pass
+    - gate: 'Mentee browsing /dashboard without cookie → redirect to /login'
+      covered_by: 'mentee-web-app/src/middleware.ts checks felly_at cookie'
+      status: implemented
+    - gate: 'Admin accessing portal at / without felly_admin_role cookie → redirect to /login'
+      covered_by: 'admin-portal/src/middleware.ts checks felly_admin_role === ADMIN'
+      status: implemented
+    - gate: 'Admin portal login with MENTEE credentials → Access denied error'
+      covered_by: 'admin-portal/src/components/auth/login-form.tsx role check after setTokens'
+      status: implemented
+
+  changes:
+    - step: 1
+      description: 'TDD: Write RBAC integration tests first'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/__tests__/rbac.spec.ts'
+          action: created
+          summary: '7 integration tests covering /users/me (401, 200 MENTEE, 200 ADMIN) and /admin/ping (401, 403 MENTEE, 200 ADMIN)'
+      verified: true
+      deviation: null
+
+    - step: 2
+      description: 'Create AdminController with GET /admin/ping endpoint requiring ADMIN role'
+      files_modified:
+        - path: 'packages/backend-api/src/admin/admin.controller.ts'
+          action: created
+          summary: "GET /admin/ping with @UseGuards(JwtAuthGuard, RolesGuard) + @Roles('ADMIN') returning { status: 'ok' }"
+      verified: true
+      deviation: null
+
+    - step: 3
+      description: 'Create AdminModule importing PrismaModule and AuthModule'
+      files_modified:
+        - path: 'packages/backend-api/src/admin/admin.module.ts'
+          action: created
+          summary: 'Minimal stub module for admin scope with PrismaModule + AuthModule imports'
+      verified: true
+      deviation: null
+
+    - step: 4
+      description: 'Create UserController with GET /users/me (any authenticated user)'
+      files_modified:
+        - path: 'packages/backend-api/src/user/user.controller.ts'
+          action: created
+          summary: 'GET /users/me with @UseGuards(JwtAuthGuard, RolesGuard), no @Roles restriction; delegates to UserService.getMe()'
+      verified: true
+      deviation: null
+
+    - step: 5
+      description: 'Add UserService.getMe() method'
+      files_modified:
+        - path: 'packages/backend-api/src/user/user.service.ts'
+          action: modified
+          summary: 'Added getMe(userId) calling userRepository.findById, throws NotFoundException if not found, returns { id, email, role, status }'
+      verified: true
+      deviation: null
+
+    - step: 6
+      description: 'Update UserModule to import AuthModule and register UserController'
+      files_modified:
+        - path: 'packages/backend-api/src/user/user.module.ts'
+          action: modified
+          summary: 'Added AuthModule import, UserController to controllers array'
+      verified: true
+      deviation: null
+
+    - step: 7
+      description: 'Update AuthController to add RolesGuard to GET /auth/me'
+      files_modified:
+        - path: 'packages/backend-api/src/auth/auth.controller.ts'
+          action: modified
+          summary: 'Imported RolesGuard; changed @UseGuards(JwtAuthGuard) to @UseGuards(JwtAuthGuard, RolesGuard) on GET /auth/me'
+      verified: true
+      deviation: null
+
+    - step: 8
+      description: 'Update AppModule to import AdminModule'
+      files_modified:
+        - path: 'packages/backend-api/src/app.module.ts'
+          action: modified
+          summary: 'Added AdminModule import'
+      verified: true
+      deviation: null
+
+    - step: 9
+      description: 'Update mentee-web-app auth.ts with felly_at cookie management'
+      files_modified:
+        - path: 'packages/mentee-web-app/src/lib/auth.ts'
+          action: modified
+          summary: 'setTokens() sets felly_at=1 cookie (900s), clearTokens() clears it (max-age=0)'
+      verified: true
+      deviation: null
+
+    - step: 10
+      description: 'Update mentee-web-app auth-context.tsx with felly_role cookie'
+      files_modified:
+        - path: 'packages/mentee-web-app/src/lib/auth-context.tsx'
+          action: modified
+          summary: 'fetchMe() sets felly_role cookie (604800s) after fetching user; logout() clears it'
+      verified: true
+      deviation: null
+
+    - step: 11
+      description: 'Update mentee-web-app middleware.ts with real enforcement'
+      files_modified:
+        - path: 'packages/mentee-web-app/src/middleware.ts'
+          action: modified
+          summary: 'Added PUBLIC_PATHS [/, /login, /register, /verify-email, /forgot-password, /reset-password]; redirects to /login if felly_at cookie absent'
+      verified: true
+      deviation: null
+
+    - step: 12
+      description: 'Update admin-portal auth.ts with felly_admin_at cookie management'
+      files_modified:
+        - path: 'packages/admin-portal/src/lib/auth.ts'
+          action: modified
+          summary: 'setTokens() sets felly_admin_at=1 cookie (900s), clearTokens() clears it'
+      verified: true
+      deviation: null
+
+    - step: 13
+      description: 'Create admin-portal auth-context.tsx'
+      files_modified:
+        - path: 'packages/admin-portal/src/lib/auth-context.tsx'
+          action: created
+          summary: 'Mirrors mentee auth-context; fetchMe() sets felly_admin_role cookie; logout() clears felly_admin_at and felly_admin_role cookies'
+      verified: true
+      deviation: null
+
+    - step: 14
+      description: 'Update admin-portal login-form.tsx with ADMIN role check'
+      files_modified:
+        - path: 'packages/admin-portal/src/components/auth/login-form.tsx'
+          action: modified
+          summary: "After setTokens, calls GET /auth/me; if role !== ADMIN, clears tokens and shows 'Access denied. Admin credentials required.' error"
+      verified: true
+      deviation: null
+
+    - step: 15
+      description: 'Update admin-portal middleware.ts with real enforcement'
+      files_modified:
+        - path: 'packages/admin-portal/src/middleware.ts'
+          action: modified
+          summary: 'Only /login is public; redirects to /login if felly_admin_role cookie value !== ADMIN'
+      verified: true
+      deviation: null
+
+  files_touched:
+    - path: 'packages/backend-api/src/auth/__tests__/rbac.spec.ts'
+    - path: 'packages/backend-api/src/admin/admin.controller.ts'
+    - path: 'packages/backend-api/src/admin/admin.module.ts'
+    - path: 'packages/backend-api/src/user/user.controller.ts'
+    - path: 'packages/backend-api/src/user/user.service.ts'
+    - path: 'packages/backend-api/src/user/user.module.ts'
+    - path: 'packages/backend-api/src/auth/auth.controller.ts'
+    - path: 'packages/backend-api/src/app.module.ts'
+    - path: 'packages/mentee-web-app/src/lib/auth.ts'
+    - path: 'packages/mentee-web-app/src/lib/auth-context.tsx'
+    - path: 'packages/mentee-web-app/src/middleware.ts'
+    - path: 'packages/admin-portal/src/lib/auth.ts'
+    - path: 'packages/admin-portal/src/lib/auth-context.tsx'
+    - path: 'packages/admin-portal/src/components/auth/login-form.tsx'
+    - path: 'packages/admin-portal/src/middleware.ts'
+
+  issues_encountered:
+    - description: 'Prettier formatting violations in user.service.ts (long function signature) and mentee-web-app/middleware.ts (long array literal)'
+      resolution: 'Reformatted both to multi-line per prettier rules'
+      severity: low

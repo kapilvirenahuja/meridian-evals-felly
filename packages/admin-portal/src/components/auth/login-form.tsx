@@ -4,11 +4,18 @@ import { FormEvent, useState } from 'react';
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../../lib/api-client';
-import { setTokens } from '../../lib/auth';
+import { setTokens, clearTokens } from '../../lib/auth';
 
 interface LoginResponse {
   accessToken: string;
   refreshToken: string;
+}
+
+interface MeResponse {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
 }
 
 export function LoginForm() {
@@ -31,6 +38,15 @@ export function LoginForm() {
     try {
       const response = await apiClient.post<LoginResponse>('/auth/login', { email, password });
       setTokens(response.data.accessToken, response.data.refreshToken);
+
+      // Verify the user has ADMIN role before allowing portal access
+      const meResponse = await apiClient.get<MeResponse>('/auth/me');
+      if (meResponse.data.role !== 'ADMIN') {
+        clearTokens();
+        setServerError('Access denied. Admin credentials required.');
+        return;
+      }
+
       router.push('/');
     } catch (error) {
       if (error instanceof AxiosError) {

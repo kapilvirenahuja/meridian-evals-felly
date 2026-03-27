@@ -74,6 +74,11 @@ describe('AuthService', () => {
       clearFailedLogins: jest.fn(),
       isRefreshTokenInvalidated: jest.fn().mockReturnValue(false),
       invalidateRefreshToken: jest.fn(),
+      // F1.3: Password reset
+      generateResetToken: jest.fn().mockResolvedValue('reset-token-uuid'),
+      verifyResetToken: jest.fn().mockResolvedValue(null),
+      updatePassword: jest.fn().mockResolvedValue(undefined),
+      invalidateAllUserRefreshTokens: jest.fn(),
     };
 
     mockPrismaService = {

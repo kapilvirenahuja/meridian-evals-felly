@@ -10,6 +10,7 @@ import {
   JWT_AUDIENCE,
   JWT_ISSUER,
   JWT_REFRESH_EXPIRY,
+  PASSWORD_RESET_TTL_MS,
 } from '../../common/constants';
 import { IAuthAdapter } from './auth-adapter.interface';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
@@ -22,6 +23,11 @@ interface EmailVerificationEntry {
   expiresAt: Date;
 }
 
+interface PasswordResetEntry {
+  userId: string;
+  expiresAt: Date;
+}
+
 interface RateLimitEntry {
   count: number;
   windowStartMs: number;
@@ -30,8 +36,10 @@ interface RateLimitEntry {
 @Injectable()
 export class MockAuthAdapter implements IAuthAdapter {
   private readonly emailVerificationTokens = new Map<string, EmailVerificationEntry>();
+  private readonly passwordResetTokens = new Map<string, PasswordResetEntry>();
   private readonly rateLimitMap = new Map<string, RateLimitEntry>();
   private readonly invalidatedRefreshTokens = new Set<string>();
+  private readonly invalidatedUsers = new Set<string>();
 
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -128,10 +136,55 @@ export class MockAuthAdapter implements IAuthAdapter {
   // ─── F1.2: Refresh token invalidation ─────────────────────────────────────
 
   isRefreshTokenInvalidated(refreshToken: string): boolean {
-    return this.invalidatedRefreshTokens.has(refreshToken);
+    if (this.invalidatedRefreshTokens.has(refreshToken)) {
+      return true;
+    }
+    // F1.3: Also check if the token's user has had all tokens invalidated
+    try {
+      const secret = process.env['JWT_SECRET'] || 'mock-secret';
+      const payload = jwt.decode(refreshToken) as { sub?: string } | null;
+      if (payload?.sub && this.invalidatedUsers.has(payload.sub)) {
+        return true;
+      }
+    } catch {
+      // If decode fails, fall through to return false
+    }
+    return false;
   }
 
   invalidateRefreshToken(refreshToken: string): void {
     this.invalidatedRefreshTokens.add(refreshToken);
+  }
+
+  // ─── F1.3: Password reset ──────────────────────────────────────────────────
+
+  async generateResetToken(userId: string): Promise<string> {
+    const token = uuidv4();
+    const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
+    this.passwordResetTokens.set(token, { userId, expiresAt });
+    return token;
+  }
+
+  async verifyResetToken(token: string): Promise<string | null> {
+    const entry = this.passwordResetTokens.get(token);
+    if (!entry) {
+      return null;
+    }
+    if (entry.expiresAt < new Date()) {
+      this.passwordResetTokens.delete(token);
+      return null;
+    }
+    // Single-use: delete after verification
+    this.passwordResetTokens.delete(token);
+    return entry.userId;
+  }
+
+  async updatePassword(_userId: string, _newHash: string): Promise<void> {
+    // In the mock, the password update is handled by Prisma in the service layer.
+    // In production (Keycloak), this would update the password in the identity provider.
+  }
+
+  invalidateAllUserRefreshTokens(userId: string): void {
+    this.invalidatedUsers.add(userId);
   }
 }

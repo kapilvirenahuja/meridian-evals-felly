@@ -222,4 +222,50 @@ export class AuthService {
       status: user.status,
     };
   }
+
+  async forgotPassword(email: string): Promise<{ success: boolean }> {
+    const normalizedEmail = email.toLowerCase();
+
+    // Always return success to prevent email enumeration
+    const user = await this.userService.findByEmail(normalizedEmail);
+    if (!user) {
+      return { success: true };
+    }
+
+    await this.authAdapter.generateResetToken(user.id);
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'PASSWORD_RESET_REQUESTED',
+      },
+    });
+
+    return { success: true };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean }> {
+    const userId = await this.authAdapter.verifyResetToken(token);
+    if (!userId) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const newHash = await this.authAdapter.hashPassword(newPassword);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHash },
+    });
+
+    this.authAdapter.invalidateAllUserRefreshTokens(userId);
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: 'PASSWORD_CHANGED',
+      },
+    });
+
+    return { success: true };
+  }
 }

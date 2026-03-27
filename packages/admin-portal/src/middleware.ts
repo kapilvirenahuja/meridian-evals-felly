@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Only /login is public — all other routes require ADMIN role
+const PUBLIC_PATHS = ['/login'];
+
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
 
-  // Admin portal: all routes require auth (F1.7 RBAC scope)
-  // Placeholder — full implementation in F1.7
-  if (pathname === '/') {
+  // Allow public paths through without auth check
+  if (PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path + '/'))) {
     return NextResponse.next();
+  }
+
+  // Check for ADMIN role cookie
+  const adminRole = request.cookies.get('felly_admin_role')?.value;
+  if (adminRole !== 'ADMIN') {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();

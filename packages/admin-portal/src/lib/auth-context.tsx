@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiClient.get<User>('/auth/me');
       setUser(response.data);
       // Set role cookie for Next.js Edge Middleware access
-      document.cookie = `felly_role=${response.data.role}; path=/; max-age=604800; SameSite=Strict`;
+      document.cookie = `felly_admin_role=${response.data.role}; path=/; max-age=604800; SameSite=Strict`;
     } catch {
       setUser(null);
       clearTokens();
@@ -57,7 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Best-effort logout — clear local state regardless
     } finally {
       clearTokens();
-      document.cookie = 'felly_role=; path=/; max-age=0; SameSite=Strict';
+      document.cookie = 'felly_admin_at=; path=/; max-age=0; SameSite=Strict';
+      document.cookie = 'felly_admin_role=; path=/; max-age=0; SameSite=Strict';
       setUser(null);
     }
   }, []);

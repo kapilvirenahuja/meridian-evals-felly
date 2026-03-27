@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 
 interface CreateUserData {
@@ -20,5 +20,20 @@ export class UserService {
 
   async findById(id: string) {
     return this.userRepository.findById(id);
+  }
+
+  async getMe(
+    userId: string,
+  ): Promise<{ id: string; email: string; role: string; status: string }> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+    };
   }
 }
