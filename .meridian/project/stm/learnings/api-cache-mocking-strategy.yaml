@@ -1,0 +1,95 @@
+# STM Learning — API Cache Mocking Strategy for Dev/Integration Testing
+# Status: PROMOTE_TO_LTM
+# Priority: HIGH — affects every epic's dev setup and production readiness
+# Scope: Architecture-level pattern, must be in LLD/tech.yaml
+
+id: 'LRN-002'
+title: 'Use API-level cached response mocking, not in-code mocks'
+category: 'architecture/testing-strategy'
+promote_to_ltm: true
+
+problem: |
+  Current approach embeds mocks directly in code (MockAuthAdapter, in-memory
+  Maps for tokens, etc.). This creates several issues:
+  - Code diverges from production path — mock adapters have different logic
+  - Dev environment can't test real request/response flows end-to-end
+  - Moving to production requires swapping adapters, not just config
+  - External dependencies (email, payment, etc.) have no dev fallback
+  - Manual DB intervention needed (e.g., manually activating users because
+    email verification has no dev bypass)
+
+preferred_pattern: |
+  API-level cache mocking — intercept at the HTTP boundary, not in code:
+
+  1. Read the actual API call/endpoint and its parameters
+  2. Set up a response cache layer that returns cached/fixture responses
+  3. The application code stays identical in dev and production
+  4. Only the external call target changes (real service vs cache)
+
+  This means:
+  - NO MockAuthAdapter, NO in-memory token Maps
+  - Instead: a cache/proxy that sits between the app and external services
+  - The app always calls the real endpoint interface
+  - In dev: cache intercepts and returns fixture responses
+  - In prod: cache is bypassed, calls go to real services
+
+implementation_approach: |
+  Option A — HTTP proxy/interceptor:
+    - Use a local proxy (e.g., WireMock, MSW, or custom middleware)
+    - Record real API responses, replay in dev
+    - App code is unaware of mocking
+
+  Option B — Service mesh / env-based routing:
+    - External service URLs are env vars
+    - Dev env points to a mock server that serves cached responses
+    - Same app binary, different config
+
+  Option C — Middleware cache layer in NestJS:
+    - Interceptor that checks a cache before making external calls
+    - In dev: cache is pre-seeded with fixtures
+    - In prod: cache is disabled or acts as performance cache
+
+  Key principle: the code that handles business logic NEVER knows
+  whether it's talking to a mock or real service.
+
+benefits: |
+  - Zero code changes when moving from dev to production
+  - Integration tests exercise the real code path
+  - Easy to add new external services — just add cache fixtures
+  - Cache responses can be version-controlled as test fixtures
+  - No adapter interface bloat (IAuthAdapter, MockAuthAdapter, etc.)
+
+applies_to:
+  - 'Email delivery (verification, password reset, notifications)'
+  - 'Payment processing'
+  - 'Social login providers (Google, Apple, KeyCloak)'
+  - 'SMS/push notifications'
+  - 'Any external API dependency'
+  - 'Phase 0 scaffolding in implement-epic'
+
+lld_integration: |
+  MUST be included in tech.yaml / LLD as the standard mocking strategy:
+
+  testing_strategy:
+    external_dependencies:
+      approach: "api-cache-mock"
+      description: "Mock at HTTP boundary via cached responses, not in-code adapters"
+      dev_setup:
+        - All external service URLs configurable via env vars
+        - Local cache/proxy serves fixture responses in dev
+        - App code is identical in dev and prod
+      fixture_location: "packages/backend-api/fixtures/"
+      cache_layer: "middleware interceptor or local proxy"
+    
+  anti_patterns:
+    - "In-code mock adapters (MockAuthAdapter pattern)"
+    - "In-memory Maps simulating external state"
+    - "Manual DB intervention to bypass missing integrations"
+    - "Code branches checking NODE_ENV for mock behavior"
+
+current_debt: |
+  E1 was built with MockAuthAdapter pattern. When implementing E2+,
+  refactor to API cache mocking:
+  - Replace MockAuthAdapter with real KeyCloak adapter + cached responses
+  - Replace in-memory email verification tokens with cached email service
+  - Remove manual DB activation workarounds

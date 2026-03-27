@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist-test",
+    "baseUrl": ".",
+    "paths": {
+      "@felly/shared-types": ["../shared-types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "../shared-types/src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

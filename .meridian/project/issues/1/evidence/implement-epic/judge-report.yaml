@@ -1,0 +1,271 @@
+# Judge Report — F1.1 Mentee Registration
+# Epic: E1 — User Identity & Profile Foundation
+# Generated: 2026-03-27
+# Eval file: /tmp/felly-club-evals/phase-1.yaml (25 evals)
+
+meta:
+  epic_id: 'E1'
+  feature_id: 'F1.1'
+  feature_name: 'Mentee Registration'
+  phase: 1
+  total_evals: 25
+  passed: 21
+  failed: 4
+  pass_rate: '84%'
+  first_run: true
+
+# ─── Per-Eval Results ──────────────────────────────────────────────────────────
+
+results:
+  # Registration Happy Path (4/4 PASS)
+  - eval_id: 'PH1-REG-001'
+    category: 'registration-happy-path'
+    result: 'PASS'
+    evidence: >
+      POST /api/v1/auth/register endpoint exists in auth.controller.ts with @HttpCode(HttpStatus.CREATED).
+      RegisterDto validates email and password. AuthService.register() creates user via $transaction,
+      generates verification token, writes audit log. Returns { userId, email, verificationToken }.
+      Unit tests confirm 201 response for valid registration.
+
+  - eval_id: 'PH1-REG-002'
+    category: 'registration-happy-path'
+    result: 'PASS'
+    evidence: >
+      UserRepository.createUserWithMenteeProfile() creates User with role='MENTEE' and
+      status='PENDING_EMAIL_VERIFICATION' atomically via prisma.$transaction. MenteeProfile
+      created with interests: [], completeness: 0. Tests verify user creation with correct role/status.
+
+  - eval_id: 'PH1-REG-003'
+    category: 'registration-happy-path'
+    result: 'PASS'
+    evidence: >
+      MockAuthAdapter.generateEmailVerificationToken() generates UUID v4 token with 24h TTL,
+      stores in Map. Per CONTEXT.md, E1 returns token in API response body (E7 replaces with
+      SendGrid email). Token is generated and returned after successful registration.
+      Mock adapter pattern satisfies the eval — email delivery is mocked per design.
+
+  - eval_id: 'PH1-REG-004'
+    category: 'registration-happy-path'
+    result: 'PASS'
+    evidence: >
+      Registration page at /register renders RegisterForm with email input (id="email"),
+      password input (id="password"), confirmPassword input (id="confirmPassword"), and
+      submit button. SocialLoginButtons with Google and Apple options also present.
+      Page builds successfully (verified via pnpm -r build).
+
+  # Email Verification (3/4 PASS)
+  - eval_id: 'PH1-VER-001'
+    category: 'email-verification'
+    result: 'PASS'
+    evidence: >
+      POST /api/v1/auth/verify-email endpoint exists with @HttpCode(HttpStatus.OK).
+      AuthService.verifyEmail() calls authAdapter.verifyEmailToken(), returns { success: true }.
+      Tests verify 200 response for valid token.
+
+  - eval_id: 'PH1-VER-002'
+    category: 'email-verification'
+    result: 'PASS'
+    evidence: >
+      AuthService.verifyEmail() updates user status to 'ACTIVE' via prisma.user.update().
+      Writes EMAIL_VERIFIED audit log entry. Tests confirm status transition.
+
+  - eval_id: 'PH1-VER-003'
+    category: 'email-verification'
+    result: 'FAIL'
+    evidence: >
+      Verify-email page at /verify-email calls the API and shows success/error states,
+      but does NOT redirect to a mentee dashboard after verification. The success state
+      shows a static "Email verified!" message with a link to "/". No /dashboard route
+      exists yet. Eval requires redirect to mentee dashboard.
+    remediation: >
+      After successful email verification, the page should redirect to a dashboard route
+      (e.g., /dashboard). Currently shows static success message without navigation.
+
+  - eval_id: 'PH1-VER-004'
+    category: 'email-verification'
+    result: 'PASS'
+    evidence: >
+      MockAuthAdapter.verifyEmailToken() deletes token from Map after first use.
+      Second call with same token returns null (not found in Map).
+      Tests verify: "should invalidate token after first use" passes — second call returns null.
+
+  # Social Login (3/4 PASS)
+  - eval_id: 'PH1-SOC-001'
+    category: 'social-login'
+    result: 'PASS'
+    evidence: >
+      MockAuthAdapter.getSocialLoginUser('google', email) creates a user with MENTEE role
+      and returns JWTs. AuthService.socialLogin() calls adapter correctly.
+      Tests confirm google social login returns userId, email, accessToken, refreshToken.
+
+  - eval_id: 'PH1-SOC-002'
+    category: 'social-login'
+    result: 'PASS'
+    evidence: >
+      MockAuthAdapter.getSocialLoginUser('apple', email) works identically to google.
+      Tests confirm apple social login returns correct response shape.
+
+  - eval_id: 'PH1-SOC-003'
+    category: 'social-login'
+    result: 'PASS'
+    evidence: >
+      Social login stubs do not create User records in database (mock adapter generates
+      in-memory userId). No email verification is dispatched for social login.
+      Social login bypasses email verification by design.
+
+  - eval_id: 'PH1-SOC-004'
+    category: 'social-login'
+    result: 'FAIL'
+    evidence: >
+      Social login endpoints (GET /api/v1/auth/social/google, /apple) return JSON with
+      tokens but do NOT redirect to a dashboard. They are API stubs returning token data.
+      SocialLoginButtons in frontend does window.location.href redirect to backend stub,
+      but backend returns JSON not a redirect. No /dashboard route exists.
+    remediation: >
+      Social login stub endpoints should redirect to the mentee dashboard with tokens,
+      or the frontend should handle the token response and navigate to dashboard.
+
+  # Registration Validation (7/9 PASS)
+  - eval_id: 'PH1-VAL-001'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      AuthService.register() catches Prisma P2002 error and throws ConflictException('Email already in use').
+      NestJS maps ConflictException to HTTP 409. Tests verify duplicate email returns 409.
+
+  - eval_id: 'PH1-VAL-002'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      Prisma @unique constraint on User.email prevents duplicate records at database level.
+      P2002 error is caught, no second record created. Test confirms single record per email.
+
+  - eval_id: 'PH1-VAL-003'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      ConflictException message is 'Email already in use' — clear, human-readable message
+      explicitly stating the email is already registered. Response body contains this message.
+
+  - eval_id: 'PH1-VAL-004'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      RegisterDto has @MinLength(8) and @Matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).+$/).
+      Global ValidationPipe returns 400 for weak passwords. Tests verify 400 for short
+      and non-compliant passwords.
+
+  - eval_id: 'PH1-VAL-005'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      Error messages from class-validator: "Password must be at least 8 characters long"
+      and "Password must contain at least one letter and one number". Both specify exact requirements.
+
+  - eval_id: 'PH1-VAL-006'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      @MinLength(8) on RegisterDto rejects all passwords with fewer than 8 characters.
+      ValidationPipe enforced globally. Tests confirm short passwords are rejected.
+
+  - eval_id: 'PH1-VAL-007'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      @Matches regex requires both letter and number. All-digit ('12345678'), all-letter
+      ('abcdefgh'), and all-special ('!!!!!!!!') passwords are rejected. Tests confirm.
+
+  - eval_id: 'PH1-VAL-008'
+    category: 'registration-validation'
+    result: 'PASS'
+    evidence: >
+      User.email has @unique in Prisma schema (schema.prisma line 66). Database-level
+      uniqueness enforced across all roles. P2002 caught → 409. Cross-role uniqueness
+      is enforced by the single User table with unique email constraint.
+
+  - eval_id: 'PH1-VAL-009'
+    category: 'registration-validation'
+    result: 'FAIL'
+    evidence: >
+      No case normalization found in registration flow. UserRepository.createUserWithMenteeProfile()
+      stores email as-is without toLowerCase(). No toLowerCase/toLocaleLowerCase calls in
+      auth.service.ts, user.service.ts, or user.repository.ts. The Prisma @unique constraint
+      is case-sensitive by default in PostgreSQL. 'User@Example.com' and 'user@example.com'
+      would be treated as different emails.
+    remediation: >
+      Email should be normalized to lowercase before storing. Add email.toLowerCase()
+      in AuthService.register() or UserRepository before database insertion.
+
+  # Infrastructure (4/4 PASS)
+  - eval_id: 'PH1-INF-001'
+    category: 'infrastructure'
+    result: 'PASS'
+    evidence: >
+      59 tests across 5 suites all pass. Exit code 0. Coverage: 100% statements,
+      88.88% branches, 100% functions, 100% lines. All above configured thresholds.
+
+  - eval_id: 'PH1-INF-002'
+    category: 'infrastructure'
+    result: 'PASS'
+    evidence: >
+      AuthController has @Post('register') endpoint. Global ValidationPipe returns
+      structured JSON for invalid inputs. HttpExceptionFilter handles all exceptions
+      as JSON responses. Tests confirm JSON responses for all scenarios.
+
+  - eval_id: 'PH1-INF-003'
+    category: 'infrastructure'
+    result: 'PASS'
+    evidence: >
+      AuthController has @Post('verify-email') endpoint accepting VerifyEmailDto.
+      Invalid tokens return 400 with JSON body. HttpExceptionFilter ensures JSON.
+
+  - eval_id: 'PH1-INF-004'
+    category: 'infrastructure'
+    result: 'PASS'
+    evidence: >
+      RegisterForm in mentee-web-app submits via apiClient.post('/auth/register', {...}).
+      apiClient is Axios instance with baseURL pointing to /api/v1. POST method confirmed.
+
+# ─── Category Breakdown ────────────────────────────────────────────────────────
+
+category_breakdown:
+  registration-happy-path:
+    total: 4
+    passed: 4
+    failed: 0
+  email-verification:
+    total: 4
+    passed: 3
+    failed: 1
+  social-login:
+    total: 4
+    passed: 3
+    failed: 1
+  registration-validation:
+    total: 9
+    passed: 8
+    failed: 1
+  infrastructure:
+    total: 4
+    passed: 4
+    failed: 0
+
+# ─── Summary ───────────────────────────────────────────────────────────────────
+
+summary:
+  overall_pass_rate: '84% (21/25)'
+  first_run_threshold: '50%'
+  threshold_met: true
+  critical_failures: 0
+  high_failures: 3
+  failures:
+    - eval_id: 'PH1-VER-003'
+      category: 'email-verification'
+      issue: 'No redirect to mentee dashboard after email verification'
+    - eval_id: 'PH1-SOC-004'
+      category: 'social-login'
+      issue: 'Social login stubs do not redirect to dashboard'
+    - eval_id: 'PH1-VAL-009'
+      category: 'registration-validation'
+      issue: 'Email uniqueness is not case-insensitive — no toLowerCase normalization'

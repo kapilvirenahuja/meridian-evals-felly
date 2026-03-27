@@ -1,0 +1,24 @@
+{
+  "recipe": "implement-epic",
+  "issue": "1",
+  "epic_id": "E1",
+  "feature_id": "F1.1",
+  "phase_num": 1,
+  "started_at": "2026-03-26T18:40:00Z",
+  "eval_dir": "/tmp/felly-club-evals",
+  "fix_iteration": 0,
+  "tasks": {
+    "build-context": { "status": "completed", "completed_at": "2026-03-26T18:41:00Z" },
+    "update-claude-md": { "status": "completed", "completed_at": "2026-03-26T18:42:00Z" },
+    "capture-quality-gates": { "status": "completed", "completed_at": "2026-03-26T18:42:00Z" },
+    "generate-evals": { "status": "completed", "completed_at": "2026-03-26T18:42:30Z" },
+    "build-epic": { "status": "pending" },
+    "quality-gate": { "status": "pending" },
+    "judge-evals": { "status": "pending" },
+    "fix-loop": { "status": "pending", "iterations_completed": 0 },
+    "test-scenarios": { "status": "pending" },
+    "commit-push": { "status": "pending" },
+    "cleanup": { "status": "pending" },
+    "report": { "status": "pending" }
+  }
+}

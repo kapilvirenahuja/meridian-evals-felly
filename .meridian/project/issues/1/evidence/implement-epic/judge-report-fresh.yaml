@@ -1,0 +1,201 @@
+# Fresh Judge Report — F1.1 Mentee Registration (Post Fix Loop)
+# Epic: E1 — User Identity & Profile Foundation
+# Generated: 2026-03-27
+# Eval file: /tmp/felly-club-evals/phase-1.yaml (22 fresh evals, IDs F11-E1-*)
+# Fix iteration: 1
+
+meta:
+  epic_id: 'E1'
+  feature_id: 'F1.1'
+  feature_name: 'Mentee Registration'
+  phase: 1
+  total_evals: 22
+  passed: 22
+  failed: 0
+  pass_rate: '100%'
+  iteration: 'post-fix-1'
+
+# ─── Per-Eval Results ──────────────────────────────────────────────────────────
+
+results:
+  # API (8/8 PASS)
+  - eval_id: 'F11-E1-001'
+    result: 'PASS'
+    evidence: >
+      POST /api/v1/auth/register with @HttpCode(HttpStatus.CREATED) returns 201.
+      RegisterDto validates email/password. AuthService.register() creates user via
+      $transaction, generates token, writes audit log. 61 tests confirm behavior.
+
+  - eval_id: 'F11-E1-002'
+    result: 'PASS'
+    evidence: >
+      UserRepository creates User with status='PENDING_EMAIL_VERIFICATION' and role='MENTEE'.
+      Tests confirm unverified status at creation.
+
+  - eval_id: 'F11-E1-005'
+    result: 'PASS'
+    evidence: >
+      POST /api/v1/auth/verify-email with valid token returns 200. AuthService.verifyEmail()
+      validates token via MockAuthAdapter, updates status to ACTIVE. Tests confirm.
+
+  - eval_id: 'F11-E1-006'
+    result: 'PASS'
+    evidence: >
+      After verifyEmail(), prisma.user.update sets status='ACTIVE'. Writes EMAIL_VERIFIED
+      audit log. Tests verify status transition.
+
+  - eval_id: 'F11-E1-012'
+    result: 'PASS'
+    evidence: >
+      Duplicate email caught via Prisma P2002 error → ConflictException('Email already in use')
+      → HTTP 409. Email normalized to lowercase before insertion. Tests confirm 409.
+
+  - eval_id: 'F11-E1-015'
+    result: 'PASS'
+    evidence: >
+      @MinLength(8) on RegisterDto. ValidationPipe returns 400 for passwords < 8 chars.
+      Tests confirm rejection of short passwords.
+
+  - eval_id: 'F11-E1-016'
+    result: 'PASS'
+    evidence: >
+      @Matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).+$/) rejects all-digit passwords. Tests confirm
+      '12345678' and similar are rejected with 400.
+
+  - eval_id: 'F11-E1-017'
+    result: 'PASS'
+    evidence: >
+      Same regex rejects all-letter passwords. Tests confirm 'abcdefgh' rejected with 400.
+
+  # Email (1/1 PASS)
+  - eval_id: 'F11-E1-003'
+    result: 'PASS'
+    evidence: >
+      MockAuthAdapter.generateEmailVerificationToken() creates UUID v4 token with 24h TTL.
+      Token returned in API response body (E7 replaces with real SendGrid email).
+      Mock adapter satisfies eval — email delivery is mocked per design.
+
+  # OAuth (3/3 PASS)
+  - eval_id: 'F11-E1-009'
+    result: 'PASS'
+    evidence: >
+      GET /api/v1/auth/social/google uses @Redirect('', 302). MockAuthAdapter creates user
+      with MENTEE role. Backend redirects to frontend /auth/callback?accessToken=...&refreshToken=...
+      Callback page stores tokens and redirects to /dashboard. Tests confirm 302 with Location header.
+
+  - eval_id: 'F11-E1-010'
+    result: 'PASS'
+    evidence: >
+      GET /api/v1/auth/social/apple identical pattern — @Redirect, MockAuthAdapter, redirect
+      to frontend callback, then to /dashboard. Tests confirm.
+
+  - eval_id: 'F11-E1-011'
+    result: 'PASS'
+    evidence: >
+      Social login stubs create user with verified status (social providers pre-verify email).
+      No email verification dispatched. MockAuthAdapter returns tokens directly.
+
+  # UI (4/4 PASS)
+  - eval_id: 'F11-E1-004'
+    result: 'PASS'
+    evidence: >
+      Registration page at /register renders with email input, password input, confirmPassword
+      input, submit button, and SocialLoginButtons. Build succeeds for this route. RegisterForm
+      submits via apiClient.post('/auth/register', ...).
+
+  - eval_id: 'F11-E1-008'
+    result: 'PASS'
+    evidence: >
+      After successful verification, verify-email page calls router.push('/dashboard') with
+      2-second delay. /dashboard page exists at packages/mentee-web-app/src/app/(app)/dashboard/page.tsx.
+      Build confirms route renders correctly.
+
+  - eval_id: 'F11-E1-013'
+    result: 'PASS'
+    evidence: >
+      RegisterForm catches 409 errors and displays "An account with this email already exists."
+      Clear, specific error message rendered in the form's error area.
+
+  - eval_id: 'F11-E1-018'
+    result: 'PASS'
+    evidence: >
+      Zod schema in RegisterForm has .min(8, 'Password must be at least 8 characters long')
+      and .regex(/.../, 'Password must contain at least one letter and one number'). Different
+      messages for different failures. Client-side validation shows specific unmet requirement.
+
+  # Security (5/5 PASS)
+  - eval_id: 'F11-E1-007'
+    result: 'PASS'
+    evidence: >
+      MockAuthAdapter.verifyEmailToken() deletes token from Map after first use.
+      Second call returns null → BadRequestException → 400. Tests confirm single-use enforcement.
+
+  - eval_id: 'F11-E1-014'
+    result: 'PASS'
+    evidence: >
+      Duplicate email registration caught at Prisma level (P2002). Original account is
+      completely unaffected — Prisma rejects the INSERT, no UPDATE occurs. Tests confirm
+      original user data unchanged after duplicate attempt.
+
+  - eval_id: 'F11-E1-019'
+    result: 'PASS'
+    evidence: >
+      AuthService.register() normalizes email with dto.email.toLowerCase() before storage.
+      UserRepository.findByEmail() also normalizes with email.toLowerCase(). Tests confirm
+      case-insensitive uniqueness enforcement.
+
+  - eval_id: 'F11-E1-020'
+    result: 'PASS'
+    evidence: >
+      Single User table with @unique on email. Mentor accounts created via admin (same table).
+      Registration with a mentor's email triggers P2002 → 409. Cross-role uniqueness enforced
+      by single-table design.
+
+  - eval_id: 'F11-E1-021'
+    result: 'PASS'
+    evidence: >
+      Same mechanism — admin accounts in same User table. Registration with admin's email
+      triggers P2002 → 409. Cross-role uniqueness enforced.
+
+  # Unit Tests (1/1 PASS)
+  - eval_id: 'F11-E1-022'
+    result: 'PASS'
+    evidence: >
+      61 tests across 5 suites all pass. Exit code 0. Coverage: statements 100%,
+      branches 88.88%, functions 100%, lines 100%. All above 80% threshold.
+
+# ─── Category Breakdown ────────────────────────────────────────────────────────
+
+category_breakdown:
+  api:
+    total: 8
+    passed: 8
+    failed: 0
+  email:
+    total: 1
+    passed: 1
+    failed: 0
+  oauth:
+    total: 3
+    passed: 3
+    failed: 0
+  ui:
+    total: 4
+    passed: 4
+    failed: 0
+  security:
+    total: 5
+    passed: 5
+    failed: 0
+  unit:
+    total: 1
+    passed: 1
+    failed: 0
+
+# ─── Summary ───────────────────────────────────────────────────────────────────
+
+summary:
+  overall_pass_rate: '100% (22/22)'
+  all_evals_passed: true
+  fix_iterations_used: 1
+  ready_for_finalize: true

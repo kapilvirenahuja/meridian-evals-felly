@@ -1,0 +1,135 @@
+quality_report:
+  timestamp: '2026-03-27T00:00:00Z'
+  overall: 'FAIL'
+  gates:
+    - name: 'build'
+      status: 'FAIL'
+      command: 'pnpm -r build'
+      exit_code: 1
+      evidence: |
+        packages/shared-types build: Done (PASS)
+        packages/backend-api build: Done (PASS)
+        packages/admin-portal build: Failed to compile.
+          ./src/app/layout.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/page.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/lib/api-client.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/lib/auth.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/lib/query-client.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/middleware.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/providers/QueryProvider.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+        packages/mentee-web-app build: Failed to compile.
+          ./src/app/(auth)/layout.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/(auth)/register/page.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/(auth)/verify-email/page.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/error.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/layout.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/not-found.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/app/page.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/components/auth/RegisterForm.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/components/auth/SocialLoginButtons.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/lib/api-client.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/lib/auth.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/lib/query-client.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/middleware.ts — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+          ./src/providers/QueryProvider.tsx — Error: Parsing error: Cannot read file 'packages/backend-api/tsconfig.test.json'.
+        Root cause: .eslintrc.json at workspace root includes "packages/backend-api/tsconfig.test.json" in the
+          parser project array with tsconfigRootDir "." — when next build invokes ESLint internally from within
+          packages/admin-portal or packages/mentee-web-app, the tsconfigRootDir resolves to the package directory
+          rather than the workspace root, making the relative path unresolvable.
+
+    - name: 'typecheck'
+      status: 'PASS'
+      command: 'pnpm -r typecheck'
+      exit_code: 0
+      evidence: |
+        packages/shared-types typecheck: Done
+        packages/admin-portal typecheck: Done
+        packages/backend-api typecheck: Done
+        packages/mentee-web-app typecheck: Done
+        Zero type errors across all 4 packages.
+
+    - name: 'lint'
+      status: 'FAIL'
+      command: 'pnpm lint'
+      exit_code: 1
+      violations: 2
+      evidence: |
+        /packages/admin-portal/next-env.d.ts
+          3:1  error  Do not use a triple slash reference for ./.next/types/routes.d.ts, use `import` style instead  @typescript-eslint/triple-slash-reference
+        /packages/mentee-web-app/next-env.d.ts
+          3:1  error  Do not use a triple slash reference for ./.next/types/routes.d.ts, use `import` style instead  @typescript-eslint/triple-slash-reference
+        ✖ 2 problems (2 errors, 0 warnings)
+        Root cause: next-env.d.ts is an auto-generated Next.js file (marked "NOTE: This file should not be edited").
+          It uses a triple-slash reference path directive required by Next.js typed routes, but the root
+          .eslintrc.json enforces @typescript-eslint/triple-slash-reference. The ignorePatterns in .eslintrc.json
+          do not include next-env.d.ts, so it is linted and fails.
+
+    - name: 'unit_tests'
+      status: 'PASS'
+      command: 'pnpm -r test'
+      exit_code: 0
+      tests_passed: 59
+      tests_failed: 0
+      coverage:
+        statements: 100
+        branches: 88.88
+        functions: 100
+        lines: 100
+        thresholds:
+          statements: 80
+          branches: 70
+          functions: 80
+          lines: 80
+        threshold_met: true
+      evidence: |
+        PASS src/auth/__tests__/mock-auth.adapter.spec.ts
+        PASS src/user/__tests__/user.repository.spec.ts
+        PASS src/user/__tests__/user.service.spec.ts
+        PASS src/auth/__tests__/auth.service.spec.ts
+        PASS src/auth/__tests__/auth.controller.spec.ts
+        Test Suites: 5 passed, 5 total
+        Tests:       59 passed, 59 total
+        Coverage summary (backend-api auth + user modules):
+          auth/auth.controller.ts:   Stmts 100% | Branch 50% | Funcs 100% | Lines 100%
+          auth/auth.service.ts:      Stmts 100% | Branch 100% | Funcs 100% | Lines 100%
+          auth/adapters/mock-auth:   Stmts 100% | Branch 87.5% | Funcs 100% | Lines 100%
+          user/user.repository.ts:   Stmts 100% | Branch 100% | Funcs 100% | Lines 100%
+          user/user.service.ts:      Stmts 100% | Branch 100% | Funcs 100% | Lines 100%
+          All files:                 Stmts 100% | Branch 88.88% | Funcs 100% | Lines 100%
+
+  vision_gate_violations:
+    - gate: 'build'
+      severity: 'error'
+      files:
+        - 'packages/admin-portal/src/app/layout.tsx'
+        - 'packages/admin-portal/src/app/page.tsx'
+        - 'packages/admin-portal/src/lib/api-client.ts'
+        - 'packages/admin-portal/src/lib/auth.ts'
+        - 'packages/admin-portal/src/lib/query-client.ts'
+        - 'packages/admin-portal/src/middleware.ts'
+        - 'packages/admin-portal/src/providers/QueryProvider.tsx'
+        - 'packages/mentee-web-app/src/app/(auth)/layout.tsx'
+        - 'packages/mentee-web-app/src/app/(auth)/register/page.tsx'
+        - 'packages/mentee-web-app/src/app/(auth)/verify-email/page.tsx'
+        - 'packages/mentee-web-app/src/app/error.tsx'
+        - 'packages/mentee-web-app/src/app/layout.tsx'
+        - 'packages/mentee-web-app/src/app/not-found.tsx'
+        - 'packages/mentee-web-app/src/app/page.tsx'
+        - 'packages/mentee-web-app/src/components/auth/RegisterForm.tsx'
+        - 'packages/mentee-web-app/src/components/auth/SocialLoginButtons.tsx'
+        - 'packages/mentee-web-app/src/lib/api-client.ts'
+        - 'packages/mentee-web-app/src/lib/auth.ts'
+        - 'packages/mentee-web-app/src/lib/query-client.ts'
+        - 'packages/mentee-web-app/src/middleware.ts'
+        - 'packages/mentee-web-app/src/providers/QueryProvider.tsx'
+      message: "ESLint parse error — root .eslintrc.json project path 'packages/backend-api/tsconfig.test.json' unresolvable from within frontend package directories during next build"
+      fix: 'Add tsconfig.test.json to ignorePatterns in .eslintrc.json or use absolute path for tsconfigRootDir'
+
+    - gate: 'lint'
+      severity: 'error'
+      files:
+        - 'packages/admin-portal/next-env.d.ts:3:1'
+        - 'packages/mentee-web-app/next-env.d.ts:3:1'
+      rule: '@typescript-eslint/triple-slash-reference'
+      message: 'Auto-generated Next.js next-env.d.ts files not excluded from ESLint; triple-slash reference path directive flagged as error'
+      fix: "Add 'next-env.d.ts' to ignorePatterns in .eslintrc.json"
