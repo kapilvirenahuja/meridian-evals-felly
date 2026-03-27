@@ -1,6 +1,7 @@
 # Felly Club — Development Guide
 
-## Active Implementation
+## Completed
 
-Issue: #1 — E1: User Identity & Profile Foundation (F1.1 Mentee Registration)
-Context: .meridian/project/issues/1/CONTEXT.md
+- E1: User Identity & Profile Foundation (Issue #1) — all 7 features implemented
+  - Branch: feat/1-e1-user-identity-profile
+  - 184 tests, lint/typecheck/build all green
