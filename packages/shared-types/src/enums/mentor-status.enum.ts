@@ -1,0 +1,6 @@
+export enum MentorProfileStatus {
+  INCOMPLETE = 'INCOMPLETE',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}

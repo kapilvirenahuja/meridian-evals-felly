@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MENTEE
+  MENTOR
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING_EMAIL_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum MentorProfileStatus {
+  INCOMPLETE
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+}
+
+enum ExpertiseCategory {
+  SOFTWARE_ENGINEERING
+  PRODUCT_MANAGEMENT
+  DESIGN
+  DATA_SCIENCE
+  BUSINESS
+  MARKETING
+  OTHER
+}
+
+enum ArtefactType {
+  RESUME
+  LINKEDIN_URL
+  PORTFOLIO_URL
+  CERTIFICATION
+  GITHUB_URL
+}
+
+enum AuditAction {
+  USER_REGISTERED
+  EMAIL_VERIFIED
+  USER_LOGGED_IN
+  USER_LOGGED_OUT
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PROFILE_UPDATED
+  MENTOR_APPLICATION_SUBMITTED
+  MENTOR_APPLICATION_APPROVED
+  MENTOR_APPLICATION_REJECTED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String?
+  role         UserRole   @default(MENTEE)
+  status       UserStatus @default(PENDING_EMAIL_VERIFICATION)
+  firstName    String?
+  lastName     String?
+  avatarUrl    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  menteeProfile MenteeProfile?
+  mentorProfile MentorProfile?
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model MenteeProfile {
+  id           String              @id @default(uuid())
+  userId       String              @unique
+  interests    ExpertiseCategory[]
+  bio          String?
+  completeness Int                 @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mentee_profiles")
+}
+
+model MentorProfile {
+  id                  String              @id @default(uuid())
+  userId              String              @unique
+  status              MentorProfileStatus @default(INCOMPLETE)
+  headline            String?
+  bio                 String?
+  expertiseCategories ExpertiseCategory[]
+  yearsOfExperience   Int?
+  linkedinUrl         String?
+  hourlyRate          Float?
+  completeness        Int                 @default(0)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pricingTiers          MentorPricingTier[]
+  availabilitySlots     MentorAvailabilitySlot[]
+  verificationArtefacts VerificationArtefact[]
+
+  @@map("mentor_profiles")
+}
+
+model MentorPricingTier {
+  id              String   @id @default(uuid())
+  mentorProfileId String
+  name            String
+  description     String?
+  priceInCents    Int
+  durationMinutes Int
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  mentorProfile MentorProfile @relation(fields: [mentorProfileId], references: [id], onDelete: Cascade)
+
+  @@map("mentor_pricing_tiers")
+}
+
+model MentorAvailabilitySlot {
+  id              String   @id @default(uuid())
+  mentorProfileId String
+  dayOfWeek       Int
+  startTimeUtc    String
+  endTimeUtc      String
+  isRecurring     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  mentorProfile MentorProfile @relation(fields: [mentorProfileId], references: [id], onDelete: Cascade)
+
+  @@map("mentor_availability_slots")
+}
+
+model VerificationArtefact {
+  id              String       @id @default(uuid())
+  mentorProfileId String
+  type            ArtefactType
+  value           String
+  isVerified      Boolean      @default(false)
+  verifiedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  mentorProfile MentorProfile @relation(fields: [mentorProfileId], references: [id], onDelete: Cascade)
+
+  @@map("verification_artefacts")
+}
+
+model AuditLog {
+  id            String      @id @default(uuid())
+  userId        String
+  action        AuditAction
+  metadata      Json?
+  ipAddressHash String?
+  createdAt     DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}

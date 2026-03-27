@@ -1,0 +1,29 @@
+# Quality Vision Gates — E1 Implementation
+# Detected toolchain: pnpm monorepo (NestJS + Next.js + TypeScript)
+# Commands defined for post-Phase-0 scaffolding state
+
+quality_gates:
+  build:
+    required: true
+    command: 'cd /Users/kapilahuja/cto/builder/meridian-evals-felly && pnpm -r build'
+    description: 'Build all packages in the monorepo'
+  typecheck:
+    required: true
+    command: 'cd /Users/kapilahuja/cto/builder/meridian-evals-felly && pnpm -r typecheck'
+    description: 'TypeScript type checking across all packages'
+  lint:
+    required: true
+    command: 'cd /Users/kapilahuja/cto/builder/meridian-evals-felly && pnpm lint'
+    max_warnings: 0
+    description: 'ESLint + Prettier checks across all packages'
+  unit_tests:
+    required: true
+    command: 'cd /Users/kapilahuja/cto/builder/meridian-evals-felly && pnpm -r test'
+    min_coverage: 80
+    description: 'Jest unit tests across all packages with 80% coverage target on auth module'
+  bundle_size:
+    required: false
+    max_kb: null
+  lighthouse:
+    required: false
+    min_score: null
