@@ -30,6 +30,8 @@ enum MentorProfileStatus {
   SUSPENDED
   DRAFT
   PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
 }
 
 enum ExpertiseCategory {
@@ -111,6 +113,8 @@ model MentorProfile {
   linkedinUrl         String?
   hourlyRate          Float?
   completeness        Int                 @default(0)
+  verifiedBadge       Boolean             @default(false)
+  rejectionReason     String?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 

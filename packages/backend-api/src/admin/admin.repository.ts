@@ -1,7 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { ArtefactType, ExpertiseCategory, MentorProfileStatus } from '@prisma/client';
+import {
+  ArtefactType,
+  ExpertiseCategory,
+  MentorProfileStatus,
+  UserRole,
+  UserStatus,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMentorDto } from './dto/create-mentor.dto';
+
+export interface UserFilters {
+  status?: UserStatus;
+  role?: UserRole;
+  page?: number;
+  limit?: number;
+}
 
 @Injectable()
 export class AdminRepository {
@@ -56,5 +69,79 @@ export class AdminRepository {
         value,
       },
     });
+  }
+
+  // ─── F1.5: Verification queue ─────────────────────────────────────────────
+
+  async findPendingVerificationProfiles() {
+    return this.prisma.mentorProfile.findMany({
+      where: { status: 'PENDING_VERIFICATION' as MentorProfileStatus },
+      orderBy: { createdAt: 'asc' },
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } },
+    });
+  }
+
+  async approveMentor(id: string) {
+    return this.prisma.mentorProfile.update({
+      where: { id },
+      data: {
+        status: 'VERIFIED' as MentorProfileStatus,
+        verifiedBadge: true,
+      },
+    });
+  }
+
+  async rejectMentor(id: string, reason: string) {
+    return this.prisma.mentorProfile.update({
+      where: { id },
+      data: {
+        status: 'REJECTED' as MentorProfileStatus,
+        rejectionReason: reason,
+      },
+    });
+  }
+
+  async resubmitMentor(id: string) {
+    return this.prisma.mentorProfile.update({
+      where: { id },
+      data: {
+        status: 'PENDING_VERIFICATION' as MentorProfileStatus,
+        rejectionReason: null,
+      },
+    });
+  }
+
+  // ─── F1.6: User management ────────────────────────────────────────────────
+
+  async findAllUsers(filters: UserFilters) {
+    const { status, role, page = 1, limit = 20 } = filters;
+    const skip = (page - 1) * limit;
+
+    const where: { status?: UserStatus; role?: UserRole } = {};
+    if (status) where.status = status;
+    if (role) where.role = role;
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          status: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return { users, total, page, limit };
   }
 }
