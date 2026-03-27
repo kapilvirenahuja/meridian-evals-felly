@@ -1,0 +1,5 @@
+stm:
+  base-path: .meridian/project/issues
+product:
+  base-path: .meridian/project/product
+platform: github

@@ -1,0 +1,17 @@
+pre_lock_resolutions:
+  epic_id: 'E2'
+  resolved_at: '2026-03-27T13:30:00+0530'
+  open_questions:
+    - source: 'tech.yaml'
+      id: 'OQ-E2-01'
+      question: >
+        E11 only scopes KeyCloak + Stripe adapter swaps. Who owns the
+        "run all adapters against real services in staging" integration
+        test pass before production launch?
+      answer: >
+        Option A — Expand E11 scope to cover ALL adapter swaps (OpenSearch,
+        Redis, email, SMS) — not just KeyCloak + Stripe. E11 becomes the
+        single epic responsible for replacing every mock/fallback adapter
+        with its production implementation and validating against real
+        infrastructure in staging.
+  high_risk_items: []
