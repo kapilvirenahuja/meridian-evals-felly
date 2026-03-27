@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AUTH_ADAPTER_TOKEN } from '../common/constants';
 import { UserModule } from '../user/user.module';
@@ -10,7 +10,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), UserModule],
+  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), forwardRef(() => UserModule)],
   controllers: [AuthController],
   providers: [
     AuthService,
@@ -23,6 +23,12 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       // E11: change to: useClass: KeyCloakAuthAdapter
     },
   ],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, PassportModule],
+  exports: [
+    AuthService,
+    JwtAuthGuard,
+    RolesGuard,
+    PassportModule,
+    { provide: AUTH_ADAPTER_TOKEN, useClass: MockAuthAdapter },
+  ],
 })
 export class AuthModule {}
