@@ -14,14 +14,24 @@ import {
 import { IAuthAdapter } from './auth-adapter.interface';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
 interface EmailVerificationEntry {
   userId: string;
   expiresAt: Date;
 }
 
+interface RateLimitEntry {
+  count: number;
+  windowStartMs: number;
+}
+
 @Injectable()
 export class MockAuthAdapter implements IAuthAdapter {
   private readonly emailVerificationTokens = new Map<string, EmailVerificationEntry>();
+  private readonly rateLimitMap = new Map<string, RateLimitEntry>();
+  private readonly invalidatedRefreshTokens = new Set<string>();
 
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -86,5 +96,42 @@ export class MockAuthAdapter implements IAuthAdapter {
     const email = mockEmail || `stub-${provider}-${Date.now()}@mock.felly.club`;
     const tokens = await this.generateAuthTokens(userId, email, ['MENTEE']);
     return { userId, email, tokens };
+  }
+
+  // ─── F1.2: Rate limiting ───────────────────────────────────────────────────
+
+  checkRateLimit(ipHash: string): boolean {
+    const entry = this.rateLimitMap.get(ipHash);
+    if (!entry) return false;
+    const windowExpired = Date.now() - entry.windowStartMs >= RATE_LIMIT_WINDOW_MS;
+    if (windowExpired) {
+      this.rateLimitMap.delete(ipHash);
+      return false;
+    }
+    return entry.count >= RATE_LIMIT_MAX;
+  }
+
+  recordFailedLogin(ipHash: string): void {
+    const entry = this.rateLimitMap.get(ipHash);
+    const now = Date.now();
+    if (!entry || now - entry.windowStartMs >= RATE_LIMIT_WINDOW_MS) {
+      this.rateLimitMap.set(ipHash, { count: 1, windowStartMs: now });
+    } else {
+      this.rateLimitMap.set(ipHash, { count: entry.count + 1, windowStartMs: entry.windowStartMs });
+    }
+  }
+
+  clearFailedLogins(ipHash: string): void {
+    this.rateLimitMap.delete(ipHash);
+  }
+
+  // ─── F1.2: Refresh token invalidation ─────────────────────────────────────
+
+  isRefreshTokenInvalidated(refreshToken: string): boolean {
+    return this.invalidatedRefreshTokens.has(refreshToken);
+  }
+
+  invalidateRefreshToken(refreshToken: string): void {
+    this.invalidatedRefreshTokens.add(refreshToken);
   }
 }

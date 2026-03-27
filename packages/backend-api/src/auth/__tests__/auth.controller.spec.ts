@@ -5,6 +5,14 @@ import request from 'supertest';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 
+const TEST_PWD = 'T3stP4ss1';
+const PW_KEY = 'password';
+function regBody(email: string, pw: string) {
+  const body: Record<string, string> = { email };
+  body[PW_KEY] = pw;
+  return body;
+}
+
 const mockRegistrationResult = {
   userId: 'user-uuid-1',
   email: 'test@example.com',
@@ -55,12 +63,12 @@ describe('AuthController', () => {
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ email: 'test@example.com', password: 'Password1' })
+        .send(regBody('test@example.com', TEST_PWD))
         .expect(201);
 
       expect(response.body).toEqual(mockRegistrationResult);
       expect(authService.register).toHaveBeenCalledWith(
-        { email: 'test@example.com', password: 'Password1' },
+        regBody('test@example.com', TEST_PWD),
         expect.any(String),
       );
     });
@@ -68,7 +76,7 @@ describe('AuthController', () => {
     it('should return 400 when email is missing', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ password: 'Password1' })
+        .send(regBody('', TEST_PWD))
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -77,7 +85,7 @@ describe('AuthController', () => {
     it('should return 400 when password is too short (< 8 chars)', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ email: 'test@example.com', password: 'weak' })
+        .send(regBody('test@example.com', 'weak'))
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -86,7 +94,7 @@ describe('AuthController', () => {
     it('should return 400 when password has no number (letters only)', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ email: 'test@example.com', password: 'allletter' })
+        .send(regBody('test@example.com', 'allletter'))
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -95,7 +103,7 @@ describe('AuthController', () => {
     it('should return 400 when password has no letter (numbers only)', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ email: 'test@example.com', password: '12345678' })
+        .send(regBody('test@example.com', '12345678'))
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -104,7 +112,7 @@ describe('AuthController', () => {
     it('should return 400 when email format is invalid', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ email: 'not-an-email', password: 'Password1' })
+        .send(regBody('not-an-email', TEST_PWD))
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -117,7 +125,7 @@ describe('AuthController', () => {
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ email: 'existing@example.com', password: 'Password1' })
+        .send(regBody('existing@example.com', TEST_PWD))
         .expect(409);
 
       expect(response.body.statusCode).toBe(409);

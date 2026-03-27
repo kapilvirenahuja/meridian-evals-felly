@@ -12,4 +12,13 @@ export interface IAuthAdapter {
     provider: 'google' | 'apple',
     mockEmail: string,
   ): Promise<{ userId: string; email: string; tokens: IAuthTokens }>;
+
+  // F1.2: Rate limiting
+  checkRateLimit(ipHash: string): boolean;
+  recordFailedLogin(ipHash: string): void;
+  clearFailedLogins(ipHash: string): void;
+
+  // F1.2: Refresh token invalidation
+  isRefreshTokenInvalidated(refreshToken: string): boolean;
+  invalidateRefreshToken(refreshToken: string): void;
 }

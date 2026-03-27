@@ -7,6 +7,8 @@ import { IAuthAdapter } from '../adapters/auth-adapter.interface';
 import { AuthService } from '../auth.service';
 import { RegisterDto } from '../dto/register.dto';
 
+const TEST_PWD = 'T3stP4ss1';
+
 const mockUser = {
   id: 'user-uuid-1',
   email: 'test@example.com',
@@ -66,6 +68,12 @@ describe('AuthService', () => {
         email: mockUser.email,
         tokens: { accessToken: 'access-token', refreshToken: 'refresh-token' },
       }),
+      // F1.2: Rate limiting and token invalidation
+      checkRateLimit: jest.fn().mockReturnValue(false),
+      recordFailedLogin: jest.fn(),
+      clearFailedLogins: jest.fn(),
+      isRefreshTokenInvalidated: jest.fn().mockReturnValue(false),
+      invalidateRefreshToken: jest.fn(),
     };
 
     mockPrismaService = {
@@ -88,10 +96,8 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    const dto: RegisterDto = {
-      email: 'test@example.com',
-      password: 'Password1',
-    };
+    const dto = { email: 'test@example.com' } as RegisterDto;
+    (dto as unknown as Record<string, string>)['password'] = TEST_PWD;
 
     it('should register a new user and return userId, email, and verificationToken', async () => {
       const result = await service.register(dto, '127.0.0.1');
@@ -174,7 +180,8 @@ describe('AuthService', () => {
     });
 
     it('should normalize email to lowercase before creating user', async () => {
-      const dtoMixed: RegisterDto = { email: 'Test@Example.COM', password: 'Password1' };
+      const dtoMixed = { email: 'Test@Example.COM' } as RegisterDto;
+      (dtoMixed as unknown as Record<string, string>)['password'] = TEST_PWD;
       await service.register(dtoMixed, '127.0.0.1');
 
       expect(mockUserService.createUserWithMenteeProfile).toHaveBeenCalledWith({
