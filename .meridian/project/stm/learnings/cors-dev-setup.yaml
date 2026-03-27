@@ -1,0 +1,51 @@
+# STM Learning — CORS in Dev Environment
+# Status: PROMOTE_TO_LTM
+# Recurrence: 3x (observed across multiple implement-epic sessions)
+# Priority: HIGH — blocks every frontend-backend integration test
+
+id: 'LRN-001'
+title: 'CORS must be enabled in backend main.ts for dev environment'
+category: 'infrastructure/dev-setup'
+recurrence_count: 3
+promote_to_ltm: true
+
+problem: |
+  When running NestJS backend on :3000 and Next.js frontend on :3001,
+  browser blocks all API requests with CORS errors. This happens every
+  time a new backend is scaffolded because CORS is not enabled by default
+  in NestJS.
+
+root_cause: |
+  NestJS does not enable CORS by default. The frontend and backend run
+  on different ports in development, making them different origins.
+  Without explicit app.enableCors(), browsers reject cross-origin requests.
+
+fix: |
+  In backend main.ts, add CORS configuration before setting the global prefix:
+
+  app.enableCors({
+    origin: process.env['FRONTEND_URL'] || 'http://localhost:3001',
+    credentials: true,
+  });
+
+lld_integration: |
+  This MUST be included in tech.yaml / LLD under the backend scaffolding
+  section as a mandatory Phase 0 step. Every NestJS project that has a
+  separate frontend origin needs CORS enabled from day one.
+
+  Suggested tech.yaml addition:
+    backend_scaffolding:
+      cors:
+        dev_origin: "http://localhost:${FRONTEND_PORT}"
+        credentials: true
+        note: "Required for split frontend/backend dev setup"
+
+applies_to:
+  - 'NestJS + Fastify backend with separate frontend'
+  - 'Any multi-origin dev setup (backend :3000, frontend :3001+)'
+  - 'Phase 0 scaffolding in implement-epic'
+
+prevention: |
+  - Add to code-builder CONTEXT.md template as mandatory scaffolding item
+  - Add to quality-vision-gates as a startup check
+  - Include in LLD tech.yaml backend section

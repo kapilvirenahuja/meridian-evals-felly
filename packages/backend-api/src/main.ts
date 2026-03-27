@@ -11,6 +11,10 @@ async function bootstrap(): Promise<void> {
   });
 
   app.useLogger(app.get(Logger));
+  app.enableCors({
+    origin: process.env['FRONTEND_URL'] || 'http://localhost:3001',
+    credentials: true,
+  });
   app.setGlobalPrefix('api/v1');
 
   app.useGlobalPipes(
