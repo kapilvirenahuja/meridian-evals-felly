@@ -13,7 +13,7 @@ import { RecommendationsService } from './recommendations.service';
 import { RedisService } from './redis.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule, forwardRef(() => UserModule)],
+  imports: [PrismaModule, forwardRef(() => AuthModule), forwardRef(() => UserModule)],
   controllers: [MarketplaceController],
   providers: [
     MarketplaceService,

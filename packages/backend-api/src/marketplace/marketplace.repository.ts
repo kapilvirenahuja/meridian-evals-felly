@@ -31,9 +31,9 @@ export class MarketplaceRepository {
     const rows = await this.prisma.$queryRaw<Array<{ category: string; count: bigint }>>`
       SELECT unnested.category, COUNT(*) as count
       FROM (
-        SELECT unnest("expertise_categories") as category
+        SELECT unnest("expertiseCategories") as category
         FROM mentor_profiles
-        WHERE status = 'VERIFIED' AND "verified_badge" = true
+        WHERE status = 'VERIFIED' AND "verifiedBadge" = true
       ) AS unnested
       GROUP BY unnested.category
     `;
