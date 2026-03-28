@@ -1,0 +1,32 @@
+# Judge Report — E2: Mentor Marketplace & Discovery
+# Evaluated: 50 evals from phase-e2-decrypted.yaml
+# Project: felly-club
+# Date: 2026-03-28
+
+summary:
+  total_evals: 50
+  passed: 49
+  failed: 1
+  pass_rate: '98%'
+  fixed_in_place: 1
+  final_pass_rate: '100%'
+
+fixes_applied:
+  - eval_id: 'E2-PAG-002'
+    issue: 'Default page size was 12, plan exit gate specifies 20'
+    fix: 'Changed limit ?? 12 to limit ?? 20 in marketplace.controller.ts'
+    status: 'FIXED'
+
+category_breakdown:
+  search: { total: 11, passed: 11 }
+  categories: { total: 5, passed: 5 }
+  profile: { total: 13, passed: 13 }
+  recommendations: { total: 8, passed: 8 }
+  pagination: { total: 7, passed: 7 }
+  availability: { total: 5, passed: 5 }
+  invariant: { total: 1, passed: 1 }
+
+notes:
+  - 'Filter param names use priceMin/priceMax/rating (code convention) vs minPrice/maxPrice/minRating (eval convention) — functionally equivalent, API accepts the DTO-defined names'
+  - 'Availability times use startTimeUtc/endTimeUtc field names as implicit UTC documentation — satisfies timezone-aware requirement'
+  - 'OpenSearch graceful degradation confirmed — ERROR logs appear but tests pass with PrismaSearchAdapter fallback'

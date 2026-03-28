@@ -29,7 +29,7 @@ export class MarketplaceController {
     return this.marketplaceService.searchMentors(
       { q, category, priceMin, priceMax, rating, hasAvailability },
       page ?? 1,
-      limit ?? 12,
+      limit ?? 20,
       sort ?? 'relevance',
     );
   }
