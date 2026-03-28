@@ -1,17 +1,28 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AUTH_ADAPTER_TOKEN } from '../common/constants';
 import { IAuthAdapter } from '../auth/adapters/auth-adapter.interface';
+import { MarketplaceSearchService } from '../marketplace/marketplace.search.service';
 import { AdminRepository, UserFilters } from './admin.repository';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UploadArtefactDto } from './dto/upload-artefact.dto';
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     private readonly adminRepository: AdminRepository,
     @Inject(AUTH_ADAPTER_TOKEN) private readonly authAdapter: IAuthAdapter,
     private readonly prisma: PrismaService,
+    @Optional() private readonly marketplaceSearchService?: MarketplaceSearchService,
   ) {}
 
   async createMentor(dto: CreateMentorDto) {
@@ -70,6 +81,13 @@ export class AdminService {
     // an email with login credentials via the auth adapter / email service.
     // Mocked: credentials delivered (no-op in E1)
 
+    // E2: Fire-and-forget index sync (INV-E2-05)
+    if (this.marketplaceSearchService) {
+      void this.marketplaceSearchService
+        .indexMentor(mentorProfileId)
+        .catch((e: unknown) => this.logger.error(e));
+    }
+
     return approved;
   }
 
@@ -88,6 +106,13 @@ export class AdminService {
         metadata: { mentorProfileId, reason, rejectedBy: 'admin' },
       },
     });
+
+    // E2: Fire-and-forget index sync (INV-E2-05)
+    if (this.marketplaceSearchService) {
+      void this.marketplaceSearchService
+        .removeMentorFromIndex(mentorProfileId)
+        .catch((e: unknown) => this.logger.error(e));
+    }
 
     return rejected;
   }

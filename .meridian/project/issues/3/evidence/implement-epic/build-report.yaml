@@ -1,0 +1,286 @@
+implementation:
+  success: true
+  epic: 'E2 — Mentor Marketplace & Discovery'
+  issue: '#3'
+  branch: 'feat/3-e2-mentor-marketplace-discovery'
+  date: '2026-03-28'
+
+  steps_completed: 8
+  steps_total: 8
+
+  exit_gates:
+    phase_0:
+      deps_installed: true
+      packages:
+        backend: ['@opensearch-project/opensearch@^2.3.0', 'ioredis@^5.3.2']
+        frontend:
+          [
+            '@radix-ui/react-tabs@^1.0.4',
+            '@radix-ui/react-select@^2.1.0',
+            '@radix-ui/react-checkbox@^1.1.1',
+          ]
+      prisma_migration: '20260328035941_add_marketplace_fields'
+      fields_added: ['sessionCount INT DEFAULT 0', 'averageRating DOUBLE PRECISION DEFAULT 0']
+      search_adapter_scaffolded: true
+      env_documented: true
+      docker_compose_extended: true
+
+    f2_2_categories:
+      api_route: 'GET /api/v1/marketplace/categories'
+      returns_all_plus_per_category: true
+      verified_only_invariant: true
+      redis_cache_ttl: 300
+      frontend:
+        page: '/mentors'
+        components: ['CategoryTabs', 'EmptyState']
+        hook: 'useCategoryCount'
+        nav_link_added: true
+
+    f2_1_search:
+      api_route: 'GET /api/v1/marketplace/mentors'
+      filters: ['q', 'category', 'priceMin', 'priceMax', 'rating', 'hasAvailability']
+      privacy_enforced: true
+      forbidden_fields:
+        ['status', 'rejectionReason', 'verificationArtefacts', 'completeness', 'passwordHash']
+      redis_cache_ttl: 300
+      fire_and_forget_wired:
+        admin_service: true
+        user_service: true
+      frontend:
+        components: ['SearchBar', 'MentorFilters', 'MentorCard']
+        hook: 'useMentors'
+
+    f2_5_pagination:
+      params: ['sort', 'page', 'limit']
+      defaults: { page: 1, limit: 12, sort: 'relevance', max_limit: 50 }
+      total_pages_computed: true
+      sort_options: ['relevance', 'price_asc', 'price_desc', 'rating_desc']
+      frontend:
+        components: ['PaginationControls', 'SortControl']
+
+    f2_3_profile:
+      api_route: 'GET /api/v1/marketplace/mentors/:id'
+      verified_returns_200: true
+      pending_returns_404: true
+      nonexistent_returns_404: true
+      redis_cache_ttl: 600
+      ssr_page: '/mentors/[id]'
+      generate_metadata: true
+      not_found_on_404: true
+
+    f2_6_availability:
+      availability_display_component: true
+      mentor_card_availability_indicator: true
+      filter_has_availability: true
+      opensearch_document_has_availability: true
+
+    f2_4_recommendations:
+      api_route: 'GET /api/v1/marketplace/recommendations'
+      auth_required: true
+      role_restricted: 'MENTEE'
+      no_jwt_returns_401: true
+      mentor_role_returns_403: true
+      mentee_with_interests_returns_200: true
+      empty_interests_returns_empty: true
+      max_results: 8
+      matching_categories_intersection_only: true
+      frontend:
+        component: 'RecommendedMentors'
+        hook: 'useRecommendations'
+        client_side_only: true
+
+  quality_gates:
+    tests:
+      total: 281
+      passed: 281
+      failed: 0
+      suites: 17
+      coverage:
+        statements: '96.05%'
+        branches: '74.79%'
+        functions: '88.63%'
+        lines: '96.01%'
+        thresholds_met: true
+        note: 'Coverage measured on marketplace service files only per CONTEXT.md spec'
+
+    lint:
+      tool: 'eslint'
+      errors: 0
+      warnings: 0
+      status: 'PASS'
+
+    typecheck:
+      packages:
+        - name: '@felly/shared-types'
+          status: 'PASS'
+        - name: '@felly/backend-api'
+          status: 'PASS'
+        - name: '@felly/mentee-web-app'
+          status: 'PASS'
+        - name: '@felly/admin-portal'
+          status: 'PASS'
+
+    build:
+      backend_api: 'PASS'
+      mentee_web_app: 'PASS'
+      admin_portal: 'PASS'
+      shared_types: 'PASS'
+
+  files_touched:
+    # Phase 0
+    - path: 'packages/shared-types/src/types/marketplace.types.ts'
+      action: 'created'
+    - path: 'packages/shared-types/src/index.ts'
+      action: 'modified'
+    - path: 'packages/backend-api/prisma/schema.prisma'
+      action: 'modified'
+    - path: 'packages/backend-api/prisma/migrations/20260328035941_add_marketplace_fields/'
+      action: 'created'
+    - path: 'packages/backend-api/.env.local.example'
+      action: 'created'
+    - path: 'docker-compose.yml'
+      action: 'modified'
+    - path: 'packages/backend-api/src/marketplace/adapters/search-adapter.interface.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/adapters/opensearch.adapter.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/adapters/prisma-search.adapter.ts'
+      action: 'created'
+
+    # F2.2
+    - path: 'packages/backend-api/src/marketplace/marketplace.module.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/marketplace.controller.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/marketplace.service.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/marketplace.repository.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/redis.service.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/dto/category-count.dto.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/app.module.ts'
+      action: 'modified'
+    - path: 'packages/mentee-web-app/src/app/(app)/mentors/page.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/components/marketplace/CategoryTabs.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/components/marketplace/EmptyState.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/hooks/useCategoryCount.ts'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/app/(app)/layout.tsx'
+      action: 'modified'
+    - path: 'packages/backend-api/src/marketplace/__tests__/marketplace.controller.spec.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/__tests__/redis.service.spec.ts'
+      action: 'created'
+
+    # F2.1
+    - path: 'packages/backend-api/src/marketplace/marketplace.search.service.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/dto/mentor-search-query.dto.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/dto/public-mentor-profile.dto.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/admin/admin.module.ts'
+      action: 'modified'
+    - path: 'packages/backend-api/src/admin/admin.service.ts'
+      action: 'modified'
+    - path: 'packages/backend-api/src/user/user.service.ts'
+      action: 'modified'
+    - path: 'packages/backend-api/src/user/user.module.ts'
+      action: 'modified'
+    - path: 'packages/mentee-web-app/src/components/marketplace/SearchBar.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/components/marketplace/MentorFilters.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/components/marketplace/MentorCard.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/hooks/useMentors.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/__tests__/marketplace.service.spec.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/__tests__/marketplace.search.service.spec.ts'
+      action: 'created'
+
+    # F2.5
+    - path: 'packages/mentee-web-app/src/components/marketplace/PaginationControls.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/components/marketplace/SortControl.tsx'
+      action: 'created'
+
+    # F2.3
+    - path: 'packages/mentee-web-app/src/app/(app)/mentors/[id]/page.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/hooks/useMentorDetail.ts'
+      action: 'created'
+
+    # F2.6
+    - path: 'packages/mentee-web-app/src/components/marketplace/AvailabilityDisplay.tsx'
+      action: 'created'
+
+    # F2.4
+    - path: 'packages/backend-api/src/marketplace/recommendations.service.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/dto/recommendation-result.dto.ts'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/components/marketplace/RecommendedMentors.tsx'
+      action: 'created'
+    - path: 'packages/mentee-web-app/src/hooks/useRecommendations.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/__tests__/recommendations.service.spec.ts'
+      action: 'created'
+    - path: 'packages/backend-api/src/marketplace/__tests__/marketplace.repository.spec.ts'
+      action: 'created'
+    - path: 'packages/backend-api/package.json'
+      action: 'modified'
+
+  domain_invariants_verified:
+    INV_E2_01:
+      description: 'Verified-only invariant — every Prisma query includes status=VERIFIED + verifiedBadge=true'
+      enforced_in: ['marketplace.repository.ts', 'recommendations.service.ts']
+      tested: true
+
+    INV_E2_02:
+      description: 'Privacy invariant — private fields excluded from public responses'
+      enforced_via: 'PublicMentorProfileDto @Exclude() + plainToInstance(excludeExtraneousValues: true)'
+      tested: true
+
+    INV_E2_03:
+      description: 'Category enum invariant — uses ExpertiseCategory enum, raw SQL for groupBy on array'
+      enforced_in: 'marketplace.repository.countVerifiedByCategory'
+      tested: true
+
+    INV_E2_04:
+      description: 'Recommendations privacy — matchingCategories is intersection only'
+      enforced_in: 'recommendations.service.ts'
+      tested: true
+
+    INV_E2_05:
+      description: 'Fire-and-forget sync — never awaited in request handler scope'
+      enforced_in: ['admin.service.ts', 'user.service.ts']
+      pattern: 'void promise.catch(logger.error)'
+      tested: true
+
+  issues_encountered:
+    - description: 'Circular dependency between MarketplaceModule and UserModule'
+      resolution: 'Used forwardRef() on both modules'
+      severity: 'low'
+
+    - description: "Prisma TypeScript type for findMany parameters had complex generic that didn't expose where/orderBy directly"
+      resolution: 'Used Prisma.MentorProfileWhereInput and Prisma.MentorProfileOrderByWithRelationInput types'
+      severity: 'low'
+
+    - description: 'SEARCH_PROVIDER env var read at module-load time (IS_OPENSEARCH const) caused test isolation issues'
+      resolution: 'Moved check to constructor/method level using process.env read inline'
+      severity: 'low'
+
+    - description: 'mentors/page.tsx used useAuth() but AuthProvider was not in layout'
+      resolution: 'Added AuthProvider wrapper to (app)/layout.tsx'
+      severity: 'low'
+
+    - description: 'RBAC test flaky (ECONNRESET) when parallel test execution causes port conflicts'
+      resolution: 'Runs cleanly with --runInBand; pre-existing issue not caused by E2 changes'
+      severity: 'low'

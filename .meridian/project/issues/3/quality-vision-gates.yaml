@@ -1,0 +1,15 @@
+quality_gates:
+  build:
+    required: true
+    command: 'pnpm -r build'
+  typecheck:
+    required: true
+    command: 'pnpm -r typecheck'
+  lint:
+    required: true
+    command: 'pnpm lint'
+    max_warnings: 0
+  unit_tests:
+    required: true
+    command: 'pnpm -r test'
+    min_coverage: null

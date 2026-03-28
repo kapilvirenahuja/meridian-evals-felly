@@ -10,3 +10,4 @@ export * from './types/user.types';
 export * from './types/auth.types';
 export * from './types/mentor.types';
 export * from './types/api-response.types';
+export * from './types/marketplace.types';

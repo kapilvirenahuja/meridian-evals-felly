@@ -115,6 +115,8 @@ model MentorProfile {
   completeness        Int                 @default(0)
   verifiedBadge       Boolean             @default(false)
   rejectionReason     String?
+  sessionCount        Int                 @default(0)
+  averageRating       Float               @default(0)
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 

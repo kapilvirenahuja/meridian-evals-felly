@@ -1,5 +1,10 @@
 # Felly Club — Development Guide
 
+## Active Implementation
+
+Issue: #3 — E2: Mentor Marketplace & Discovery
+Context: .meridian/project/issues/3/CONTEXT.md
+
 ## Completed
 
 - E1: User Identity & Profile Foundation (Issue #1) — all 7 features implemented
